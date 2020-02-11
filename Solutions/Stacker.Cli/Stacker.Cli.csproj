@@ -26,7 +26,7 @@
 
   <PropertyGroup>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageDescription>A .NET Global Tool for adopting and using Architectural Decision Records (ADR).</PackageDescription>
+    <PackageDescription>A .NET Global Tool for automating marketing content across social channels.</PackageDescription>
     <PackageTags>stacker tools endjin dotnet-cli</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <AssemblyName>stacker</AssemblyName>
