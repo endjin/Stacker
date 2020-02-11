@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <GitHubOrg>endjin</GitHubOrg>
+    <GitHubProject>Stacker</GitHubProject>
+  </PropertyGroup>
+</Project>
