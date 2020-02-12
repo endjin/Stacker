@@ -48,9 +48,9 @@ namespace Stacker.Cli.Commands.WordPress.Export.Twitter
                     }
 
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-                    var posts = blogSite.GetAllPosts();
-                    var validPosts = posts.FilterByValid(settings);
-                    var promotablePosts = validPosts.FilterByPromotable();
+                    var posts = blogSite.GetAllPosts().ToList();
+                    var validPosts = posts.FilterByValid(settings).ToList();
+                    var promotablePosts = validPosts.FilterByPromotable().ToList();
                     var tweets = new List<Tweet>();
                     var hashTagConverter = new WordPressToTwitterHashTagConverter();
 
@@ -78,7 +78,7 @@ namespace Stacker.Cli.Commands.WordPress.Export.Twitter
 
                     var formatter = new TweetFormatter();
 
-                    using (var writer = File.CreateText(twitterfilepath))
+                    await using (var writer = File.CreateText(twitterfilepath))
                     {
                         foreach (var tweet in tweets)
                         {

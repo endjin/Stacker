@@ -9,7 +9,7 @@ namespace Stacker.Cli.Domain.Twitter
 
     public class TweetFormatter
     {
-        private const int MaxTweetLength = 280;
+        private const int MaxContentLength = 280;
 
         public string Format(Tweet tweet)
         {
@@ -36,7 +36,7 @@ namespace Stacker.Cli.Domain.Twitter
                 foreach (var tag in tweet.Tags)
                 {
                     // 2 Offset = Space + #
-                    if (tweetLength + tag.Length + 2 <= MaxTweetLength)
+                    if (tweetLength + tag.Length + 2 <= MaxContentLength)
                     {
                         tagsToInclude++;
                     }
