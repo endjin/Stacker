@@ -1,4 +1,4 @@
-# stacker
+# Stacker
 A .NET Global Tool for automating marketing content across social channels. 
 
 `stacker` is built using Microsoft's `System.CommandLine` [libraries](https://github.com/dotnet/command-line-api). These packages, while still marked as experimental, are seeing lots of real-world usage, including tools such as [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet). 
@@ -51,7 +51,7 @@ If you don't see such a file run the following command:
 
 Otherwise, copy the contents of the file above and paste it into your pre-existing profile.
 
-## stacker Commands
+## Commands
 
 Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to explore the available commands. Here is a detailed list of the available commands:
 

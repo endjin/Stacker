@@ -5,7 +5,7 @@
 namespace Stacker.Cli.Commands.Twitter
 {
     using System.CommandLine;
-    using Stacker.Cli.Commands.Twitter.Stack;
+    using Stacker.Cli.Commands.Twitter.Buffer;
 
     public class TwitterCommandFactory : ICommandFactory<TwitterCommandFactory>
     {
