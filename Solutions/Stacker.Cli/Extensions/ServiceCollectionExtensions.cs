@@ -8,12 +8,15 @@ namespace Stacker.Cli.Extensions
     using Stacker.Cli.Commands;
     using Stacker.Cli.Commands.Environment;
     using Stacker.Cli.Commands.Environment.Init;
+    using Stacker.Cli.Commands.Twitter;
+    using Stacker.Cli.Commands.Twitter.Stack;
     using Stacker.Cli.Commands.WordPress;
     using Stacker.Cli.Commands.WordPress.Export;
     using Stacker.Cli.Commands.WordPress.Export.LinkedIn;
     using Stacker.Cli.Commands.WordPress.Export.Twitter;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Configuration.Contracts;
+    using Stacker.Cli.Domain.Buffer;
 
     public static class ServiceCollectionExtensions
     {
@@ -29,6 +32,13 @@ namespace Stacker.Cli.Extensions
 
             serviceCollection.AddTransient<ICommandFactory<EnvironmentCommandFactory>, EnvironmentCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<EnvironmentInitCommandFactory>, EnvironmentInitCommandFactory>();
+
+            serviceCollection.AddTransient<ICommandFactory<TwitterCommandFactory>, TwitterCommandFactory>();
+            serviceCollection.AddTransient<ICommandFactory<TwitterBufferCommandFactory>, TwitterBufferCommandFactory>();
+
+            serviceCollection.AddTransient<IBufferClient, BufferClient>();
+
+            serviceCollection.AddHttpClient();
         }
     }
 }

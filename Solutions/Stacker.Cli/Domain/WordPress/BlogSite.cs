@@ -393,6 +393,26 @@ namespace Stacker.Cli.Domain.WordPress
                     throw new AggregateException(rawMetaData, exception);
                 }
             }
+
+            /*
+            <wp:postmeta xmlns:wp="http://wordpress.org/export/1.2/">
+              <wp:meta_key><![CDATA[_wpsso_head_info_og_img_thumb]]></wp:meta_key>
+              <wp:meta_value><![CDATA[<div class="preview_img" style="background-image:url(https://blogs.endjin.com/wp-content/uploads/2014/09/Troubleshooting-Twilio-with-New-RelicA-P1-1024px-150x150.png);"></div>]]></wp:meta_value>
+            </wp:postmeta>
+            */
+            /*if (metaKeyElement?.Value == "_wpsso_head_info_og_img_thumb")
+            {
+                var metaValueElement = postMeta.Element(WordpressNamespace + "meta_value");
+                string rawMetaData = metaValueElement?.Value;
+
+                var regexp = new Regex(@"\((?<url>.*?)\)");
+                var match = regexp.Match(rawMetaData);
+
+                if (match.Groups.ContainsKey("url"))
+                {
+                    var url = match.Groups["url"];
+                }
+            }*/
         }
 
         private Author GetAuthorByUsername(string username)

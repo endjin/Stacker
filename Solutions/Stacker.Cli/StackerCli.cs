@@ -10,6 +10,7 @@ namespace Stacker.Cli
     using Microsoft.Extensions.DependencyInjection;
     using Stacker.Cli.Commands;
     using Stacker.Cli.Commands.Environment;
+    using Stacker.Cli.Commands.Twitter;
     using Stacker.Cli.Commands.WordPress;
     using Stacker.Cli.Extensions;
 
@@ -31,6 +32,7 @@ namespace Stacker.Cli
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
             var cmd = new CommandLineBuilder()
+                .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<TwitterCommandFactory>>().Create())
                 .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<WordPressCommandFactory>>().Create())
                 .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<EnvironmentCommandFactory>>().Create())
                 .UseDefaults()

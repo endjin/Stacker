@@ -29,7 +29,26 @@ namespace Stacker.Cli.Commands.Environment.Init
                 Handler = CommandHandler.Create(() =>
                 {
                     this.appEnvironment.Initialize();
-                    this.settingsManager.SaveSettings(new StackerSettings { Users = new List<User> { new User { Email = string.Empty, IsActive = true } } }, nameof(StackerSettings));
+                    this.settingsManager.SaveSettings(
+                        new StackerSettings
+                        {
+                            BufferAccessToken = "<ADD YOUR ACCESS TOKEN>",
+                            BufferProfiles = new Dictionary<string, string>
+                            {
+                                { "facebook|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
+                                { "linkedin|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
+                                { "twitter|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
+                            },
+                            Users = new List<User>
+                            {
+                                new User
+                                {
+                                    Email = string.Empty,
+                                    IsActive = true,
+                                },
+                            },
+                        },
+                        nameof(StackerSettings));
                     Console.WriteLine($"Environment Initialized {this.appEnvironment.AppPath}");
                 }),
             };

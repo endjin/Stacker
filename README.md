@@ -57,17 +57,19 @@ Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to expl
 
 `stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
 
-`stacker wordpress export twitter` - 
+`stacker wordpress export twitter` - Exports blog posts from WordPress into a format suitable for publishing on Twitter.
 
-`stacker twitter stack <ACCOUNT> <PATH>` - 
+`stacker wordpress export linkedin` - Exports blog posts from WordPress into a format suitable for publishing on LinkedIn.
 
-`stacker linkedin stack <ACCOUNT> <PATH>` - 
+`stacker twitter buffer <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of tweets into buffer for the specified Twitter profile. If <NUMBER> is omitted, all content is uploaded.
 
-`stacker instagram stack <ACCOUNT> <PATH>` - 
+`stacker linkedin buffer  <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of posts into buffer for the specified LinkedIn profile. If <NUMBER> is omitted, all content is uploaded.
+
+`stacker facebook buffer  <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of posts into buffer for the specified Facebook profile. If <NUMBER> is omitted, all content is uploaded.
 
 `stacker environment` - Manipulate the stacker environment. Root command for environment operations. Will list available sub-commands.
 
-`stacker environment init` - Initialises the `stacker` environment.
+`stacker environment init` - Initialises the `stacker` environment. Write's a default `StackerSettings.json` file to `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`
 
 ## System Details
 
@@ -79,7 +81,6 @@ Configuration is stored in:
 
 `configuration\`
 
-The templates NuGet package is cached in `%%UserProfile%%\.nuget\packages`. 
 
 ## CI / CD
 

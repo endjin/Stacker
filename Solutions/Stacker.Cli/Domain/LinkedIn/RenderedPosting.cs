@@ -7,7 +7,5 @@ namespace Stacker.Cli.Domain.LinkedIn
     public class RenderedPosting
     {
         public string Content { get; set; }
-
-        public Image Image { get; set; }
     }
 }

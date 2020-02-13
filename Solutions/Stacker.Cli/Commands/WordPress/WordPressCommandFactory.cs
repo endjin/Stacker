@@ -18,7 +18,7 @@ namespace Stacker.Cli.Commands.WordPress
 
         public Command Create()
         {
-            var cmd = new Command("wordpress", "WordPress functionality");
+            var cmd = new Command("wordpress", "WordPress functionality.");
 
             cmd.AddCommand(this.wordpressExportCommandFactory.Create());
 

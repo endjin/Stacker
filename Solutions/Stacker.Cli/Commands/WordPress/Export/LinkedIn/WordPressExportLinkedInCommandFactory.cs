@@ -43,11 +43,15 @@ namespace Stacker.Cli.Commands.WordPress.Export.LinkedIn
 
                     BlogSite blogSite;
 
+                    Console.WriteLine($"Reading {wpexportfilepath}");
+
                     using (var reader = File.OpenText(wpexportfilepath))
                     {
                         var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
                         blogSite = new BlogSite(document);
                     }
+
+                    Console.WriteLine($"Processing...");
 
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
                     var posts = blogSite.GetAllPosts().ToList();
@@ -84,7 +88,6 @@ namespace Stacker.Cli.Commands.WordPress.Export.LinkedIn
                         renderedPosts.Add(new RenderedPosting
                         {
                             Content = formatter.Format(posting),
-                            Image = posting.Image,
                         });
                     }
 
