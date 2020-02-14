@@ -18,6 +18,7 @@ namespace Stacker.Cli.Extensions
     using Stacker.Cli.Commands.WordPress.Export;
     using Stacker.Cli.Commands.WordPress.Export.LinkedIn;
     using Stacker.Cli.Commands.WordPress.Export.Twitter;
+    using Stacker.Cli.Commands.WordPress.Export.Universal;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Configuration.Contracts;
     using Stacker.Cli.Domain.Buffer;
@@ -33,6 +34,7 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<ICommandFactory<WordPressExportCommandFactory>, WordPressExportCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportLinkedInCommandFactory>, WordPressExportLinkedInCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportTwitterCommandFactory>, WordPressExportTwitterCommandFactory>();
+            serviceCollection.AddTransient<ICommandFactory<WordPressExportUniversalCommandFactory>, WordPressExportUniversalCommandFactory>();
 
             serviceCollection.AddTransient<ICommandFactory<EnvironmentCommandFactory>, EnvironmentCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<EnvironmentInitCommandFactory>, EnvironmentInitCommandFactory>();

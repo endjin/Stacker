@@ -30,20 +30,20 @@ namespace Stacker.Cli.Commands.WordPress.Export.Twitter
         {
             var cmd = new Command("twitter", "Convert WordPress export files for publication in Twitter")
             {
-                Handler = CommandHandler.Create(async (string wpexportfilepath, string twitterfilepath) =>
+                Handler = CommandHandler.Create(async (string wpexportFilePath, string twitterFilePath) =>
                 {
-                    if (!File.Exists(wpexportfilepath))
+                    if (!File.Exists(wpexportFilePath))
                     {
-                        Console.WriteLine($"File not found {wpexportfilepath}");
+                        Console.WriteLine($"File not found {wpexportFilePath}");
 
                         return;
                     }
 
                     BlogSite blogSite;
 
-                    Console.WriteLine($"Reading {wpexportfilepath}");
+                    Console.WriteLine($"Reading {wpexportFilePath}");
 
-                    using (var reader = File.OpenText(wpexportfilepath))
+                    using (var reader = File.OpenText(wpexportFilePath))
                     {
                         var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
                         blogSite = new BlogSite(document);
@@ -82,7 +82,7 @@ namespace Stacker.Cli.Commands.WordPress.Export.Twitter
 
                     var formatter = new TweetFormatter();
 
-                    await using (var writer = File.CreateText(twitterfilepath))
+                    await using (var writer = File.CreateText(twitterFilePath))
                     {
                         foreach (var tweet in tweets)
                         {
@@ -90,12 +90,12 @@ namespace Stacker.Cli.Commands.WordPress.Export.Twitter
                         }
                     }
 
-                    Console.WriteLine($"Content written to {twitterfilepath}");
+                    Console.WriteLine($"Content written to {twitterFilePath}");
                 }),
             };
 
-            cmd.AddArgument(new Argument<string>("--wp-export-file-path") { Description = "WordPress Export file path." });
-            cmd.AddArgument(new Argument<string>("--twitter-file-path") { Description = "Twitter file path." });
+            cmd.AddArgument(new Argument<string>("wp-export-file-path") { Description = "WordPress Export file path." });
+            cmd.AddArgument(new Argument<string>("twitter-file-path") { Description = "Twitter file path." });
 
             return cmd;
         }

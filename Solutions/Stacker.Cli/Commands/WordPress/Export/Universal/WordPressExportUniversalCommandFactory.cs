@@ -1,8 +1,8 @@
-﻿// <copyright file="WordPressExportLinkedInCommandFactory.cs" company="Endjin Limited">
+﻿// <copyright file="WordPressExportUniversalCommandFactory.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands.WordPress.Export.LinkedIn
+namespace Stacker.Cli.Commands.WordPress.Export.Universal
 {
     using System;
     using System.Collections.Generic;
@@ -15,24 +15,24 @@ namespace Stacker.Cli.Commands.WordPress.Export.LinkedIn
     using Newtonsoft.Json;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Configuration.Contracts;
-    using Stacker.Cli.Domain.LinkedIn;
     using Stacker.Cli.Domain.Twitter;
+    using Stacker.Cli.Domain.Universal;
     using Stacker.Cli.Domain.WordPress;
 
-    public class WordPressExportLinkedInCommandFactory : ICommandFactory<WordPressExportLinkedInCommandFactory>
+    public class WordPressExportUniversalCommandFactory : ICommandFactory<WordPressExportUniversalCommandFactory>
     {
         private readonly IStackerSettingsManager settingsManager;
 
-        public WordPressExportLinkedInCommandFactory(IStackerSettingsManager settingsManager)
+        public WordPressExportUniversalCommandFactory(IStackerSettingsManager settingsManager)
         {
             this.settingsManager = settingsManager;
         }
 
         public Command Create()
         {
-            var cmd = new Command("linkedin", "Convert WordPress export files for publication in LinkedIn")
+            var cmd = new Command("universal", "Convert WordPress export files into a universal format.")
             {
-                Handler = CommandHandler.Create(async (string wpexportFilePath, string linkedinFilePath) =>
+                Handler = CommandHandler.Create(async (string wpexportFilePath, string universalFilePath) =>
                 {
                     if (!File.Exists(wpexportFilePath))
                     {
@@ -57,51 +57,63 @@ namespace Stacker.Cli.Commands.WordPress.Export.LinkedIn
                     var posts = blogSite.GetAllPosts().ToList();
                     var validPosts = posts.FilterByValid(settings).ToList();
                     var promotablePosts = validPosts.FilterByPromotable().ToList();
-                    var postings = new List<Posting>();
                     var hashTagConverter = new WordPressToTwitterHashTagConverter();
+                    var feed = new List<FeedItem>();
 
                     Console.WriteLine($"Total Posts: {posts.Count()}");
                     Console.WriteLine($"Valid Posts: {validPosts.Count()}");
                     Console.WriteLine($"Promotable Posts: {promotablePosts.Count()}");
 
+                    // Sort the promotable posts so that those due to expire are at the top of the publication list.
                     foreach (var post in promotablePosts.OrderByDescending(p => p.PromoteUntil))
                     {
+                        var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+                        var formatter = new TweetFormatter();
+
+                        var tweet = new Tweet
+                        {
+                            AuthorHandle = user.Twitter,
+                            AuthorDisplaName = post.Author.DisplayName,
+                            Link = post.Link,
+                            PublishedOn = post.PublishedAtUtc,
+                            Title = post.Title,
+                            Tags = post.Tags.Where(t => t != null).Select(t => hashTagConverter.Convert(t.Slug)),
+                        };
+
                         if (post.MetaData.TryGetValue("og_desc", out string description))
                         {
                         }
 
-                        postings.Add(new Posting
+                        feed.Add(new FeedItem
                         {
-                            Author = post.Author.DisplayName,
-                            Body = description,
-                            Image = new Image { Title = post.FeaturedImage?.Title, Url = post.FeaturedImage?.Url },
-                            Link = post.Link,
+                            Author = new AuthorElement
+                            {
+                                DisplayName = post.Author.DisplayName,
+                                Email = post.Author.Email,
+                                TwitterHandle = user.Twitter,
+                            },
+                            Content = new Content
+                            {
+                              Editorial = description,
+                              Tweet = formatter.Format(tweet),
+                            },
+                            PublishedOn = post.PublishedAtUtc,
+                            PromoteUntil = post.PromoteUntil,
                             Tags = post.Tags.Where(t => t != null).Select(t => hashTagConverter.Convert(t.Slug)),
                         });
                     }
 
-                    var formatter = new LinkedInFormatter();
-                    var renderedPosts = new List<RenderedPosting>();
-
-                    foreach (var posting in postings)
+                    await using (var writer = File.CreateText(universalFilePath))
                     {
-                        renderedPosts.Add(new RenderedPosting
-                        {
-                            Content = formatter.Format(posting),
-                        });
+                        await writer.WriteAsync(JsonConvert.SerializeObject(feed)).ConfigureAwait(false);
                     }
 
-                    await using (var writer = File.CreateText(linkedinFilePath))
-                    {
-                        await writer.WriteAsync(JsonConvert.SerializeObject(renderedPosts)).ConfigureAwait(false);
-                    }
-
-                    Console.WriteLine($"Content written to {linkedinFilePath}");
+                    Console.WriteLine($"Content written to {universalFilePath}");
                 }),
             };
 
             cmd.AddArgument(new Argument<string>("wp-export-file-path") { Description = "WordPress Export file path." });
-            cmd.AddArgument(new Argument<string>("linkedin-file-path") { Description = "LinkedIn file path." });
+            cmd.AddArgument(new Argument<string>("universal-file-path") { Description = "Universal file path." });
 
             return cmd;
         }
