@@ -33,7 +33,7 @@ namespace Stacker.Cli.Domain.WordPress
 
         public bool Promote { get; set; }
 
-        public DateTimeOffset PromoteUntil { get; set; }
+        public DateTimeOffset PromoteUntil { get; set; } = DateTimeOffset.MaxValue;
 
         public DateTimeOffset PublishedAtUtc { get; set; }
 

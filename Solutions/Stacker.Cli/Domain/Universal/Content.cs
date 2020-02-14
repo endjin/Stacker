@@ -6,8 +6,12 @@ namespace Stacker.Cli.Domain.Universal
 {
     public class Content
     {
-        public string Tweet { get; set; }
+        public string Body { get; set; }
 
-        public string Editorial { get; set; }
+        public string Excerpt { get; set; }
+
+        public string Link { get; set; }
+
+        public string Title { get; set; }
     }
 }

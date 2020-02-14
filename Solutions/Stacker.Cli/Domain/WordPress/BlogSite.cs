@@ -329,6 +329,10 @@ namespace Stacker.Cli.Domain.WordPress
                     {
                         post.PromoteUntil = promoteUntil;
                     }
+                    else
+                    {
+                        post.PromoteUntil = DateTimeOffset.MaxValue;
+                    }
                 }
             }
             catch (Exception)

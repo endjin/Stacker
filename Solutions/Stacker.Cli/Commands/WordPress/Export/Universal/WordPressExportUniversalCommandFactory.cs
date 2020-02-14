@@ -80,10 +80,6 @@ namespace Stacker.Cli.Commands.WordPress.Export.Universal
                             Tags = post.Tags.Where(t => t != null).Select(t => hashTagConverter.Convert(t.Slug)),
                         };
 
-                        if (post.MetaData.TryGetValue("og_desc", out string description))
-                        {
-                        }
-
                         feed.Add(new FeedItem
                         {
                             Author = new AuthorElement
@@ -94,8 +90,10 @@ namespace Stacker.Cli.Commands.WordPress.Export.Universal
                             },
                             Content = new Content
                             {
-                              Editorial = description,
-                              Tweet = formatter.Format(tweet),
+                                Body = post.Body,
+                                Excerpt = post.Excerpt,
+                                Link = post.Link,
+                                Title = post.Title,
                             },
                             PublishedOn = post.PublishedAtUtc,
                             PromoteUntil = post.PromoteUntil,
@@ -105,7 +103,7 @@ namespace Stacker.Cli.Commands.WordPress.Export.Universal
 
                     await using (var writer = File.CreateText(universalFilePath))
                     {
-                        await writer.WriteAsync(JsonConvert.SerializeObject(feed)).ConfigureAwait(false);
+                        await writer.WriteAsync(JsonConvert.SerializeObject(feed, Formatting.Indented)).ConfigureAwait(false);
                     }
 
                     Console.WriteLine($"Content written to {universalFilePath}");
