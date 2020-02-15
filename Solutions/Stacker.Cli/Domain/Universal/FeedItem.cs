@@ -6,7 +6,9 @@ namespace Stacker.Cli.Domain.Universal
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
 
+    [DebuggerDisplay("{Content.Title} by {Author.DisplayName}")]
     public class FeedItem
     {
         public AuthorElement Author { get; set; }
@@ -17,6 +19,6 @@ namespace Stacker.Cli.Domain.Universal
 
         public DateTimeOffset PublishedOn { get; set; }
 
-        public IEnumerable<string> Tags { get; internal set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }

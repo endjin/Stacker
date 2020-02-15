@@ -1,5 +1,5 @@
 # Stacker
-A .NET Global Tool for automating marketing content across social channels. 
+A .NET Global Tool for automating marketing content across social channels. It supports extracting content from WordPress Export files and then republishing via Buffer to Twitter & LinkedIn, with automatically generated leader copy.
 
 `stacker` is built using Microsoft's `System.CommandLine` [libraries](https://github.com/dotnet/command-line-api). These packages, while still marked as experimental, are seeing lots of real-world usage, including tools such as [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet). 
 

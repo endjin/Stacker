@@ -5,13 +5,17 @@
 namespace Stacker.Cli.Commands.Twitter.Buffer
 {
     using System;
+    using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
     using System.Linq;
+    using Newtonsoft.Json;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Configuration.Contracts;
     using Stacker.Cli.Domain.Buffer;
+    using Stacker.Cli.Domain.Twitter;
+    using Stacker.Cli.Domain.Universal;
 
     public class TwitterBufferCommandFactory : ICommandFactory<TwitterBufferCommandFactory>
     {
@@ -28,7 +32,7 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
         {
             var cmd = new Command("buffer", "Uploads content to Buffer to be published via Twitter")
             {
-                Handler = CommandHandler.Create(async (string twitterFilePath, string profileName, int take) =>
+                Handler = CommandHandler.Create(async (string contentFilePath, string profileName, int take) =>
                 {
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
                     var profileKey = $"twitter|{profileName}";
@@ -42,7 +46,13 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
                             take = int.MaxValue;
                         }
 
-                        await this.bufferClient.UploadAsync((await File.ReadAllLinesAsync(twitterFilePath).ConfigureAwait(false)).Take(take), profileId).ConfigureAwait(false);
+                        var content = JsonConvert.DeserializeObject<List<FeedItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false)).OrderBy(p => p.PromoteUntil);
+
+                        var formatter = new TweetFormatter();
+
+                        var tweets = formatter.Format(content.Take(take));
+
+                        await this.bufferClient.UploadAsync(tweets, profileId).ConfigureAwait(false);
                     }
                     else
                     {
@@ -51,7 +61,7 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
                 }),
             };
 
-            cmd.Add(new Argument<string>("twitter-file-path") { Description = "Twitter file path." });
+            cmd.Add(new Argument<string>("content-file-path") { Description = "Content file path." });
             cmd.Add(new Argument<string>("profile-name") { Description = "Twitter profile to Buffer." });
             cmd.AddOption(new Option("--take") { Argument = new Argument<int>(), Description = "Number of posts to buffer. If omitted all content is buffered." });
 
