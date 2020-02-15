@@ -11,6 +11,7 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
     using System.IO;
     using System.Linq;
     using Newtonsoft.Json;
+    using NodaTime;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Configuration.Contracts;
     using Stacker.Cli.Domain.Buffer;
@@ -32,7 +33,7 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
         {
             var cmd = new Command("buffer", "Uploads content to Buffer to be published via Twitter")
             {
-                Handler = CommandHandler.Create(async (string contentFilePath, string profileName, int take) =>
+                Handler = CommandHandler.Create(async (string contentFilePath, string profileName, int take, DateTime fromDate, DateTime toDate, TimePeriod timePeriod) =>
                 {
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
                     var profileKey = $"twitter|{profileName}";
@@ -41,7 +42,21 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
                     {
                         Console.WriteLine($"Loading: {contentFilePath}");
 
-                        var content = JsonConvert.DeserializeObject<List<FeedItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false)).OrderBy(p => p.PromoteUntil).ToList();
+                        var content = JsonConvert.DeserializeObject<IEnumerable<FeedItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
+
+                        if (timePeriod != TimePeriod.None)
+                        {
+                            var dateRange = new TimePeriodConverter().Convert(timePeriod);
+
+                            content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) > dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) < dateRange.End));
+                        }
+
+                        if (fromDate != DateTime.MinValue && toDate != DateTime.MinValue)
+                        {
+                        }
+
+                        content = content.OrderBy(p => p.PromoteUntil).ToList();
+
                         var profileId = settings.BufferProfiles[profileKey];
 
                         Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
@@ -68,10 +83,11 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
 
             cmd.Add(new Argument<string>("content-file-path") { Description = "Content file path." });
             cmd.Add(new Argument<string>("profile-name") { Description = "Twitter profile to Buffer." });
-            cmd.AddOption(new Option("--take") { Argument = new Argument<int>(), Description = "Number of posts to buffer. If omitted all content is buffered." });
 
-            /*cmd.AddOption(new Option("--from-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
-            cmd.AddOption(new Option("--to-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });*/
+            cmd.AddOption(new Option("--take") { Argument = new Argument<int>(), Description = "Number of posts to buffer. If omitted all content is buffered." });
+            cmd.AddOption(new Option("--from-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
+            cmd.AddOption(new Option("--to-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
+            cmd.AddOption(new Option("--time-period") { Argument = new Argument<TimePeriod> { Description = "Time period to select content." } });
 
             return cmd;
         }
