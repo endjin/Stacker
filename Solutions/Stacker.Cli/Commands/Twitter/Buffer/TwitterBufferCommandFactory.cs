@@ -39,17 +39,22 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
 
                     if (settings.BufferProfiles.ContainsKey(profileKey))
                     {
+                        Console.WriteLine($"Loading: {contentFilePath}");
+
+                        var content = JsonConvert.DeserializeObject<List<FeedItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false)).OrderBy(p => p.PromoteUntil).ToList();
                         var profileId = settings.BufferProfiles[profileKey];
+
+                        Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
 
                         if (take == 0)
                         {
-                            take = int.MaxValue;
+                            take = content.Count();
                         }
 
-                        var content = JsonConvert.DeserializeObject<List<FeedItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false)).OrderBy(p => p.PromoteUntil);
+                        Console.WriteLine($"Total Posts: {content.Count()}");
+                        Console.WriteLine($"Promoting first: {take}");
 
                         var formatter = new TweetFormatter();
-
                         var tweets = formatter.Format(content.Take(take));
 
                         await this.bufferClient.UploadAsync(tweets, profileId).ConfigureAwait(false);

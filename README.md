@@ -57,9 +57,7 @@ Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to expl
 
 `stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
 
-`stacker wordpress export twitter` - Exports blog posts from WordPress into a format suitable for publishing on Twitter.
-
-`stacker wordpress export linkedin` - Exports blog posts from WordPress into a format suitable for publishing on LinkedIn.
+`stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
 
 `stacker twitter buffer <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of tweets into buffer for the specified Twitter profile. If <NUMBER> is omitted, all content is uploaded.
 
