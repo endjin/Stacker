@@ -53,6 +53,7 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
 
                         if (fromDate != DateTime.MinValue && toDate != DateTime.MinValue)
                         {
+                            content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
                         }
 
                         content = content.OrderBy(p => p.PromoteUntil).ToList();

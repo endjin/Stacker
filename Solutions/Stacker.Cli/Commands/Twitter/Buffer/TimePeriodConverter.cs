@@ -31,6 +31,13 @@ namespace Stacker.Cli.Commands.Twitter.Buffer
                     var startOfLastMonth = LocalDate.FromDateTime(new DateTime(today.Year, today.Month, 1)).PlusMonths(-1);
                     var endOfLastMonth = new LocalDate(startOfLastMonth.Year, startOfLastMonth.Month, startOfLastMonth.Calendar.GetDaysInMonth(startOfLastMonth.Year, startOfLastMonth.Month));
                     return new DateInterval(startOfLastMonth, endOfLastMonth);
+                case TimePeriod.ThisYear:
+                    var startOfThisYear = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1));
+                    return new DateInterval(startOfThisYear, today);
+                case TimePeriod.LastYear:
+                    var startOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1)).PlusYears(-1);
+                    var endOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 12, 31)).PlusYears(-1);
+                    return new DateInterval(startOfLastYear, endOfLastYear);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(timePeriod), timePeriod, null);
             }
