@@ -37,7 +37,7 @@ namespace Stacker.Cli.Commands
             cmd.AddOption(new Option("--item-count") { Argument = new Argument<int>(), Description = "Number of posts to buffer. If omitted all content is buffered." });
             cmd.AddOption(new Option("--from-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
             cmd.AddOption(new Option("--to-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
-            cmd.AddOption(new Option("--time-period") { Argument = new Argument<PublicationPeriod> { Description = "Time period to select content." } });
+            cmd.AddOption(new Option("--publication-period") { Argument = new Argument<PublicationPeriod> { Description = "Time period to select content." } });
 
             return cmd;
         }
