@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stacker.Cli", "Stacker.Cli\Stacker.Cli.csproj", "{5FA259AB-3CB1-4356-9FE3-820F7DDE13DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stacker.Cli.Specs", "Stacker.Cli.Specs\Stacker.Cli.Specs.csproj", "{72755AD8-AC2D-47B6-9EBB-5FF84F54809A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{5FA259AB-3CB1-4356-9FE3-820F7DDE13DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FA259AB-3CB1-4356-9FE3-820F7DDE13DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FA259AB-3CB1-4356-9FE3-820F7DDE13DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72755AD8-AC2D-47B6-9EBB-5FF84F54809A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72755AD8-AC2D-47B6-9EBB-5FF84F54809A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72755AD8-AC2D-47B6-9EBB-5FF84F54809A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72755AD8-AC2D-47B6-9EBB-5FF84F54809A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

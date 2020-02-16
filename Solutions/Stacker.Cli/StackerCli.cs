@@ -9,11 +9,7 @@ namespace Stacker.Cli
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Stacker.Cli.Commands;
-    using Stacker.Cli.Commands.Environment;
-    using Stacker.Cli.Commands.Facebook;
-    using Stacker.Cli.Commands.LinkedIn;
-    using Stacker.Cli.Commands.Twitter;
-    using Stacker.Cli.Commands.WordPress;
+    using Stacker.Cli.Contracts.Commands;
     using Stacker.Cli.Extensions;
 
     /// <summary>

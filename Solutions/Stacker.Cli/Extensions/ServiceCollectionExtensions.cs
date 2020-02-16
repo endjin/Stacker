@@ -6,22 +6,12 @@ namespace Stacker.Cli.Extensions
 {
     using Microsoft.Extensions.DependencyInjection;
     using Stacker.Cli.Commands;
-    using Stacker.Cli.Commands.Environment;
-    using Stacker.Cli.Commands.Environment.Init;
-    using Stacker.Cli.Commands.Facebook;
-    using Stacker.Cli.Commands.Facebook.Buffer;
-    using Stacker.Cli.Commands.LinkedIn;
-    using Stacker.Cli.Commands.LinkedIn.Buffer;
-    using Stacker.Cli.Commands.Twitter;
-    using Stacker.Cli.Commands.Twitter.Buffer;
-    using Stacker.Cli.Commands.WordPress;
-    using Stacker.Cli.Commands.WordPress.Export;
-    using Stacker.Cli.Commands.WordPress.Export.LinkedIn;
-    using Stacker.Cli.Commands.WordPress.Export.Twitter;
-    using Stacker.Cli.Commands.WordPress.Export.Universal;
     using Stacker.Cli.Configuration;
-    using Stacker.Cli.Configuration.Contracts;
-    using Stacker.Cli.Domain.Buffer;
+    using Stacker.Cli.Contracts.Buffer;
+    using Stacker.Cli.Contracts.Commands;
+    using Stacker.Cli.Contracts.Configuration;
+    using Stacker.Cli.Contracts.Tasks;
+    using Stacker.Cli.Tasks;
 
     public static class ServiceCollectionExtensions
     {
@@ -32,8 +22,6 @@ namespace Stacker.Cli.Extensions
 
             serviceCollection.AddTransient<ICommandFactory<WordPressCommandFactory>, WordPressCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportCommandFactory>, WordPressExportCommandFactory>();
-            serviceCollection.AddTransient<ICommandFactory<WordPressExportLinkedInCommandFactory>, WordPressExportLinkedInCommandFactory>();
-            serviceCollection.AddTransient<ICommandFactory<WordPressExportTwitterCommandFactory>, WordPressExportTwitterCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportUniversalCommandFactory>, WordPressExportUniversalCommandFactory>();
 
             serviceCollection.AddTransient<ICommandFactory<EnvironmentCommandFactory>, EnvironmentCommandFactory>();
@@ -49,6 +37,7 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<ICommandFactory<TwitterBufferCommandFactory>, TwitterBufferCommandFactory>();
 
             serviceCollection.AddTransient<IBufferClient, BufferClient>();
+            serviceCollection.AddTransient<IContentTasks, ContentTasks>();
 
             serviceCollection.AddHttpClient();
         }

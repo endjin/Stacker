@@ -4,7 +4,7 @@
 
 namespace Stacker.Cli.Configuration
 {
-    using Stacker.Cli.Configuration.Contracts;
+    using Stacker.Cli.Contracts.Configuration;
 
     public class StackerSettingsManager : SettingsManager<StackerSettings>, IStackerSettingsManager
     {

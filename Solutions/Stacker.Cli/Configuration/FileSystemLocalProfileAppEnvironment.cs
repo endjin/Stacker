@@ -6,7 +6,7 @@ namespace Stacker.Cli.Configuration
 {
     using System;
     using System.IO;
-    using Stacker.Cli.Configuration.Contracts;
+    using Stacker.Cli.Contracts.Configuration;
 
     public class FileSystemLocalProfileAppEnvironment : IAppEnvironment
     {

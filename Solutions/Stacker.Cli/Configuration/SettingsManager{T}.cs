@@ -6,7 +6,7 @@ namespace Stacker.Cli.Configuration
 {
     using System.IO;
     using Newtonsoft.Json;
-    using Stacker.Cli.Configuration.Contracts;
+    using Stacker.Cli.Contracts.Configuration;
 
     public class SettingsManager<T> : ISettingsManager<T>
         where T : class
