@@ -66,10 +66,26 @@ namespace Stacker.Cli.Tasks
 
                 content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) > dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) < dateRange.End));
             }
-
-            if (fromDate != DateTime.MinValue && toDate != DateTime.MinValue)
+            else
             {
-                content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
+                // if fromDate is specified, but toDate isn't, set toDate to now. If toDate is specified, use that.
+                if (fromDate != DateTime.MinValue)
+                {
+                    if (toDate == DateTime.MinValue)
+                    {
+                        toDate = DateTime.Now;
+                    }
+
+                    content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
+                }
+                else
+                {
+                    // if fromDate isn't specified, but toDate is
+                    if (toDate != DateTime.MinValue)
+                    {
+                        content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
+                    }
+                }
             }
 
             // Sort so that content with the shortest lifespan are first.
