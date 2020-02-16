@@ -34,10 +34,10 @@ namespace Stacker.Cli.Commands
             cmd.Add(new Argument<string>("content-file-path") { Description = "Content file path." });
             cmd.Add(new Argument<string>("profile-name") { Description = "Twitter profile to Buffer." });
 
-            cmd.AddOption(new Option("--item-count") { Argument = new Argument<int>(), Description = "Number of posts to buffer. If omitted all content is buffered." });
-            cmd.AddOption(new Option("--from-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
-            cmd.AddOption(new Option("--to-date") { Argument = new Argument<DateTime> { Description = "Number of Tweets to buffer" } });
-            cmd.AddOption(new Option("--publication-period") { Argument = new Argument<PublicationPeriod> { Description = "Time period to select content." } });
+            cmd.AddOption(new Option("--item-count", "Number of content items to buffer. If omitted all content is buffered.") { Argument = new Argument<int>() });
+            cmd.AddOption(new Option("--publication-period", "Publication period to filter content items by. If specified --from-date and --to-date are ignored.") { Argument = new Argument<PublicationPeriod>() });
+            cmd.AddOption(new Option("--from-date", "Include content items published on, or after this date. If omitted DateTime.MinValue is used.") { Argument = new Argument<DateTime>() });
+            cmd.AddOption(new Option("--to-date", "Include content items published on, or before this date. If omitted DateTime.MaxValue is used.") { Argument = new Argument<DateTime>() });
 
             return cmd;
         }

@@ -55,19 +55,31 @@ Otherwise, copy the contents of the file above and paste it into your pre-existi
 
 Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to explore the available commands. Here is a detailed list of the available commands:
 
+`stacker environment` - Manipulate the stacker environment. Root command for environment operations. Will list available sub-commands.
+
+`stacker environment init` - Initialises the `stacker` environment. Write's a default `StackerSettings.json` file to `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`
+
 `stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
 
 `stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
 
-`stacker twitter buffer <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of tweets into buffer for the specified Twitter profile. If <NUMBER> is omitted, all content is uploaded.
+### Buffer commands
 
-`stacker linkedin buffer  <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of posts into buffer for the specified LinkedIn profile. If <NUMBER> is omitted, all content is uploaded.
+`stacker twitter buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified Twitter profile.
 
-`stacker facebook buffer  <PATH> <ACCOUNT> [--take <NUMBER>]` - Upload first <NUMBER> of posts into buffer for the specified Facebook profile. If <NUMBER> is omitted, all content is uploaded.
+`stacker linkedin buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified LinkedIn profile.
 
-`stacker environment` - Manipulate the stacker environment. Root command for environment operations. Will list available sub-commands.
+`stacker facebook buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified Facebook profile.
 
-`stacker environment init` - Initialises the `stacker` environment. Write's a default `StackerSettings.json` file to `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`
+The `buffer` command also takes the following options to filter the content items to be buffered.
+
+```
+Options:
+  --item-count <item-count>                                                              Number of content items to buffer. If omitted all content is buffered.
+  --publication-period <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear>    Publication period to filter content items by. If specified --from-date and --to-date are ignored.
+  --from-date <from-date>                                                                Include content items published on, or after this date. If omitted DateTime.MinValue is used.
+  --to-date <to-date>                                                                    Include content items published on, or before this date. If omitted DateTime.MaxValue is used.
+```
 
 ## System Details
 
@@ -78,7 +90,6 @@ An application profile folder is created in:
 Configuration is stored in:
 
 `configuration\`
-
 
 ## CI / CD
 
@@ -97,6 +108,10 @@ Stacker supports filtering of blog posts via WordPress Custom Fields.
 `stacker_promote` `true` | `false` - states whether Stacker should promote. If this field is missing, Stacker will automatically include it.
 
 `stacker_promote_until` YYYY-MM-DD - states the date at which Stacker should stop including the post. This is for use cases around events which have no re-posting value.
+
+Hastags are generated from WordPress Tags associated with each post.
+
+The `Excerpt` custom field is used to provide the content summary when publishing to Facebook or LinkedIn.
 
 ## Licenses
 
