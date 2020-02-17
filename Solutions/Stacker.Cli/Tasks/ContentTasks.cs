@@ -64,7 +64,7 @@ namespace Stacker.Cli.Tasks
             {
                 var dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
 
-                content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) > dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) < dateRange.End));
+                content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End));
             }
             else
             {
@@ -75,15 +75,22 @@ namespace Stacker.Cli.Tasks
                     {
                         toDate = DateTime.Now;
                     }
+                    else
+                    {
+                        if (toDate.ToString("HH:mm:ss") == "00:00:00")
+                        {
+                            toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
+                        }
+                    }
 
-                    content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
+                    content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
                 }
                 else
                 {
                     // if fromDate isn't specified, but toDate is
                     if (toDate != DateTime.MinValue)
                     {
-                        content = content.Where(p => p.PublishedOn.LocalDateTime > fromDate && p.PublishedOn.LocalDateTime < toDate);
+                        content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
                     }
                 }
             }
