@@ -10,12 +10,14 @@ namespace Stacker.Cli.Formatters
     using Stacker.Cli.Contracts.Formatters;
     using Stacker.Cli.Domain.Universal;
 
-    public class LongFormContentFormatter : IContentFormatter
+    public abstract class LongFormContentFormatter : IContentFormatter
     {
         private readonly int maxContentLength;
+        private readonly string campaignSource;
 
-        public LongFormContentFormatter(int maxContentLength)
+        public LongFormContentFormatter(int maxContentLength, string campaignSource)
         {
+            this.campaignSource = campaignSource;
             this.maxContentLength = maxContentLength;
         }
 
@@ -62,6 +64,9 @@ namespace Stacker.Cli.Formatters
 
                 sb.AppendLine();
                 sb.Append(item.Content.Link);
+                sb.Append("?utm_source=");
+                sb.Append(this.campaignSource.ToLowerInvariant());
+                sb.Append("&utm_medium=socialmedia&utm_campaign=stacker");
                 sb.AppendLine();
 
                 postings.Add(sb.ToString());

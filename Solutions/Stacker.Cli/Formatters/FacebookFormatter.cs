@@ -11,7 +11,7 @@ namespace Stacker.Cli.Formatters
         private const int MaxContentLength = 63_206;
 
         public FacebookFormatter()
-            : base(MaxContentLength)
+            : base(MaxContentLength, "facebook")
         {
         }
     }

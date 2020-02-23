@@ -61,6 +61,7 @@ namespace Stacker.Cli.Formatters
 
                 sb.Append(" ");
                 sb.Append(item.Content.Link);
+                sb.Append("?utm_source=twitter&utm_medium=socialmedia&utm_campaign=stacker");
 
                 tweets.Add(sb.ToString());
 
