@@ -11,7 +11,7 @@ namespace Stacker.Cli.Formatters
         private const int MaxContentLength = 1300;
 
         public LinkedInFormatter()
-            : base(MaxContentLength)
+            : base(MaxContentLength, "linkedin")
         {
         }
     }
