@@ -27,7 +27,7 @@ namespace Stacker.Cli.Commands
             {
                 Handler = CommandHandler.Create(async (string contentFilePath, string profileName, int itemCount, DateTime fromDate, DateTime toDate, PublicationPeriod publicationPeriod) =>
                 {
-                    await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(contentFilePath, $"facebook|{profileName}", publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
+                    await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(contentFilePath, $"facebook|", profileName, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
                 }),
             };
 

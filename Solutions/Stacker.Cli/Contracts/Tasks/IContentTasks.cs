@@ -13,7 +13,7 @@ namespace Stacker.Cli.Contracts.Tasks
 
     public interface IContentTasks
     {
-        Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profileKey, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+        Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
             where TContentFormatter : class, IContentFormatter, new();
 
         Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount);
