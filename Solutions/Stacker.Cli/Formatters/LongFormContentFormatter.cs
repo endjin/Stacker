@@ -21,7 +21,7 @@ namespace Stacker.Cli.Formatters
             this.maxContentLength = maxContentLength;
         }
 
-        public IEnumerable<string> Format(IEnumerable<ContentItem> feedItems)
+        public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
         {
             var postings = new List<string>();
             var sb = new StringBuilder();
@@ -66,7 +66,10 @@ namespace Stacker.Cli.Formatters
                 sb.Append(item.Content.Link);
                 sb.Append("?utm_source=");
                 sb.Append(this.campaignSource.ToLowerInvariant());
-                sb.Append("&utm_medium=socialmedia&utm_campaign=stacker");
+                sb.Append("&utm_medium=");
+                sb.Append(campaignMedium.ToLowerInvariant());
+                sb.Append("&utm_campaign=");
+                sb.Append(campaignName.ToLowerInvariant());
                 sb.AppendLine();
 
                 postings.Add(sb.ToString());

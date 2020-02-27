@@ -31,10 +31,12 @@ namespace Stacker.Cli.Tasks
             this.settingsManager = settingsManager;
         }
 
-        public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profileKey, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+        public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
             where TContentFormatter : class, IContentFormatter, new()
         {
             TContentFormatter formatter = new TContentFormatter();
+
+            string profileKey = profilePrefix + profileName;
 
             var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
 
@@ -46,7 +48,7 @@ namespace Stacker.Cli.Tasks
                 Console.WriteLine($"Loading: {contentFilePath}");
 
                 var contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
-                var formattedContentItems = formatter.Format(contentItems);
+                var formattedContentItems = formatter.Format("social", profileName, contentItems);
 
                 await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
             }

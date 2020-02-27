@@ -9,6 +9,6 @@ namespace Stacker.Cli.Contracts.Formatters
 
     public interface IContentFormatter
     {
-        IEnumerable<string> Format(IEnumerable<ContentItem> feedItems);
+        IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems);
     }
 }
