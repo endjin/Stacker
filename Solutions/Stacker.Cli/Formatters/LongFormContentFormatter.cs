@@ -7,6 +7,7 @@ namespace Stacker.Cli.Formatters
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Microsoft.Extensions.Primitives;
     using Stacker.Cli.Contracts.Formatters;
     using Stacker.Cli.Domain.Universal;
 
@@ -25,14 +26,25 @@ namespace Stacker.Cli.Formatters
         {
             var postings = new List<string>();
             var sb = new StringBuilder();
+            var sbTracking = new StringBuilder();
 
             foreach (var item in feedItems)
             {
+                sbTracking.AppendLine();
+                sbTracking.Append(item.Content.Link);
+                sbTracking.Append("?utm_source=");
+                sbTracking.Append(this.campaignSource.ToLowerInvariant());
+                sbTracking.Append("&utm_medium=");
+                sbTracking.Append(campaignMedium.ToLowerInvariant());
+                sbTracking.Append("&utm_campaign=");
+                sbTracking.Append(campaignName.ToLowerInvariant());
+                sbTracking.AppendLine();
+
                 sb.Append(item.Content.Excerpt);
 
                 if (item.Tags != null && item.Tags.Any())
                 {
-                    var contentLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
+                    var contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
                     int tagsToInclude = 0;
 
                     foreach (var tag in item.Tags)
@@ -62,19 +74,12 @@ namespace Stacker.Cli.Formatters
                     }
                 }
 
-                sb.AppendLine();
-                sb.Append(item.Content.Link);
-                sb.Append("?utm_source=");
-                sb.Append(this.campaignSource.ToLowerInvariant());
-                sb.Append("&utm_medium=");
-                sb.Append(campaignMedium.ToLowerInvariant());
-                sb.Append("&utm_campaign=");
-                sb.Append(campaignName.ToLowerInvariant());
-                sb.AppendLine();
+                sb.Append(sbTracking.ToString());
 
                 postings.Add(sb.ToString());
 
                 sb.Clear();
+                sbTracking.Clear();
             }
 
             return postings;
