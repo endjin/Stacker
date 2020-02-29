@@ -10,6 +10,7 @@ namespace Stacker.Cli
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Buffer;
     using Stacker.Cli.Contracts.Configuration;
@@ -62,7 +63,13 @@ namespace Stacker.Cli
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"Buffering Failed {response.StatusCode} - {response.ReasonPhrase}");
+                        var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        var error = JsonConvert.DeserializeObject<BufferError>(errorContent);
+
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Buffering Failed: {error.Message}");
+                        Console.WriteLine();
+                        Console.ResetColor();
                     }
                 }
             }
