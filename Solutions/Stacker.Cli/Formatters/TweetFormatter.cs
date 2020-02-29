@@ -13,14 +13,26 @@ namespace Stacker.Cli.Formatters
     public class TweetFormatter : IContentFormatter
     {
         private const int MaxContentLength = 280;
+        private string campaignSource = "twitter";
 
         public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
         {
             var tweets = new List<string>();
             var sb = new StringBuilder();
+            var sbTracking = new StringBuilder();
 
             foreach (var item in feedItems)
             {
+                sbTracking.Append(" ");
+                sbTracking.Append(item.Content.Link);
+                sbTracking.Append("?utm_source=");
+                sbTracking.Append(this.campaignSource.ToLowerInvariant());
+                sbTracking.Append("&utm_medium=");
+                sbTracking.Append(campaignMedium.ToLowerInvariant());
+                sbTracking.Append("&utm_campaign=");
+                sbTracking.Append(campaignName.ToLowerInvariant());
+                sbTracking.AppendLine();
+
                 sb.Append(item.Content.Title);
                 sb.Append(" by ");
 
@@ -59,18 +71,12 @@ namespace Stacker.Cli.Formatters
                     }
                 }
 
-                sb.Append(" ");
-                sb.Append(item.Content.Link);
-                sb.Append("?utm_source=");
-                sb.Append("twitter");
-                sb.Append("&utm_medium=");
-                sb.Append(campaignMedium.ToLowerInvariant());
-                sb.Append("&utm_campaign=");
-                sb.Append(campaignName.ToLowerInvariant());
+                sb.Append(sbTracking.ToString());
 
                 tweets.Add(sb.ToString());
 
                 sb.Clear();
+                sbTracking.Clear();
             }
 
             return tweets;
