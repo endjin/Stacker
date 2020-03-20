@@ -64,7 +64,6 @@ namespace Stacker.Cli.Commands
 
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
                     var posts = blogSite.GetAllPosts().ToList();
-                    var hashTagConverter = new WordPressTagToHashTagConverter();
                     var feed = new List<ContentItem>();
 
                     Console.WriteLine($"Total Posts: {posts.Count()}");

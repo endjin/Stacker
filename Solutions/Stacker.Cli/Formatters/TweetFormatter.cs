@@ -8,6 +8,7 @@ namespace Stacker.Cli.Formatters
     using System.Linq;
     using System.Text;
     using Stacker.Cli.Contracts.Formatters;
+    using Stacker.Cli.Converters;
     using Stacker.Cli.Domain.Universal;
 
     public class TweetFormatter : IContentFormatter
@@ -20,6 +21,7 @@ namespace Stacker.Cli.Formatters
             var tweets = new List<string>();
             var sb = new StringBuilder();
             var sbTracking = new StringBuilder();
+            var hashTagConverter = new WordPressTagToHashTagConverter();
 
             foreach (var item in feedItems)
             {
@@ -67,7 +69,7 @@ namespace Stacker.Cli.Formatters
                     foreach (var tag in item.Tags.Take(tagsToInclude))
                     {
                         sb.Append(" #");
-                        sb.Append(tag);
+                        sb.Append(hashTagConverter.Convert(tag));
                     }
                 }
 
