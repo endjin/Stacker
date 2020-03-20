@@ -163,6 +163,7 @@ namespace Stacker.Cli.Domain.WordPress
         private Tag ParseTagElement(XElement tagElement)
         {
             var tagIdElement = tagElement.Element(WordpressNamespace + "term_id");
+            var tagNameElement = tagElement.Element(WordpressNamespace + "tag_name");
             var tagSlugElement = tagElement.Element(WordpressNamespace + "tag_slug");
 
             if (tagIdElement == null || tagSlugElement == null)
@@ -170,13 +171,12 @@ namespace Stacker.Cli.Domain.WordPress
                 throw new XmlException("Unable to parse malformed category.");
             }
 
-            var tag = new Tag
+            return new Tag
             {
-                Id = tagIdElement.Value,
-                Slug = tagSlugElement.Value,
+                Id = tagIdElement?.Value,
+                Name = tagNameElement?.Value,
+                Slug = tagSlugElement?.Value,
             };
-
-            return tag;
         }
 
         private void InitializeAttachments()
@@ -230,6 +230,7 @@ namespace Stacker.Cli.Domain.WordPress
             var postBodyElement = postElement.Element(ContentNamespace + "encoded");
             var postPublishedAtUtcElement = postElement.Element(WordpressNamespace + "post_date_gmt");
             var postSlugElement = postElement.Element(WordpressNamespace + "post_name");
+            var postStautsElement = postElement.Element(WordpressNamespace + "status");
 
             if (postTitleElement == null ||
                 postUsernameElement == null ||
@@ -249,6 +250,7 @@ namespace Stacker.Cli.Domain.WordPress
                 Excerpt = postExcerptElement?.Value,
                 Link = postLinkElement?.Value,
                 PublishedAtUtc = DateTimeOffset.Parse(postPublishedAtUtcElement.Value),
+                Status = postStautsElement?.Value,
                 Slug = postSlugElement.Value,
                 Title = postTitleElement.Value,
             };

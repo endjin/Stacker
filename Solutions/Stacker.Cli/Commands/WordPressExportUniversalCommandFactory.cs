@@ -85,7 +85,9 @@ namespace Stacker.Cli.Commands
                                 Title = post.Title,
                             },
                             PublishedOn = post.PublishedAtUtc,
+                            Promote = post.Promote,
                             PromoteUntil = post.PromoteUntil,
+                            Slug = post.Slug,
                             Tags = post.Tags.Where(t => t != null).Select(t => hashTagConverter.Convert(t.Slug)),
                         });
                     }

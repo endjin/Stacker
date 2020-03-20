@@ -6,13 +6,14 @@ namespace Stacker.Cli.Domain.WordPress
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class Post
     {
         public Post()
         {
-            this.Categories = System.Linq.Enumerable.Empty<Category>();
-            this.Tags = System.Linq.Enumerable.Empty<Tag>();
+            this.Categories = Enumerable.Empty<Category>();
+            this.Tags = Enumerable.Empty<Tag>();
         }
 
         public Author Author { get; set; }
@@ -23,19 +24,21 @@ namespace Stacker.Cli.Domain.WordPress
 
         public string Excerpt { get; set; }
 
-        public string Slug { get; set; }
-
         public Attachment FeaturedImage { get; set; }
 
-        public Dictionary<string, string> MetaData { get; set; }
-
         public string Link { get; set; }
+
+        public Dictionary<string, string> MetaData { get; set; }
 
         public bool Promote { get; set; }
 
         public DateTimeOffset PromoteUntil { get; set; } = DateTimeOffset.MaxValue;
 
         public DateTimeOffset PublishedAtUtc { get; set; }
+
+        public string Slug { get; set; }
+
+        public string Status { get; internal set; }
 
         public IEnumerable<Tag> Tags { get; set; }
 
