@@ -12,9 +12,12 @@ namespace Stacker.Cli.Domain.WordPress
     {
         public Post()
         {
+            this.Attachments = Enumerable.Empty<Attachment>();
             this.Categories = Enumerable.Empty<Category>();
             this.Tags = Enumerable.Empty<Tag>();
         }
+
+        public IEnumerable<Attachment> Attachments { get; internal set; }
 
         public Author Author { get; set; }
 

@@ -189,7 +189,7 @@ namespace Stacker.Cli.Domain.WordPress
         private void InitializeAttachments()
         {
             this.Attachments = this.channelElement.Elements("item")
-                                                  .Where(e => this.IsAttachmentItem(e) && this.IsPublishedPost(e))
+                                                  .Where(e => this.IsAttachmentItem(e))
                                                   .Select(this.ParseAttachmentElement);
         }
 
@@ -211,6 +211,7 @@ namespace Stacker.Cli.Domain.WordPress
         private Attachment ParseAttachmentElement(XElement attachmentElement)
         {
             var attachmentIdElement = attachmentElement.Element(WordpressNamespace + "post_id");
+            var attachmentPostIdElement = attachmentElement.Element(WordpressNamespace + "post_parent");
             var attachmentTitleElement = attachmentElement.Element("title");
             var attachmentUrlElement = attachmentElement.Element(WordpressNamespace + "attachment_url");
 
@@ -223,9 +224,10 @@ namespace Stacker.Cli.Domain.WordPress
 
             return new Attachment()
             {
-                Id = attachmentIdElement.Value,
-                Title = attachmentTitleElement.Value,
-                Url = attachmentUrlElement.Value,
+                Id = attachmentIdElement?.Value,
+                PostId = attachmentPostIdElement?.Value,
+                Title = attachmentTitleElement?.Value,
+                Url = attachmentUrlElement?.Value,
             };
         }
 
@@ -268,6 +270,8 @@ namespace Stacker.Cli.Domain.WordPress
                 Slug = postSlugElement.Value,
                 Title = postTitleElement.Value,
             };
+
+            post.Attachments = this.GetAttachmentsByPostId(post.Id);
 
             var categories = new List<Category>();
             var tags = new List<Tag>();
@@ -453,6 +457,11 @@ namespace Stacker.Cli.Domain.WordPress
         private Attachment GetAttachmentById(string attachmentId)
         {
             return this.Attachments.FirstOrDefault(a => a.Id == attachmentId);
+        }
+
+        private IEnumerable<Attachment> GetAttachmentsByPostId(string postId)
+        {
+            return this.Attachments.Where(a => a.PostId == postId);
         }
     }
 }

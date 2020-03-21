@@ -69,6 +69,8 @@ namespace Stacker.Cli.Commands
 
                     Console.WriteLine($"Total Posts: {posts.Count()}");
 
+                    var attachments = posts.Where(x => x.Attachments.Any());
+
                     foreach (var post in posts)
                     {
                         var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
@@ -85,6 +87,7 @@ namespace Stacker.Cli.Commands
                             Categories = post.Categories.Select(c => c.Name),
                             Content = new ContentDetails
                             {
+                                Attachments = post.Attachments.Select(x => x.Url),
                                 Body = post.Body.Replace("\n", "<p/>"),
                                 Excerpt = post.Excerpt,
                                 Link = post.Link,
@@ -150,7 +153,7 @@ namespace Stacker.Cli.Commands
                         sb.Append(ci.Status);
                         sb.Append(Environment.NewLine);
                         sb.Append("Attachments: ");
-                        sb.Append(string.Empty);
+                        sb.Append(string.Join(",", ci.Content.Attachments));
                         sb.Append(Environment.NewLine);
                         sb.AppendLine("---");
                         sb.Append(Environment.NewLine);

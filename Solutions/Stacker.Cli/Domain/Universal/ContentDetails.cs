@@ -4,8 +4,18 @@
 
 namespace Stacker.Cli.Domain.Universal
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class ContentDetails
     {
+        public ContentDetails()
+        {
+            this.Attachments = Enumerable.Empty<string>();
+        }
+
+        public IEnumerable<string> Attachments { get; internal set; }
+
         public string Body { get; set; }
 
         public string Excerpt { get; set; }
