@@ -17,6 +17,8 @@ namespace Stacker.Cli.Domain.Universal
 
         public ContentDetails Content { get; set; }
 
+        public string Id { get; internal set; }
+
         public bool Promote { get; internal set; }
 
         public DateTimeOffset PromoteUntil { get; set; }
@@ -28,5 +30,20 @@ namespace Stacker.Cli.Domain.Universal
         public string Status { get; internal set; }
 
         public IEnumerable<string> Tags { get; set; }
+
+        public string UniqueId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.Slug))
+                {
+                    return this.Id;
+                }
+                else
+                {
+                    return this.Slug;
+                }
+            }
+        }
     }
 }

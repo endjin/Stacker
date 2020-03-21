@@ -8,6 +8,7 @@ namespace Stacker.Cli.Commands
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -63,7 +64,7 @@ namespace Stacker.Cli.Commands
                     });
 
                     var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-                    var posts = blogSite.GetAllPosts().ToList();
+                    var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
                     var feed = new List<ContentItem>();
 
                     Console.WriteLine($"Total Posts: {posts.Count()}");
@@ -79,15 +80,17 @@ namespace Stacker.Cli.Commands
                                 DisplayName = post.Author.DisplayName,
                                 Email = post.Author.Email,
                                 TwitterHandle = user.Twitter,
+                                Username = post.Author.Username,
                             },
                             Categories = post.Categories.Select(c => c.Name),
                             Content = new ContentDetails
                             {
-                                Body = post.Body,
+                                Body = post.Body.Replace("\n", "<p/>"),
                                 Excerpt = post.Excerpt,
                                 Link = post.Link,
                                 Title = post.Title,
                             },
+                            Id = post.Id,
                             PublishedOn = post.PublishedAtUtc,
                             Promote = post.Promote,
                             PromoteUntil = post.PromoteUntil,
@@ -99,10 +102,25 @@ namespace Stacker.Cli.Commands
 
                     var sb = new StringBuilder();
                     FileInfo fi = new FileInfo(exportFilePath);
+                    DirectoryInfo tempHtmlFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "html"));
+                    DirectoryInfo tempMarkdownFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "md"));
+                    string inputTempHtmlFilePath;
+                    string outputTempMarkdownFilePath;
+                    string outputFilePath;
 
                     if (!fi.Directory.Exists)
                     {
                         fi.Directory.Create();
+                    }
+
+                    if (!tempHtmlFolder.Exists)
+                    {
+                        tempHtmlFolder.Create();
+                    }
+
+                    if (!tempMarkdownFolder.Exists)
+                    {
+                        tempMarkdownFolder.Create();
                     }
 
                     foreach (var ci in feed)
@@ -112,10 +130,10 @@ namespace Stacker.Cli.Commands
                         sb.Append(ci.Content.Title);
                         sb.Append(Environment.NewLine);
                         sb.Append("Date: ");
-                        sb.Append(ci.PublishedOn);
+                        sb.Append(ci.PublishedOn.ToString("O"));
                         sb.Append(Environment.NewLine);
                         sb.Append("Author: ");
-                        sb.Append(ci.Author.DisplayName);
+                        sb.Append(ci.Author.Username);
                         sb.Append(Environment.NewLine);
                         sb.Append("Category: [");
                         sb.Append(string.Join(",", ci.Categories));
@@ -136,17 +154,33 @@ namespace Stacker.Cli.Commands
                         sb.Append(Environment.NewLine);
                         sb.AppendLine("---");
                         sb.Append(Environment.NewLine);
-                        sb.Append(ci.Content.Body);
 
-                        await using (var writer = File.CreateText(Path.Combine(exportFilePath, ci.Slug + ".md")))
+                        await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, ci.UniqueId + ".html")))
                         {
-                            await writer.WriteAsync(sb.ToString()).ConfigureAwait(false);
+                            await writer.WriteAsync(ci.Content.Body).ConfigureAwait(false);
                         }
+
+                        inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, ci.UniqueId + ".html");
+                        outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, ci.UniqueId + ".md");
+                        outputFilePath = Path.Combine(exportFilePath, ci.UniqueId + ".md");
+
+                        if (ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
+                        {
+                            sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
+
+                            await using (var writer = File.CreateText(outputFilePath))
+                            {
+                                await writer.WriteAsync(sb.ToString()).ConfigureAwait(false);
+                            }
+
+                            Console.WriteLine(outputFilePath);
+                        }
+
+                        // Remote the temporary html file.
+                        File.Delete(inputTempHtmlFilePath);
 
                         sb.Clear();
                     }
-
-                    Console.WriteLine($"Content written to {exportFilePath}");
                 }),
             };
 
@@ -154,6 +188,38 @@ namespace Stacker.Cli.Commands
             cmd.AddArgument(new Argument<string>("export-file-path") { Description = "File path for the exported files." });
 
             return cmd;
+        }
+
+        private static bool ExecutePandoc(string inputTempHtmlFilePath, string outputTempMarkdownFilePath)
+        {
+            bool success = false;
+
+            string arguments = $"-f html+raw_html --to=markdown-smart-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "pandoc",
+                Arguments = arguments,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+            };
+
+            var process = new System.Diagnostics.Process { StartInfo = psi };
+            process.Start();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                Console.WriteLine("Failed to convert " + outputTempMarkdownFilePath);
+                Console.WriteLine(process.StandardError.ReadToEnd());
+            }
+            else
+            {
+                success = true;
+            }
+
+            return success;
         }
     }
 }

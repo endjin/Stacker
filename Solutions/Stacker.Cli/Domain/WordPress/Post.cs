@@ -26,6 +26,8 @@ namespace Stacker.Cli.Domain.WordPress
 
         public Attachment FeaturedImage { get; set; }
 
+        public string Id { get; internal set; }
+
         public string Link { get; set; }
 
         public Dictionary<string, string> MetaData { get; set; }

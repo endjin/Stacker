@@ -58,6 +58,13 @@ namespace Stacker.Cli.Domain.WordPress
                                       .Select(this.ParsePostElement);
         }
 
+        public IEnumerable<Post> GetAllPostsInAllPublicationStates()
+        {
+            return this.channelElement.Elements("item")
+                                      .Where(e => this.IsPostItem(e))
+                                      .Select(this.ParsePostElement);
+        }
+
         private void InitializeChannelElement(XDocument document)
         {
             var rssRootElement = document.Root;
@@ -230,6 +237,7 @@ namespace Stacker.Cli.Domain.WordPress
             var postBodyElement = postElement.Element(ContentNamespace + "encoded");
             var postPublishedAtUtcElement = postElement.Element(WordpressNamespace + "post_date_gmt");
             var postSlugElement = postElement.Element(WordpressNamespace + "post_name");
+            var postPostIdElement = postElement.Element(WordpressNamespace + "post_id");
             var postStautsElement = postElement.Element(WordpressNamespace + "status");
 
             if (postTitleElement == null ||
@@ -243,13 +251,19 @@ namespace Stacker.Cli.Domain.WordPress
 
             var postExcerptElement = postElement.Element(ExcerptNamespace + "encoded");
 
+            if (!DateTimeOffset.TryParse(postPublishedAtUtcElement.Value, out var publicationData))
+            {
+                publicationData = DateTimeOffset.MaxValue;
+            }
+
             var post = new Post
             {
                 Author = this.GetAuthorByUsername(postUsernameElement.Value),
                 Body = postBodyElement.Value,
                 Excerpt = postExcerptElement?.Value,
+                Id = postPostIdElement?.Value,
                 Link = postLinkElement?.Value,
-                PublishedAtUtc = DateTimeOffset.Parse(postPublishedAtUtcElement.Value),
+                PublishedAtUtc = publicationData,
                 Status = postStautsElement?.Value,
                 Slug = postSlugElement.Value,
                 Title = postTitleElement.Value,
