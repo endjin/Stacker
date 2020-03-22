@@ -175,7 +175,14 @@ namespace Stacker.Cli.Commands
 
                         inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, ci.UniqueId + ".html");
                         outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, ci.UniqueId + ".md");
-                        outputFilePath = Path.Combine(exportFilePath, ci.UniqueId + ".md");
+                        outputFilePath = Path.Combine(exportFilePath, ci.Author.Username.ToLowerInvariant(), ci.UniqueId + ".md");
+
+                        FileInfo outputFile = new FileInfo(outputFilePath);
+
+                        if (!outputFile.Directory.Exists)
+                        {
+                            outputFile.Directory.Create();
+                        }
 
                         if (ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
                         {
