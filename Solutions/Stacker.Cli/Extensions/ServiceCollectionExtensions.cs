@@ -39,6 +39,7 @@ namespace Stacker.Cli.Extensions
 
             serviceCollection.AddTransient<IBufferClient, BufferClient>();
             serviceCollection.AddTransient<IContentTasks, ContentTasks>();
+            serviceCollection.AddTransient<IDownloadTasks, DownloadTasks>();
 
             serviceCollection.AddHttpClient();
         }

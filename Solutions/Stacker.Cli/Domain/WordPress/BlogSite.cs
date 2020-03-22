@@ -61,7 +61,7 @@ namespace Stacker.Cli.Domain.WordPress
         public IEnumerable<Post> GetAllPostsInAllPublicationStates()
         {
             return this.channelElement.Elements("item")
-                                      .Where(e => this.IsPostItem(e))
+                                      .Where(e => this.IsPostItem(e) && this.IsPublishedOrDraftPost(e))
                                       .Select(this.ParsePostElement);
         }
 
@@ -125,15 +125,13 @@ namespace Stacker.Cli.Domain.WordPress
                 throw new XmlException("Unable to parse malformed author.");
             }
 
-            var author = new Author
+            return new Author
             {
                 Id = authorIdElement.Value,
                 Username = authorUsernameElement.Value,
                 Email = authorEmailElement.Value,
                 DisplayName = authorDisplayNameElement.Value,
             };
-
-            return author;
         }
 
         private void InitializeCategories()
@@ -152,14 +150,12 @@ namespace Stacker.Cli.Domain.WordPress
                 throw new XmlException("Unable to parse malformed category.");
             }
 
-            var category = new Category
+            return new Category
             {
                 Id = categoryIdElement.Value,
                 Name = categoryNameElement.Value,
                 Slug = categorySlugElement.Value,
             };
-
-            return category;
         }
 
         private void InitializeTags()
@@ -208,12 +204,20 @@ namespace Stacker.Cli.Domain.WordPress
             return itemElement?.Element(WordpressNamespace + "status")?.Value == "publish";
         }
 
+        private bool IsPublishedOrDraftPost(XElement itemElement)
+        {
+            return itemElement?.Element(WordpressNamespace + "status")?.Value == "publish" || itemElement?.Element(WordpressNamespace + "status")?.Value == "draft";
+        }
+
         private Attachment ParseAttachmentElement(XElement attachmentElement)
         {
             var attachmentIdElement = attachmentElement.Element(WordpressNamespace + "post_id");
             var attachmentPostIdElement = attachmentElement.Element(WordpressNamespace + "post_parent");
             var attachmentTitleElement = attachmentElement.Element("title");
             var attachmentUrlElement = attachmentElement.Element(WordpressNamespace + "attachment_url");
+
+            var postMetaElements = attachmentElement.Elements(WordpressNamespace + "postmeta");
+            var metaValueElement = postMetaElements.Elements(WordpressNamespace + "meta_value").FirstOrDefault(x => ((XElement)x.PreviousNode).Value == "_wp_attached_file");
 
             if (attachmentIdElement == null ||
                 attachmentTitleElement == null ||
@@ -225,6 +229,7 @@ namespace Stacker.Cli.Domain.WordPress
             return new Attachment()
             {
                 Id = attachmentIdElement?.Value,
+                Path = metaValueElement?.Value,
                 PostId = attachmentPostIdElement?.Value,
                 Title = attachmentTitleElement?.Value,
                 Url = attachmentUrlElement?.Value,

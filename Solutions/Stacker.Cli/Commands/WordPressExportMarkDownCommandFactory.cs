@@ -18,17 +18,19 @@ namespace Stacker.Cli.Commands
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Commands;
     using Stacker.Cli.Contracts.Configuration;
-    using Stacker.Cli.Converters;
     using Stacker.Cli.Domain.Universal;
     using Stacker.Cli.Domain.WordPress;
+    using Stacker.Cli.Tasks;
 
     public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressExportMarkDownCommandFactory>
     {
+        private readonly IDownloadTasks downloadTasks;
         private readonly IStackerSettingsManager settingsManager;
 
-        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager)
+        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks)
         {
             this.settingsManager = settingsManager;
+            this.downloadTasks = downloadTasks;
         }
 
         public Command Create()
@@ -87,8 +89,8 @@ namespace Stacker.Cli.Commands
                             Categories = post.Categories.Select(c => c.Name),
                             Content = new ContentDetails
                             {
-                                Attachments = post.Attachments.Select(x => x.Url),
-                                Body = post.Body.Replace("\n", "<p/>"),
+                                Attachments = post.Attachments.Select(x => new ContentAttachment { Path = "/content/images/blog/" + x.Path, Url = x.Url }),
+                                Body = post.Body.Replace("\n", "<p/>").Replace("https://blogs.endjin.com/wp-content/uploads", "/content/images/blog"),
                                 Excerpt = post.Excerpt,
                                 Link = post.Link,
                                 Title = post.Title,
@@ -126,6 +128,8 @@ namespace Stacker.Cli.Commands
                         tempMarkdownFolder.Create();
                     }
 
+                    await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
+
                     foreach (var ci in feed)
                     {
                         sb.AppendLine("---");
@@ -147,13 +151,19 @@ namespace Stacker.Cli.Commands
                         sb.Append("]");
                         sb.Append(Environment.NewLine);
                         sb.Append("Slug: ");
+
+                        if (string.IsNullOrEmpty(ci.Slug))
+                        {
+                            ci.Slug = new string(ci.Content.Title.ToLowerInvariant().Replace(" ", "-").Replace("---", "-").Replace("--", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+                        }
+
                         sb.Append(ci.Slug);
                         sb.Append(Environment.NewLine);
                         sb.Append("Status: ");
                         sb.Append(ci.Status);
                         sb.Append(Environment.NewLine);
                         sb.Append("Attachments: ");
-                        sb.Append(string.Join(",", ci.Content.Attachments));
+                        sb.Append(string.Join(",", ci.Content.Attachments.Select(x => x.Path).OrderBy(x => x)));
                         sb.Append(Environment.NewLine);
                         sb.AppendLine("---");
                         sb.Append(Environment.NewLine);

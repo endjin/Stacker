@@ -11,10 +11,10 @@ namespace Stacker.Cli.Domain.Universal
     {
         public ContentDetails()
         {
-            this.Attachments = Enumerable.Empty<string>();
+            this.Attachments = Enumerable.Empty<ContentAttachment>();
         }
 
-        public IEnumerable<string> Attachments { get; internal set; }
+        public IEnumerable<ContentAttachment> Attachments { get; internal set; }
 
         public string Body { get; set; }
 
