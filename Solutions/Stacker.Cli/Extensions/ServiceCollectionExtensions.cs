@@ -52,6 +52,7 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<IPostConvertCleaner, RemoveThreeBlankLinesFromStartBody>();
             serviceCollection.AddTransient<IPostConvertCleaner, ReplaceWpUploadPath>();
             serviceCollection.AddTransient<IPostConvertCleaner, UpdateInternalPostUrls>();
+            serviceCollection.AddTransient<IPostConvertCleaner, ReplaceSmartQuotes>();
 
             serviceCollection.AddHttpClient();
         }
