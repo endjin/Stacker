@@ -7,6 +7,7 @@ namespace Stacker.Cli.Domain.Universal
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Text.RegularExpressions;
 
     [DebuggerDisplay("{Content.Title} by {Author.DisplayName}")]
     public class ContentItem
@@ -27,6 +28,14 @@ namespace Stacker.Cli.Domain.Universal
 
         public string Slug { get; internal set; }
 
+        public string CleanSlug
+        {
+            get
+            {
+                return Regex.Replace(this.Slug, @"\-+", "-");
+            }
+        }
+
         public string Status { get; internal set; }
 
         public IEnumerable<string> Tags { get; set; }
@@ -41,7 +50,7 @@ namespace Stacker.Cli.Domain.Universal
                 }
                 else
                 {
-                    return this.Slug;
+                    return this.CleanSlug;
                 }
             }
         }

@@ -5,16 +5,10 @@
 namespace Stacker.Cli.Domain.Universal
 {
     using System.Collections.Generic;
-    using System.Linq;
 
     public class ContentDetails
     {
-        public ContentDetails()
-        {
-            this.Attachments = Enumerable.Empty<ContentAttachment>();
-        }
-
-        public IEnumerable<ContentAttachment> Attachments { get; internal set; }
+        public List<ContentAttachment> Attachments { get; internal set; } = new List<ContentAttachment>();
 
         public string Body { get; set; }
 

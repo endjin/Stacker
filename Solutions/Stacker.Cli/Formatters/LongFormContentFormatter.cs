@@ -44,7 +44,7 @@ namespace Stacker.Cli.Formatters
 
                 sb.Append(item.Content.Excerpt);
 
-                if (item.Tags != null && item.Tags.Any())
+                if (item.Tags?.Any() == true)
                 {
                     var contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
                     int tagsToInclude = 0;

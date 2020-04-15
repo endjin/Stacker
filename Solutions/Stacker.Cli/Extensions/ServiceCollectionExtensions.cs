@@ -5,6 +5,7 @@
 namespace Stacker.Cli.Extensions
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Stacker.Cli.Cleaners;
     using Stacker.Cli.Commands;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Buffer;
@@ -40,6 +41,17 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<IBufferClient, BufferClient>();
             serviceCollection.AddTransient<IContentTasks, ContentTasks>();
             serviceCollection.AddTransient<IDownloadTasks, DownloadTasks>();
+
+            serviceCollection.AddTransient<ContentItemCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, ContentItemAttachementPathCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, WordPressImageResizerCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, ReplaceNewLineWithParagraphTagCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, EnsureEndjinHttpsInBody>();
+            serviceCollection.AddTransient<IPostDownloadCleaner, RemoveHostNamesFromBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, RemoveHeaderImageFromBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, RemoveThreeBlankLinesFromStartBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, ReplaceWpUploadPath>();
+            serviceCollection.AddTransient<IPostConvertCleaner, UpdateInternalPostUrls>();
 
             serviceCollection.AddHttpClient();
         }

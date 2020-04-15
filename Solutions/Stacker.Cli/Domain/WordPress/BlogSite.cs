@@ -313,8 +313,9 @@ namespace Stacker.Cli.Domain.WordPress
                 var metaKeyElement = postMeta.Element(WordpressNamespace + "meta_key");
 
                 this.ParseFeaturedImage(metaKeyElement, postMeta, post);
-                this.ParseSsoMetaData(metaKeyElement, postMeta, metaData);
                 this.ParseStackerPromote(metaKeyElement, post);
+
+                // this.ParseSsoMetaData(metaKeyElement, postMeta, metaData);
             }
 
             post.MetaData = metaData;
@@ -381,7 +382,7 @@ namespace Stacker.Cli.Domain.WordPress
 
                 rawMetaData = Regex.Replace(rawMetaData, @"(?<prefix>^\w:\d+:)", string.Empty);
                 rawMetaData = Regex.Replace(rawMetaData, @"{(?<first>\w:\d{1,3}:)", "{");
-                rawMetaData = Regex.Replace(rawMetaData, @"(?<trailing>;)(?:})", "}");
+                rawMetaData = Regex.Replace(rawMetaData, "(?<trailing>;)(?:})", "}");
 
                 var regexp = new Regex(@"(?<separators>;\w:\d+?:)(?:"")");
                 var matches = regexp.Matches(rawMetaData);

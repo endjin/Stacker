@@ -29,9 +29,9 @@ namespace Stacker.Cli.Tasks
         {
             var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
-            foreach (var feedItem in feed)
+            foreach (var contentItem in feed)
             {
-                foreach (var attachment in feedItem.Content.Attachments)
+                foreach (var attachment in contentItem.Content.Attachments)
                 {
                     var context = new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) };
 
@@ -41,7 +41,7 @@ namespace Stacker.Cli.Tasks
 
             downloadFeedBlock.Complete();
 
-            await downloadFeedBlock.Completion;
+            await downloadFeedBlock.Completion.ConfigureAwait(false);
 
             Console.WriteLine("File Download Completed");
         }
@@ -92,7 +92,7 @@ namespace Stacker.Cli.Tasks
                 },
                     CancellationToken.None,
                     new Backoff(5, TimeSpan.FromSeconds(1)),
-                    new AnyException());
+                    new AnyException()).ConfigureAwait(false);
                 context.IsFaulted = false;
             }
             catch (Exception ex)

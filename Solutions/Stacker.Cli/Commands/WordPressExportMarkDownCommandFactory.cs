@@ -12,9 +12,13 @@ namespace Stacker.Cli.Commands
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Xml.Linq;
+    using Flurl;
     using ReverseMarkdown;
+    using Stacker.Cli.Cleaners;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Commands;
     using Stacker.Cli.Contracts.Configuration;
@@ -26,11 +30,13 @@ namespace Stacker.Cli.Commands
     {
         private readonly IDownloadTasks downloadTasks;
         private readonly IStackerSettingsManager settingsManager;
+        private readonly ContentItemCleaner cleanerManager;
 
-        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks)
+        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager)
         {
             this.settingsManager = settingsManager;
             this.downloadTasks = downloadTasks;
+            this.cleanerManager = cleanerManager;
         }
 
         public Command Create()
@@ -46,64 +52,9 @@ namespace Stacker.Cli.Commands
                         return;
                     }
 
-                    BlogSite blogSite;
+                    BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
 
-                    Console.WriteLine($"Reading {wpexportFilePath}");
-
-                    using (var reader = File.OpenText(wpexportFilePath))
-                    {
-                        var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
-                        blogSite = new BlogSite(document);
-                    }
-
-                    Console.WriteLine($"Processing...");
-
-                    var converter = new Converter(new Config
-                    {
-                        UnknownTags = Config.UnknownTagsOption.PassThrough, // Include the unknown tag completely in the result (default as well)
-                        RemoveComments = true, // will ignore all comments
-                        SmartHrefHandling = true, // remove markdown output for links where appropriate
-                    });
-
-                    var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-                    var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
-                    var feed = new List<ContentItem>();
-
-                    Console.WriteLine($"Total Posts: {posts.Count()}");
-
-                    var attachments = posts.Where(x => x.Attachments.Any());
-
-                    foreach (var post in posts)
-                    {
-                        var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
-
-                        feed.Add(new ContentItem
-                        {
-                            Author = new AuthorDetails
-                            {
-                                DisplayName = post.Author.DisplayName,
-                                Email = post.Author.Email,
-                                TwitterHandle = user.Twitter,
-                                Username = post.Author.Username,
-                            },
-                            Categories = post.Categories.Select(c => c.Name),
-                            Content = new ContentDetails
-                            {
-                                Attachments = post.Attachments.Select(x => new ContentAttachment { Path = "/content/images/blog/" + x.Path, Url = x.Url }),
-                                Body = post.Body.Replace("\n", "<p/>").Replace("https://blogs.endjin.com/wp-content/uploads", "/content/images/blog"),
-                                Excerpt = post.Excerpt,
-                                Link = post.Link,
-                                Title = post.Title,
-                            },
-                            Id = post.Id,
-                            PublishedOn = post.PublishedAtUtc,
-                            Promote = post.Promote,
-                            PromoteUntil = post.PromoteUntil,
-                            Slug = post.Slug,
-                            Status = post.Status,
-                            Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
-                        });
-                    }
+                    var feed = this.LoadFeed(blogSite);
 
                     var sb = new StringBuilder();
                     FileInfo fi = new FileInfo(exportFilePath);
@@ -132,50 +83,18 @@ namespace Stacker.Cli.Commands
 
                     foreach (var ci in feed)
                     {
-                        sb.AppendLine("---");
-                        sb.Append("Title: ");
-                        sb.Append(ci.Content.Title);
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Date: ");
-                        sb.Append(ci.PublishedOn.ToString("O"));
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Author: ");
-                        sb.Append(ci.Author.Username);
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Category: [");
-                        sb.Append(string.Join(",", ci.Categories));
-                        sb.Append("]");
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Tags: [");
-                        sb.Append(string.Join(",", ci.Tags));
-                        sb.Append("]");
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Slug: ");
+                        var contentItem = this.cleanerManager.PostDownload(ci);
 
-                        if (string.IsNullOrEmpty(ci.Slug))
+                        this.CreateYamlHeader(sb, contentItem);
+
+                        await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
                         {
-                            ci.Slug = new string(ci.Content.Title.ToLowerInvariant().Replace(" ", "-").Replace("---", "-").Replace("--", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+                            await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
                         }
 
-                        sb.Append(ci.Slug);
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Status: ");
-                        sb.Append(ci.Status);
-                        sb.Append(Environment.NewLine);
-                        sb.Append("Attachments: ");
-                        sb.Append(string.Join(",", ci.Content.Attachments.Select(x => x.Path).OrderBy(x => x)));
-                        sb.Append(Environment.NewLine);
-                        sb.AppendLine("---");
-                        sb.Append(Environment.NewLine);
-
-                        await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, ci.UniqueId + ".html")))
-                        {
-                            await writer.WriteAsync(ci.Content.Body).ConfigureAwait(false);
-                        }
-
-                        inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, ci.UniqueId + ".html");
-                        outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, ci.UniqueId + ".md");
-                        outputFilePath = Path.Combine(exportFilePath, ci.Author.Username.ToLowerInvariant(), ci.UniqueId + ".md");
+                        inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html");
+                        outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
+                        outputFilePath = Path.Combine(exportFilePath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
 
                         FileInfo outputFile = new FileInfo(outputFilePath);
 
@@ -184,16 +103,27 @@ namespace Stacker.Cli.Commands
                             outputFile.Directory.Create();
                         }
 
-                        if (ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
+                        if (this.ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
                         {
                             sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
 
-                            await using (var writer = File.CreateText(outputFilePath))
-                            {
-                                await writer.WriteAsync(sb.ToString()).ConfigureAwait(false);
-                            }
+                            string content = sb.ToString();
 
                             Console.WriteLine(outputFilePath);
+
+                            try
+                            {
+                                content = this.cleanerManager.PostConvert(content);
+                            }
+                            catch (Exception exception)
+                            {
+                                Console.WriteLine(exception.Message);
+                            }
+
+                            await using (var writer = File.CreateText(outputFilePath))
+                            {
+                                await writer.WriteAsync(content).ConfigureAwait(false);
+                            }
                         }
 
                         // Remote the temporary html file.
@@ -210,11 +140,151 @@ namespace Stacker.Cli.Commands
             return cmd;
         }
 
-        private static bool ExecutePandoc(string inputTempHtmlFilePath, string outputTempMarkdownFilePath)
+        private void CreateYamlHeader(StringBuilder sb, ContentItem contentItem)
+        {
+            sb.AppendLine("---");
+            sb.Append("Title: ");
+            sb.Append(this.YamlEncode(contentItem.Content.Title));
+            sb.Append(Environment.NewLine);
+            sb.Append("Date: ");
+            sb.Append(contentItem.PublishedOn.ToString("O"));
+            sb.Append(Environment.NewLine);
+            sb.Append("Author: ");
+            sb.Append(contentItem.Author.Username);
+            sb.Append(Environment.NewLine);
+            sb.Append("Category: [");
+            sb.Append(string.Join(",", contentItem.Categories));
+            sb.Append("]");
+            sb.Append(Environment.NewLine);
+            sb.Append("Tags: [");
+            sb.Append(string.Join(",", contentItem.Tags));
+            sb.Append("]");
+            sb.Append(Environment.NewLine);
+            sb.Append("Slug: ");
+
+            if (string.IsNullOrEmpty(contentItem.Slug))
+            {
+                contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+            }
+
+            sb.Append(contentItem.Slug);
+            sb.Append(Environment.NewLine);
+            sb.Append("Status: ");
+            sb.Append(contentItem.Status);
+            sb.Append(Environment.NewLine);
+
+            sb.Append("FeaturedImage: ");
+            sb.Append(this.GetFeaturedImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()));
+            sb.Append(Environment.NewLine);
+
+            if (!string.IsNullOrEmpty(contentItem.Content.Excerpt))
+            {
+                sb.Append("Excerpt: ");
+                sb.Append(this.YamlEncode(contentItem.Content.Excerpt.Replace("\n", string.Empty).Trim()));
+                sb.Append(Environment.NewLine);
+            }
+
+            sb.Append("Attachments: ");
+            sb.Append(string.Join(",", contentItem.Content.Attachments.Select(x => x.Path).Distinct()));
+            sb.Append(Environment.NewLine);
+            sb.AppendLine("---");
+            sb.Append(Environment.NewLine);
+        }
+
+        private List<ContentItem> LoadFeed(BlogSite blogSite)
+        {
+            Console.WriteLine($"Processing...");
+
+            var feed = new List<ContentItem>();
+            var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+            var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
+
+            Console.WriteLine($"Total Posts: {posts.Count}");
+
+            // var attachments = posts.Where(x => x.Attachments.Any());
+            foreach (var post in posts)
+            {
+                var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+
+                /*
+                 * 1. Remove wp resizer image urls in body
+                 * 2. Remove wp resizer image urls in attachments
+                 * 3. Add mising attachements in body
+                 * 4. DOWNLOAD ATTACHMENTS
+                 * 5. CONVERT TO MARKDOWN
+                 * 4. Remove header image from body
+                 * 5. Replace page links in body
+                 */
+
+                var ci = new ContentItem
+                {
+                    Author = new AuthorDetails
+                    {
+                        DisplayName = post.Author.DisplayName,
+                        Email = post.Author.Email,
+                        TwitterHandle = user.Twitter,
+                        Username = post.Author.Username,
+                    },
+                    Categories = post.Categories.Select(c => c.Name).Where(x => !this.IsCategoryExcluded(x)),
+                    Content = new ContentDetails
+                    {
+                        Attachments = post.Attachments.Select(x => new ContentAttachment { Path = x.Path, Url = x.Url }).ToList(),
+                        Body = post.Body,
+                        Excerpt = post.Excerpt,
+                        Link = post.Link,
+                        Title = post.Title,
+                    },
+                    Id = post.Id,
+                    PublishedOn = post.PublishedAtUtc,
+                    Promote = post.Promote,
+                    PromoteUntil = post.PromoteUntil,
+                    Slug = post.Slug,
+                    Status = post.Status,
+                    Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
+                };
+
+                // Search the body for any missing images.
+                var matches = Regex.Matches(post.Body, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+                if (matches.Count > 0)
+                {
+                    foreach (Match match in matches)
+                    {
+                        if (!ci.Content.Attachments.Any(x => string.Equals(x.Url, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)) && this.IsRelevantHost(match.Groups[1].Value))
+                        {
+                            ci.Content.Attachments.Add(new ContentAttachment { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
+                        }
+                    }
+                }
+
+                ci = this.cleanerManager.PreDownload(ci);
+
+                feed.Add(ci);
+            }
+
+            return feed;
+        }
+
+        private async Task<BlogSite> LoadWordPressExportAsync(string wpexportFilePath)
+        {
+            BlogSite blogSite;
+
+            Console.WriteLine($"Reading {wpexportFilePath}");
+
+            using (var reader = File.OpenText(wpexportFilePath))
+            {
+                var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
+                blogSite = new BlogSite(document);
+            }
+
+            return blogSite;
+        }
+
+        private bool ExecutePandoc(string inputTempHtmlFilePath, string outputTempMarkdownFilePath)
         {
             bool success = false;
 
-            string arguments = $"-f html+raw_html --to=markdown-smart-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
+            string arguments = $"-f html+raw_html --to=markdown_github-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
 
             var psi = new ProcessStartInfo
             {
@@ -240,6 +310,57 @@ namespace Stacker.Cli.Commands
             }
 
             return success;
+        }
+
+        private bool IsCategoryExcluded(string category)
+        {
+            string[] excluded = new string[] { "Uncategorized", "Mobile Services", "Networking", string.Empty };
+
+            return excluded.Contains(category);
+        }
+
+        private string RemovePrefixes(string value)
+        {
+            value = value.Trim().Replace("https://blogs.endjin.com/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
+            value = value.Replace("http://blogs.endjin.com/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
+            value = value.Replace("http://endjinblog.azurewebsites.net/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
+
+            // adds links to image paths that are malformed.
+            if (!value.StartsWith("/content", StringComparison.InvariantCultureIgnoreCase))
+            {
+                value = Url.Combine("/content/images/blog", value);
+            }
+
+            return value;
+        }
+
+        private string GetFeaturedImage(List<string> attachments)
+        {
+            if (attachments.Count == 1)
+            {
+                return attachments[0];
+            }
+
+            var header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
+
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header.Trim();
+            }
+
+            return string.Empty;
+        }
+
+        private bool IsRelevantHost(string url)
+        {
+            var hosts = new string[] { "blogs.endjin.com", "endjinblog.azurewebsites.net" };
+
+            return hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private string YamlEncode(string value)
+        {
+            return value.Replace(":", "&#58;");
         }
     }
 }
