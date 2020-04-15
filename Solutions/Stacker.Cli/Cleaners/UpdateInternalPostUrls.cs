@@ -11,7 +11,7 @@ namespace Stacker.Cli.Cleaners
     {
         public string Clean(string content)
         {
-            Regex regexp = new Regex(@"\((\/\d{4}\/\d{2}\/.*)(\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+            Regex regexp = new Regex(@"\((\/\d{4}\/\d{2}\/.*?)(\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
             content = regexp.Replace(content, (match) =>
             {
