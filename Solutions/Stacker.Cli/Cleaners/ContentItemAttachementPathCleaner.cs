@@ -22,7 +22,7 @@ namespace Stacker.Cli.Cleaners
             {
                 attachment.Path = regexp.Replace(attachment.Path, path);
 
-                if (!attachment.Path.StartsWith("/content", StringComparison.InvariantCultureIgnoreCase))
+                if (!attachment.Path.StartsWith(path, StringComparison.InvariantCultureIgnoreCase))
                 {
                     attachment.Path = Url.Combine(path, attachment.Path);
                 }
