@@ -12,6 +12,7 @@ namespace Stacker.Cli.Extensions
     using Stacker.Cli.Contracts.Commands;
     using Stacker.Cli.Contracts.Configuration;
     using Stacker.Cli.Contracts.Tasks;
+    using Stacker.Cli.Serialization;
     using Stacker.Cli.Tasks;
 
     public static class ServiceCollectionExtensions
@@ -41,6 +42,7 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<IBufferClient, BufferClient>();
             serviceCollection.AddTransient<IContentTasks, ContentTasks>();
             serviceCollection.AddTransient<IDownloadTasks, DownloadTasks>();
+            serviceCollection.AddTransient<IYamlSerializerFactory, YamlSerializerFactory>();
 
             serviceCollection.AddTransient<ContentItemCleaner>();
             serviceCollection.AddTransient<IPreDownloadCleaner, ContentItemAttachementPathCleaner>();

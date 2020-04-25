@@ -24,19 +24,24 @@ namespace Stacker.Cli.Commands
     using Stacker.Cli.Contracts.Configuration;
     using Stacker.Cli.Domain.Universal;
     using Stacker.Cli.Domain.WordPress;
+    using Stacker.Cli.Serialization;
     using Stacker.Cli.Tasks;
+    using YamlDotNet.Serialization;
 
     public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressExportMarkDownCommandFactory>
     {
         private readonly IDownloadTasks downloadTasks;
         private readonly IStackerSettingsManager settingsManager;
         private readonly ContentItemCleaner cleanerManager;
+        private readonly IYamlSerializerFactory serializerFactory;
+        private ISerializer serializer;
 
-        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager)
+        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
         {
             this.settingsManager = settingsManager;
             this.downloadTasks = downloadTasks;
             this.cleanerManager = cleanerManager;
+            this.serializerFactory = serializerFactory;
         }
 
         public Command Create()
@@ -51,6 +56,8 @@ namespace Stacker.Cli.Commands
 
                         return;
                     }
+
+                    this.serializer = this.serializerFactory.GetSerializer();
 
                     BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
 
@@ -85,7 +92,11 @@ namespace Stacker.Cli.Commands
                     {
                         var contentItem = this.cleanerManager.PostDownload(ci);
 
-                        this.CreateYamlHeader(sb, contentItem);
+                        sb.AppendLine("---");
+                        sb.Append(this.CreateYamlHeader(contentItem));
+                        sb.Append("---");
+                        sb.Append(Environment.NewLine);
+                        sb.Append(Environment.NewLine);
 
                         await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
                         {
@@ -140,55 +151,28 @@ namespace Stacker.Cli.Commands
             return cmd;
         }
 
-        private void CreateYamlHeader(StringBuilder sb, ContentItem contentItem)
+        private string CreateYamlHeader(ContentItem contentItem)
         {
-            sb.AppendLine("---");
-            sb.Append("Title: ");
-            sb.Append(this.YamlEncode(contentItem.Content.Title));
-            sb.Append(Environment.NewLine);
-            sb.Append("Date: ");
-            sb.Append(contentItem.PublishedOn.ToString("O"));
-            sb.Append(Environment.NewLine);
-            sb.Append("Author: ");
-            sb.Append(contentItem.Author.Username);
-            sb.Append(Environment.NewLine);
-            sb.Append("Category: [");
-            sb.Append(string.Join(",", contentItem.Categories));
-            sb.Append("]");
-            sb.Append(Environment.NewLine);
-            sb.Append("Tags: [");
-            sb.Append(string.Join(",", contentItem.Tags));
-            sb.Append("]");
-            sb.Append(Environment.NewLine);
-            sb.Append("Slug: ");
-
             if (string.IsNullOrEmpty(contentItem.Slug))
             {
                 contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
             }
 
-            sb.Append(contentItem.Slug);
-            sb.Append(Environment.NewLine);
-            sb.Append("Status: ");
-            sb.Append(contentItem.Status);
-            sb.Append(Environment.NewLine);
-
-            sb.Append("FeaturedImage: ");
-            sb.Append(this.GetFeaturedImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()));
-            sb.Append(Environment.NewLine);
-
-            if (!string.IsNullOrEmpty(contentItem.Content.Excerpt))
+            var frontmatter = new
             {
-                sb.Append("Excerpt: ");
-                sb.Append(this.YamlEncode(contentItem.Content.Excerpt.Replace("\n", string.Empty).Trim()));
-                sb.Append(Environment.NewLine);
-            }
+                Title = contentItem.Content.Title,
+                Date = contentItem.PublishedOn.ToString("O"),
+                Author = contentItem.Author.Username,
+                Category = contentItem.Categories,
+                Tags = contentItem.Tags,
+                Slug = contentItem.Slug,
+                Status = contentItem.Status,
+                HeaderImageUrl = this.GetHeaderImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()),
+                Excerpt = contentItem.Content.Excerpt.Replace("\n", string.Empty).Trim(),
+                Attachments = contentItem.Content.Attachments.Select(x => x.Path).Distinct(),
+            };
 
-            sb.Append("Attachments: ");
-            sb.Append(string.Join(",", contentItem.Content.Attachments.Select(x => x.Path).Distinct()));
-            sb.Append(Environment.NewLine);
-            sb.AppendLine("---");
-            sb.Append(Environment.NewLine);
+            return this.serializer.Serialize(frontmatter);
         }
 
         private List<ContentItem> LoadFeed(BlogSite blogSite)
@@ -205,16 +189,6 @@ namespace Stacker.Cli.Commands
             foreach (var post in posts)
             {
                 var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
-
-                /*
-                 * 1. Remove wp resizer image urls in body
-                 * 2. Remove wp resizer image urls in attachments
-                 * 3. Add mising attachements in body
-                 * 4. DOWNLOAD ATTACHMENTS
-                 * 5. CONVERT TO MARKDOWN
-                 * 4. Remove header image from body
-                 * 5. Replace page links in body
-                 */
 
                 var ci = new ContentItem
                 {
@@ -319,22 +293,7 @@ namespace Stacker.Cli.Commands
             return excluded.Contains(category);
         }
 
-        private string RemovePrefixes(string value)
-        {
-            value = value.Trim().Replace("https://blogs.endjin.com/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
-            value = value.Replace("http://blogs.endjin.com/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
-            value = value.Replace("http://endjinblog.azurewebsites.net/wp-content/uploads", "/content/images/blog", StringComparison.InvariantCultureIgnoreCase);
-
-            // adds links to image paths that are malformed.
-            if (!value.StartsWith("/content", StringComparison.InvariantCultureIgnoreCase))
-            {
-                value = Url.Combine("/content/images/blog", value);
-            }
-
-            return value;
-        }
-
-        private string GetFeaturedImage(List<string> attachments)
+        private string GetHeaderImage(List<string> attachments)
         {
             if (attachments.Count == 1)
             {
@@ -356,11 +315,6 @@ namespace Stacker.Cli.Commands
             var hosts = new string[] { "blogs.endjin.com", "endjinblog.azurewebsites.net" };
 
             return hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        private string YamlEncode(string value)
-        {
-            return value.Replace(":", "&#58;");
         }
     }
 }
