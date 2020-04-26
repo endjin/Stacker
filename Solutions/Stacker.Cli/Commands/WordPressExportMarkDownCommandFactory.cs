@@ -15,6 +15,7 @@ namespace Stacker.Cli.Commands
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Web;
     using System.Xml.Linq;
     using Flurl;
     using ReverseMarkdown;
@@ -86,8 +87,7 @@ namespace Stacker.Cli.Commands
                         tempMarkdownFolder.Create();
                     }
 
-                    await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
-
+                    // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
                     foreach (var ci in feed)
                     {
                         var contentItem = this.cleanerManager.PostDownload(ci);
@@ -160,7 +160,7 @@ namespace Stacker.Cli.Commands
 
             var frontmatter = new
             {
-                Title = contentItem.Content.Title,
+                Title = contentItem.Content.Title.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'"),
                 Date = contentItem.PublishedOn.ToString("O"),
                 Author = contentItem.Author.Username,
                 Category = contentItem.Categories,
@@ -168,7 +168,7 @@ namespace Stacker.Cli.Commands
                 Slug = contentItem.Slug,
                 Status = contentItem.Status,
                 HeaderImageUrl = this.GetHeaderImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()),
-                Excerpt = contentItem.Content.Excerpt.Replace("\n", string.Empty).Trim(),
+                Excerpt = contentItem.Content.Excerpt.Replace("\n", string.Empty).Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'").Trim(),
                 Attachments = contentItem.Content.Attachments.Select(x => x.Path).Distinct(),
             };
 
