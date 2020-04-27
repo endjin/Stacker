@@ -15,10 +15,7 @@ namespace Stacker.Cli.Commands
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Web;
     using System.Xml.Linq;
-    using Flurl;
-    using ReverseMarkdown;
     using Stacker.Cli.Cleaners;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Commands;

@@ -5,6 +5,10 @@ A .NET Global Tool for automating marketing content across social channels. It s
 
 A useful blog post for understanding `System.CommandLine` is [Radu Matei's](https://twitter.com/matei_radu) blog post "[Building self-contained, single executable .NET Core 3 CLI tools](https://radu-matei.com/blog/self-contained-dotnet-cli/)".
 
+## Prerequisites
+
+`stacker` used Pandoc to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html)
+
 ## dotnet global tools
 
 `stacker` is a [.NET global tool](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), which means once installed, it's available on the PATH of your machine. 
