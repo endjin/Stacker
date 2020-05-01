@@ -84,7 +84,8 @@ namespace Stacker.Cli.Commands
                         tempMarkdownFolder.Create();
                     }
 
-                    // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
+                    await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
+
                     foreach (var ci in feed)
                     {
                         var contentItem = this.cleanerManager.PostDownload(ci);
