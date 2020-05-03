@@ -7,7 +7,7 @@ A useful blog post for understanding `System.CommandLine` is [Radu Matei's](http
 
 ## Prerequisites
 
-`stacker` used Pandoc to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html)
+`stacker` used Pandoc to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html) and add it to the `PATH`.
 
 ## dotnet global tools
 
@@ -66,6 +66,8 @@ Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to expl
 `stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
 
 `stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
+
+`wordpress export markdown` - Exports blog posts from WordPress and converts them into Markdown. Various clean up routes are also run.
 
 ### Buffer commands
 

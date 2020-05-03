@@ -16,5 +16,7 @@ namespace Stacker.Cli.Configuration
         public string BufferAccessToken { get; set; }
 
         public Dictionary<string, string> BufferProfiles { get; set; }
+
+        public WordPressToMarkdown WordPressToMarkdown { get; set; }
     }
 }

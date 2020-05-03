@@ -312,10 +312,9 @@ namespace Stacker.Cli.Domain.WordPress
             {
                 var metaKeyElement = postMeta.Element(WordpressNamespace + "meta_key");
 
+                // this.ParseSsoMetaData(metaKeyElement, postMeta, metaData);
                 this.ParseFeaturedImage(metaKeyElement, postMeta, post);
                 this.ParseStackerPromote(metaKeyElement, post);
-
-                // this.ParseSsoMetaData(metaKeyElement, postMeta, metaData);
             }
 
             post.MetaData = metaData;

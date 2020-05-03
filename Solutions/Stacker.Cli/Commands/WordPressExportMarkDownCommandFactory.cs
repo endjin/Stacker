@@ -33,6 +33,7 @@ namespace Stacker.Cli.Commands
         private readonly ContentItemCleaner cleanerManager;
         private readonly IYamlSerializerFactory serializerFactory;
         private ISerializer serializer;
+        private StackerSettings settings;
 
         public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
         {
@@ -48,6 +49,8 @@ namespace Stacker.Cli.Commands
             {
                 Handler = CommandHandler.Create(async (string wpexportFilePath, string exportFilePath) =>
                 {
+                    this.settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+
                     if (!File.Exists(wpexportFilePath))
                     {
                         Console.WriteLine($"File not found {wpexportFilePath}");
@@ -286,9 +289,7 @@ namespace Stacker.Cli.Commands
 
         private bool IsCategoryExcluded(string category)
         {
-            string[] excluded = new string[] { "Uncategorized", "Mobile Services", "Networking", string.Empty };
-
-            return excluded.Contains(category);
+            return this.settings.WordPressToMarkdown.TagsToRemove.Contains(category);
         }
 
         private string GetHeaderImage(List<string> attachments)
@@ -310,9 +311,7 @@ namespace Stacker.Cli.Commands
 
         private bool IsRelevantHost(string url)
         {
-            var hosts = new string[] { "blogs.endjin.com", "endjinblog.azurewebsites.net" };
-
-            return hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+            return this.settings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
