@@ -9,6 +9,7 @@ namespace Stacker.Cli.Formatters
     using System.Text;
     using Microsoft.Extensions.Primitives;
     using Stacker.Cli.Contracts.Formatters;
+    using Stacker.Cli.Converters;
     using Stacker.Cli.Domain.Universal;
 
     public abstract class LongFormContentFormatter : IContentFormatter
@@ -27,6 +28,7 @@ namespace Stacker.Cli.Formatters
             var postings = new List<string>();
             var sb = new StringBuilder();
             var sbTracking = new StringBuilder();
+            var hashTagConverter = new WordPressTagToHashTagConverter();
 
             foreach (var item in feedItems)
             {
@@ -42,7 +44,7 @@ namespace Stacker.Cli.Formatters
 
                 sb.Append(item.Content.Excerpt);
 
-                if (item.Tags != null && item.Tags.Any())
+                if (item.Tags?.Any() == true)
                 {
                     var contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
                     int tagsToInclude = 0;
@@ -69,7 +71,7 @@ namespace Stacker.Cli.Formatters
                     foreach (var tag in item.Tags.Take(tagsToInclude))
                     {
                         sb.Append(" #");
-                        sb.Append(tag);
+                        sb.Append(hashTagConverter.Convert(tag));
                         sb.AppendLine();
                     }
                 }

@@ -26,9 +26,7 @@ namespace Stacker.Cli.Commands
             var cmd = new Command("buffer", "Uploads content to Buffer to be published via Facebook")
             {
                 Handler = CommandHandler.Create(async (string contentFilePath, string profileName, int itemCount, DateTime fromDate, DateTime toDate, PublicationPeriod publicationPeriod) =>
-                {
-                    await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(contentFilePath, $"facebook|", profileName, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
-                }),
+                await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(contentFilePath, $"facebook|", profileName, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false)),
             };
 
             cmd.Add(new Argument<string>("content-file-path") { Description = "Content file path." });

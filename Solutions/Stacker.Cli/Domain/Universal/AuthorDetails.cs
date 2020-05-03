@@ -11,5 +11,7 @@ namespace Stacker.Cli.Domain.Universal
         public string Email { get; set; }
 
         public string TwitterHandle { get; set; }
+
+        public string Username { get; internal set; }
     }
 }

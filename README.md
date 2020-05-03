@@ -5,6 +5,10 @@ A .NET Global Tool for automating marketing content across social channels. It s
 
 A useful blog post for understanding `System.CommandLine` is [Radu Matei's](https://twitter.com/matei_radu) blog post "[Building self-contained, single executable .NET Core 3 CLI tools](https://radu-matei.com/blog/self-contained-dotnet-cli/)".
 
+## Prerequisites
+
+`stacker` used Pandoc to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html) and add it to the `PATH`.
+
 ## dotnet global tools
 
 `stacker` is a [.NET global tool](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), which means once installed, it's available on the PATH of your machine. 
@@ -62,6 +66,8 @@ Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to expl
 `stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
 
 `stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
+
+`wordpress export markdown` - Exports blog posts from WordPress and converts them into Markdown. Various clean up routes are also run.
 
 ### Buffer commands
 

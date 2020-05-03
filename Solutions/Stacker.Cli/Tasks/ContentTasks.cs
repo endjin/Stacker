@@ -104,10 +104,10 @@ namespace Stacker.Cli.Tasks
 
             if (itemCount == 0)
             {
-                itemCount = contentItems.Count();
+                itemCount = contentItems.Count;
             }
 
-            Console.WriteLine($"Total Posts: {contentItems.Count()}");
+            Console.WriteLine($"Total Posts: {contentItems.Count}");
             Console.WriteLine($"Promoting first: {itemCount}");
 
             return contentItems.Take(itemCount);

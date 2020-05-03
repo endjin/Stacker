@@ -5,12 +5,14 @@
 namespace Stacker.Cli.Extensions
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Stacker.Cli.Cleaners;
     using Stacker.Cli.Commands;
     using Stacker.Cli.Configuration;
     using Stacker.Cli.Contracts.Buffer;
     using Stacker.Cli.Contracts.Commands;
     using Stacker.Cli.Contracts.Configuration;
     using Stacker.Cli.Contracts.Tasks;
+    using Stacker.Cli.Serialization;
     using Stacker.Cli.Tasks;
 
     public static class ServiceCollectionExtensions
@@ -23,6 +25,7 @@ namespace Stacker.Cli.Extensions
             serviceCollection.AddTransient<ICommandFactory<WordPressCommandFactory>, WordPressCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportCommandFactory>, WordPressExportCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<WordPressExportUniversalCommandFactory>, WordPressExportUniversalCommandFactory>();
+            serviceCollection.AddTransient<ICommandFactory<WordPressExportMarkDownCommandFactory>, WordPressExportMarkDownCommandFactory>();
 
             serviceCollection.AddTransient<ICommandFactory<EnvironmentCommandFactory>, EnvironmentCommandFactory>();
             serviceCollection.AddTransient<ICommandFactory<EnvironmentInitCommandFactory>, EnvironmentInitCommandFactory>();
@@ -38,6 +41,20 @@ namespace Stacker.Cli.Extensions
 
             serviceCollection.AddTransient<IBufferClient, BufferClient>();
             serviceCollection.AddTransient<IContentTasks, ContentTasks>();
+            serviceCollection.AddTransient<IDownloadTasks, DownloadTasks>();
+            serviceCollection.AddTransient<IYamlSerializerFactory, YamlSerializerFactory>();
+
+            serviceCollection.AddTransient<ContentItemCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, ContentItemAttachementPathCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, WordPressImageResizerCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, ReplaceNewLineWithParagraphTagCleaner>();
+            serviceCollection.AddTransient<IPreDownloadCleaner, EnsureEndjinHttpsInBody>();
+            serviceCollection.AddTransient<IPostDownloadCleaner, RemoveHostNamesFromBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, RemoveHeaderImageFromBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, RemoveThreeBlankLinesFromStartBody>();
+            serviceCollection.AddTransient<IPostConvertCleaner, ReplaceWpUploadPath>();
+            serviceCollection.AddTransient<IPostConvertCleaner, UpdateInternalPostUrls>();
+            serviceCollection.AddTransient<IPostConvertCleaner, ReplaceSmartQuotes>();
 
             serviceCollection.AddHttpClient();
         }

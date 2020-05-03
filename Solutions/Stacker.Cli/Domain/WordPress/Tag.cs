@@ -11,6 +11,8 @@ namespace Stacker.Cli.Domain.WordPress
     {
         public string Id { get; set; }
 
+        public string Name { get; internal set; }
+
         public string Slug { get; set; }
     }
 }
