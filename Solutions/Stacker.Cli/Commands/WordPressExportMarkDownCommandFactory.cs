@@ -191,6 +191,11 @@ namespace Stacker.Cli.Commands
             {
                 var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
+                if (user == null)
+                {
+                    throw new NotImplementedException($"User {post.Author.Email} has not been configured. Update the settings file.");
+                }
+
                 var ci = new ContentItem
                 {
                     Author = new AuthorDetails
