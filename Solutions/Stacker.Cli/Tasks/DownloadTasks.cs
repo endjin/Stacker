@@ -92,7 +92,7 @@ namespace Stacker.Cli.Tasks
                 },
                     CancellationToken.None,
                     new Backoff(5, TimeSpan.FromSeconds(1)),
-                    new AnyException()).ConfigureAwait(false);
+                    new AnyExceptionPolicy()).ConfigureAwait(false);
                 context.IsFaulted = false;
             }
             catch (Exception ex)
