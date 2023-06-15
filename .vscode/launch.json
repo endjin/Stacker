@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Solutions/Endjin.Stacker.Cli/bin/Debug/netcoreapp2.0/Endjin.Stacker.Cli.dll",
+            "program": "${workspaceFolder}/Solutions/Endjin.Stacker.Cli/bin/Debug/net6.0/Endjin.Stacker.Cli.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Solutions/Endjin.Stacker.Cli",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
