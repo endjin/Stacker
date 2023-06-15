@@ -2,23 +2,22 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
+namespace Stacker.Cli;
+
+public class BufferError
 {
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
+    [JsonProperty("success")]
+    public bool Success { get; set; }
 
-    public class BufferError
-    {
-        [JsonProperty("success")]
-        public bool Success { get; set; }
+    [JsonProperty("message")]
+    public string Message { get; set; }
 
-        [JsonProperty("message")]
-        public string Message { get; set; }
+    [JsonProperty("code")]
+    public int Code { get; set; }
 
-        [JsonProperty("code")]
-        public int Code { get; set; }
-
-        [JsonProperty("errored_profiles")]
-        public IEnumerable<Profiles> ErroredProfiles { get; set; }
-    }
+    [JsonProperty("errored_profiles")]
+    public IEnumerable<Profiles> ErroredProfiles { get; set; }
 }

@@ -2,17 +2,16 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Formatters
+using Stacker.Cli.Contracts.Formatters;
+
+namespace Stacker.Cli.Formatters;
+
+public class FacebookFormatter : LongFormContentFormatter, IContentFormatter
 {
-    using Stacker.Cli.Contracts.Formatters;
+    private const int MaxContentLength = 63_206;
 
-    public class FacebookFormatter : LongFormContentFormatter, IContentFormatter
+    public FacebookFormatter()
+        : base(MaxContentLength, "facebook")
     {
-        private const int MaxContentLength = 63_206;
-
-        public FacebookFormatter()
-            : base(MaxContentLength, "facebook")
-        {
-        }
     }
 }

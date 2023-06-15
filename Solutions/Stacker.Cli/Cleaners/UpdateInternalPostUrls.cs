@@ -2,24 +2,23 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+using System;
+using System.Text.RegularExpressions;
+
+namespace Stacker.Cli.Cleaners;
+
+public class UpdateInternalPostUrls : IPostConvertCleaner
 {
-    using System;
-    using System.Text.RegularExpressions;
-
-    public class UpdateInternalPostUrls : IPostConvertCleaner
+    public string Clean(string content)
     {
-        public string Clean(string content)
+        Regex regexp = new Regex(@"\((\/\d{4}\/\d{2}\/.*?)(\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+
+        content = regexp.Replace(content, (match) =>
         {
-            Regex regexp = new Regex(@"\((\/\d{4}\/\d{2}\/.*?)(\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+            Group group = match.Groups[1];
+            return $"(/blog{group.Value}.html";
+        });
 
-            content = regexp.Replace(content, (match) =>
-            {
-                Group group = match.Groups[1];
-                return $"(/blog{group.Value}.html";
-            });
-
-            return content;
-        }
+        return content;
     }
 }

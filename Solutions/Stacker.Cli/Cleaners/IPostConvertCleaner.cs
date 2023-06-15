@@ -2,10 +2,9 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+namespace Stacker.Cli.Cleaners;
+
+public interface IPostConvertCleaner
 {
-    public interface IPostConvertCleaner
-    {
-        string Clean(string content);
-    }
+    string Clean(string content);
 }

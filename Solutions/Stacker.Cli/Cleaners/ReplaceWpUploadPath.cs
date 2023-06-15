@@ -2,18 +2,17 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+using System;
+using System.Text.RegularExpressions;
+
+namespace Stacker.Cli.Cleaners;
+
+public class ReplaceWpUploadPath : IPostConvertCleaner
 {
-    using System;
-    using System.Text.RegularExpressions;
-
-    public class ReplaceWpUploadPath : IPostConvertCleaner
+    public string Clean(string content)
     {
-        public string Clean(string content)
-        {
-            Regex regexp = new Regex(@"\((\/wp-content\/uploads\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new Regex(@"\((\/wp-content\/uploads\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
-            return regexp.Replace(content, "(/assets/images/blog/");
-        }
+        return regexp.Replace(content, "(/assets/images/blog/");
     }
 }

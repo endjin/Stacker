@@ -2,17 +2,16 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Formatters
+using Stacker.Cli.Contracts.Formatters;
+
+namespace Stacker.Cli.Formatters;
+
+public class LinkedInFormatter : LongFormContentFormatter, IContentFormatter
 {
-    using Stacker.Cli.Contracts.Formatters;
+    private const int MaxContentLength = 1300;
 
-    public class LinkedInFormatter : LongFormContentFormatter, IContentFormatter
+    public LinkedInFormatter()
+        : base(MaxContentLength, "linkedin")
     {
-        private const int MaxContentLength = 1300;
-
-        public LinkedInFormatter()
-            : base(MaxContentLength, "linkedin")
-        {
-        }
     }
 }

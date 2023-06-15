@@ -2,17 +2,16 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+using Stacker.Cli.Domain.Universal;
+
+namespace Stacker.Cli.Cleaners;
+
+public class ReplaceNewLineWithParagraphTagCleaner : IPreDownloadCleaner
 {
-    using Stacker.Cli.Domain.Universal;
-
-    public class ReplaceNewLineWithParagraphTagCleaner : IPreDownloadCleaner
+    public ContentItem Clean(ContentItem contentItem)
     {
-        public ContentItem Clean(ContentItem contentItem)
-        {
-            contentItem.Content.Body = contentItem.Content.Body.Replace("\n", "<p/>");
+        contentItem.Content.Body = contentItem.Content.Body.Replace("\n", "<p/>");
 
-            return contentItem;
-        }
+        return contentItem;
     }
 }

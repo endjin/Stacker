@@ -2,13 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+namespace Stacker.Cli.Cleaners;
+
+public class ReplaceSmartQuotes : IPostConvertCleaner
 {
-    public class ReplaceSmartQuotes : IPostConvertCleaner
+    public string Clean(string content)
     {
-        public string Clean(string content)
-        {
-            return content.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'");
-        }
+        return content.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'");
     }
 }

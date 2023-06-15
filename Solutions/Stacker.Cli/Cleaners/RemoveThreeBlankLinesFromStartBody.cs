@@ -2,18 +2,17 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Cleaners
+using System;
+using System.Text.RegularExpressions;
+
+namespace Stacker.Cli.Cleaners;
+
+public class RemoveThreeBlankLinesFromStartBody : IPostConvertCleaner
 {
-    using System;
-    using System.Text.RegularExpressions;
-
-    public class RemoveThreeBlankLinesFromStartBody : IPostConvertCleaner
+    public string Clean(string content)
     {
-        public string Clean(string content)
-        {
-            Regex regexp = new Regex(@"(\r\n){3,3}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new Regex(@"(\r\n){3,3}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
-            return regexp.Replace(content, Environment.NewLine);
-        }
+        return regexp.Replace(content, Environment.NewLine);
     }
 }

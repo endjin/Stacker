@@ -2,53 +2,52 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Configuration
+using System;
+using System.IO;
+using Stacker.Cli.Contracts.Configuration;
+
+namespace Stacker.Cli.Configuration;
+
+public class FileSystemLocalProfileAppEnvironment : IAppEnvironment
 {
-    using System;
-    using System.IO;
-    using Stacker.Cli.Contracts.Configuration;
+    public const string AppName = "stacker";
+    public const string AppOrgName = "endjin";
+    public const string ConfigurationDirectorName = "configuration";
 
-    public class FileSystemLocalProfileAppEnvironment : IAppEnvironment
+    public string AppPath
     {
-        public const string AppName = "stacker";
-        public const string AppOrgName = "endjin";
-        public const string ConfigurationDirectorName = "configuration";
-
-        public string AppPath
+        get
         {
-            get
-            {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppOrgName, AppName);
-            }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppOrgName, AppName);
+        }
+    }
+
+    public string ConfigurationPath
+    {
+        get { return Path.Combine(this.AppPath, ConfigurationDirectorName); }
+    }
+
+    public void Clean()
+    {
+        Directory.Delete(this.AppPath, recursive: true);
+    }
+
+    public void Initialize()
+    {
+        if (!Directory.Exists(this.AppPath))
+        {
+            Directory.CreateDirectory(this.AppPath);
         }
 
-        public string ConfigurationPath
+        if (!Directory.Exists(this.ConfigurationPath))
         {
-            get { return Path.Combine(this.AppPath, ConfigurationDirectorName); }
+            Directory.CreateDirectory(this.ConfigurationPath);
         }
+    }
 
-        public void Clean()
-        {
-            Directory.Delete(this.AppPath, recursive: true);
-        }
-
-        public void Initialize()
-        {
-            if (!Directory.Exists(this.AppPath))
-            {
-                Directory.CreateDirectory(this.AppPath);
-            }
-
-            if (!Directory.Exists(this.ConfigurationPath))
-            {
-                Directory.CreateDirectory(this.ConfigurationPath);
-            }
-        }
-
-        public bool IsInitialized()
-        {
-            // TODO: Better probing that a template actually exists.
-            return Directory.Exists(this.ConfigurationPath);
-        }
+    public bool IsInitialized()
+    {
+        // TODO: Better probing that a template actually exists.
+        return Directory.Exists(this.ConfigurationPath);
     }
 }

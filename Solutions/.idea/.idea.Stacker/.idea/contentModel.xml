@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\_Projects\OSS\endjin\Stacker\Solutions" t="IncludeFlat">
+      <e p="PackageIcon.png" t="Include" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Stacker.Cli" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="BufferClient.cs" t="Include" />
+        <e p="BufferError.cs" t="Include" />
+        <e p="Cleaners" t="Include">
+          <e p="ContentItemAttachementPathCleaner.cs" t="Include" />
+          <e p="ContentItemCleaner.cs" t="Include" />
+          <e p="EnsureEndjinHttpsInBody.cs" t="Include" />
+          <e p="IPostConvertCleaner.cs" t="Include" />
+          <e p="IPostDownloadCleaner.cs" t="Include" />
+          <e p="IPreDownloadCleaner.cs" t="Include" />
+          <e p="RemoveHeaderImageFromBody.cs" t="Include" />
+          <e p="RemoveHostNamesFromBody.cs" t="Include" />
+          <e p="RemoveThreeBlankLinesFromStartBody.cs" t="Include" />
+          <e p="ReplaceNewLineWithParagraphTagCleaner.cs" t="Include" />
+          <e p="ReplaceSmartQuotes.cs" t="Include" />
+          <e p="ReplaceWpUploadPath.cs" t="Include" />
+          <e p="UpdateInternalPostUrls.cs" t="Include" />
+          <e p="WordPressImageResizerCleaner.cs" t="Include" />
+        </e>
+        <e p="Commands" t="Include">
+          <e p="EnvironmentCommandFactory.cs" t="Include" />
+          <e p="EnvironmentInitCommandFactory.cs" t="Include" />
+          <e p="FacebookBufferCommandFactory.cs" t="Include" />
+          <e p="FacebookCommandFactory.cs" t="Include" />
+          <e p="LinkedInBufferCommandFactory.cs" t="Include" />
+          <e p="LinkedInCommandFactory.cs" t="Include" />
+          <e p="TwitterBufferCommandFactory.cs" t="Include" />
+          <e p="TwitterCommandFactory.cs" t="Include" />
+          <e p="WordPressCommandFactory.cs" t="Include" />
+          <e p="WordPressExportCommandFactory.cs" t="Include" />
+          <e p="WordPressExportMarkDownCommandFactory.cs" t="Include" />
+          <e p="WordPressExportUniversalCommandFactory.cs" t="Include" />
+        </e>
+        <e p="Configuration" t="Include">
+          <e p="FileSystemLocalProfileAppEnvironment.cs" t="Include" />
+          <e p="SettingsManager{T}.cs" t="Include" />
+          <e p="StackerSettings.cs" t="Include" />
+          <e p="StackerSettingsManager.cs" t="Include" />
+          <e p="User.cs" t="Include" />
+        </e>
+        <e p="Contracts" t="Include">
+          <e p="Buffer" t="Include">
+            <e p="IBufferClient.cs" t="Include" />
+          </e>
+          <e p="Commands" t="Include">
+            <e p="ICommandFactory.cs" t="Include" />
+          </e>
+          <e p="Configuration" t="Include">
+            <e p="IAppEnvironment.cs" t="Include" />
+            <e p="ISettingsManager.cs" t="Include" />
+            <e p="IStackerSettingsManager.cs" t="Include" />
+          </e>
+          <e p="Formatters" t="Include">
+            <e p="IContentFormatter.cs" t="Include" />
+          </e>
+          <e p="Tasks" t="Include">
+            <e p="IContentTasks.cs" t="Include" />
+          </e>
+        </e>
+        <e p="Converters" t="Include">
+          <e p="PublicationPeriodConverter.cs" t="Include" />
+          <e p="WordPressTagToHashTagConverter.cs" t="Include" />
+        </e>
+        <e p="Domain" t="Include">
+          <e p="Publication" t="Include">
+            <e p="PublicationPeriod.cs" t="Include" />
+          </e>
+          <e p="Universal" t="Include">
+            <e p="AuthorDetails.cs" t="Include" />
+            <e p="ContentAttachment.cs" t="Include" />
+            <e p="ContentDetails.cs" t="Include" />
+            <e p="ContentItem.cs" t="Include" />
+          </e>
+          <e p="WordPress" t="Include">
+            <e p="Attachment.cs" t="Include" />
+            <e p="Author.cs" t="Include" />
+            <e p="BlogSite.cs" t="Include" />
+            <e p="Category.cs" t="Include" />
+            <e p="Post.cs" t="Include" />
+            <e p="PostExtensions.cs" t="Include" />
+            <e p="Tag.cs" t="Include" />
+          </e>
+        </e>
+        <e p="Extensions" t="Include">
+          <e p="ServiceCollectionExtensions.cs" t="Include" />
+        </e>
+        <e p="Formatters" t="Include">
+          <e p="FacebookFormatter.cs" t="Include" />
+          <e p="LinkedInFormatter.cs" t="Include" />
+          <e p="LongFormContentFormatter.cs" t="Include" />
+          <e p="TweetFormatter.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Stacker.Cli.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Profiles.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="launchSettings.json" t="Include" />
+        </e>
+        <e p="Serialization" t="Include">
+          <e p="ForceQuotedStringValuesEventEmitter.cs" t="Include" />
+          <e p="IYamlSerializerFactory.cs" t="Include" />
+          <e p="YamlSerializerFactory.cs" t="Include" />
+        </e>
+        <e p="Stacker.Cli.csproj" t="IncludeRecursive" />
+        <e p="StackerCli.cs" t="Include" />
+        <e p="Tasks" t="Include">
+          <e p="ContentTasks.cs" t="Include" />
+          <e p="DataflowContext.cs" t="Include" />
+          <e p="DownloadTasks.cs" t="Include" />
+          <e p="IDownloadTasks.cs" t="Include" />
+        </e>
+      </e>
+      <e p="Stacker.Cli.Specs" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Features" t="Include">
+          <e p="WordPressExportToTwitter.feature.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Stacker.Cli.Specs.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="specflow.json" t="Include" />
+        <e p="Stacker.Cli.Specs.csproj" t="IncludeRecursive" />
+        <e p="Steps" t="Include">
+          <e p="WordPressExportToTwitterSteps.cs" t="Include" />
+        </e>
+      </e>
+      <e p="Stacker.sln" t="IncludeFlat" />
+      <e p="stylecop.json" t="Include" />
+    </e>
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\microsoft.net.test.sdk\16.5.0\build\netcoreapp2.1" t="Include">
+      <e p="Microsoft.NET.Test.Sdk.Program.cs" t="Include" />
+    </e>
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\microsoft.testplatform.testhost\16.5.0\build\netcoreapp2.1\x64\testhost.dll" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\microsoft.testplatform.testhost\16.5.0\build\netcoreapp2.1\x64\testhost.exe" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\nunit3testadapter\3.16.1\build\netcoreapp2.1\nunit.engine.api.dll" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\nunit3testadapter\3.16.1\build\netcoreapp2.1\nunit.engine.dll" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\nunit3testadapter\3.16.1\build\netcoreapp2.1\NUnit3.TestAdapter.dll" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\nunit3testadapter\3.16.1\build\netcoreapp2.1\NUnit3.TestAdapter.pdb" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.nuget\packages\specflow.nunit\3.1.95\lib\netstandard2.0\TechTalk.SpecFlow.NUnit.SpecFlowPlugin.dll" t="Include" />
+    <e p="C:\Users\HowardvanRooijen\.Rider2019.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\HowardvanRooijen\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_Stacker.-614724051.00" t="ExcludeRecursive" />
+  </component>
+</project>

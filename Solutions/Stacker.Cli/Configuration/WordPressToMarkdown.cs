@@ -2,14 +2,13 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Configuration
+using System.Collections.Generic;
+
+namespace Stacker.Cli.Configuration;
+
+public class WordPressToMarkdown
 {
-    using System.Collections.Generic;
+    public List<string> Hosts { get; set; } = new List<string>();
 
-    public class WordPressToMarkdown
-    {
-        public List<string> Hosts { get; set; } = new List<string>();
-
-        public List<string> TagsToRemove { get; set; } = new List<string>();
-    }
+    public List<string> TagsToRemove { get; set; } = new List<string>();
 }

@@ -2,15 +2,14 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Configuration
-{
-    using Stacker.Cli.Contracts.Configuration;
+using Stacker.Cli.Contracts.Configuration;
 
-    public class StackerSettingsManager : SettingsManager<StackerSettings>, IStackerSettingsManager
+namespace Stacker.Cli.Configuration;
+
+public class StackerSettingsManager : SettingsManager<StackerSettings>, IStackerSettingsManager
+{
+    public StackerSettingsManager(IAppEnvironment appEnvironment)
+        : base(appEnvironment)
     {
-        public StackerSettingsManager(IAppEnvironment appEnvironment)
-            : base(appEnvironment)
-        {
-        }
     }
 }

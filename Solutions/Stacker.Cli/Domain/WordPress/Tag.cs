@@ -2,17 +2,16 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Domain.WordPress
+using System.Diagnostics;
+
+namespace Stacker.Cli.Domain.WordPress;
+
+[DebuggerDisplay("{Slug} Id = {Id}")]
+public class Tag
 {
-    using System.Diagnostics;
+    public string Id { get; set; }
 
-    [DebuggerDisplay("{Slug} Id = {Id}")]
-    public class Tag
-    {
-        public string Id { get; set; }
+    public string Name { get; internal set; }
 
-        public string Name { get; internal set; }
-
-        public string Slug { get; set; }
-    }
+    public string Slug { get; set; }
 }

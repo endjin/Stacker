@@ -2,27 +2,26 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands
+using System.CommandLine;
+using Stacker.Cli.Contracts.Commands;
+
+namespace Stacker.Cli.Commands;
+
+public class WordPressCommandFactory : ICommandFactory<WordPressCommandFactory>
 {
-    using System.CommandLine;
-    using Stacker.Cli.Contracts.Commands;
+    private readonly ICommandFactory<WordPressExportCommandFactory> wordpressExportCommandFactory;
 
-    public class WordPressCommandFactory : ICommandFactory<WordPressCommandFactory>
+    public WordPressCommandFactory(ICommandFactory<WordPressExportCommandFactory> wordpressExportCommandFactory)
     {
-        private readonly ICommandFactory<WordPressExportCommandFactory> wordpressExportCommandFactory;
+        this.wordpressExportCommandFactory = wordpressExportCommandFactory;
+    }
 
-        public WordPressCommandFactory(ICommandFactory<WordPressExportCommandFactory> wordpressExportCommandFactory)
-        {
-            this.wordpressExportCommandFactory = wordpressExportCommandFactory;
-        }
+    public Command Create()
+    {
+        var cmd = new Command("wordpress", "WordPress functionality.");
 
-        public Command Create()
-        {
-            var cmd = new Command("wordpress", "WordPress functionality.");
+        cmd.AddCommand(this.wordpressExportCommandFactory.Create());
 
-            cmd.AddCommand(this.wordpressExportCommandFactory.Create());
-
-            return cmd;
-        }
+        return cmd;
     }
 }

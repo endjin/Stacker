@@ -2,13 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Contracts.Configuration
-{
-    public interface ISettingsManager<T>
-        where T : class
-    {
-        T LoadSettings(string fileName);
+namespace Stacker.Cli.Contracts.Configuration;
 
-        void SaveSettings(T settings, string fileName);
-    }
+public interface ISettingsManager<T>
+    where T : class
+{
+    T LoadSettings(string fileName);
+
+    void SaveSettings(T settings, string fileName);
 }

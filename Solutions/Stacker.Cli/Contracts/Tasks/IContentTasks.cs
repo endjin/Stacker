@@ -2,20 +2,19 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Contracts.Tasks
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Stacker.Cli.Contracts.Formatters;
+using Stacker.Cli.Domain.Publication;
+using Stacker.Cli.Domain.Universal;
+
+namespace Stacker.Cli.Contracts.Tasks;
+
+public interface IContentTasks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Stacker.Cli.Contracts.Formatters;
-    using Stacker.Cli.Domain.Publication;
-    using Stacker.Cli.Domain.Universal;
+    Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+        where TContentFormatter : class, IContentFormatter, new();
 
-    public interface IContentTasks
-    {
-        Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
-            where TContentFormatter : class, IContentFormatter, new();
-
-        Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount);
-    }
+    Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount);
 }

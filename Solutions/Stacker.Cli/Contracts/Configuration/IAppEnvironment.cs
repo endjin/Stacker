@@ -2,18 +2,17 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Contracts.Configuration
+namespace Stacker.Cli.Contracts.Configuration;
+
+public interface IAppEnvironment
 {
-    public interface IAppEnvironment
-    {
-        string AppPath { get; }
+    string AppPath { get; }
 
-        string ConfigurationPath { get; }
+    string ConfigurationPath { get; }
 
-        void Clean();
+    void Clean();
 
-        void Initialize();
+    void Initialize();
 
-        bool IsInitialized();
-    }
+    bool IsInitialized();
 }
