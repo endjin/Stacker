@@ -2,27 +2,26 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands
+using System.CommandLine;
+using Stacker.Cli.Contracts.Commands;
+
+namespace Stacker.Cli.Commands;
+
+public class FacebookCommandFactory : ICommandFactory<FacebookCommandFactory>
 {
-    using System.CommandLine;
-    using Stacker.Cli.Contracts.Commands;
+    private readonly ICommandFactory<FacebookBufferCommandFactory> facebookBufferCommandFactory;
 
-    public class FacebookCommandFactory : ICommandFactory<FacebookCommandFactory>
+    public FacebookCommandFactory(ICommandFactory<FacebookBufferCommandFactory> facebookBufferCommandFactory)
     {
-        private readonly ICommandFactory<FacebookBufferCommandFactory> facebookBufferCommandFactory;
+        this.facebookBufferCommandFactory = facebookBufferCommandFactory;
+    }
 
-        public FacebookCommandFactory(ICommandFactory<FacebookBufferCommandFactory> facebookBufferCommandFactory)
-        {
-            this.facebookBufferCommandFactory = facebookBufferCommandFactory;
-        }
+    public Command Create()
+    {
+        var cmd = new Command("facebook", "Facebook functionality.");
 
-        public Command Create()
-        {
-            var cmd = new Command("facebook", "Facebook functionality.");
+        cmd.AddCommand(this.facebookBufferCommandFactory.Create());
 
-            cmd.AddCommand(this.facebookBufferCommandFactory.Create());
-
-            return cmd;
-        }
+        return cmd;
     }
 }

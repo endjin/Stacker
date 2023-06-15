@@ -2,115 +2,114 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Tasks
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using NodaTime;
+using Stacker.Cli.Configuration;
+using Stacker.Cli.Contracts.Buffer;
+using Stacker.Cli.Contracts.Configuration;
+using Stacker.Cli.Contracts.Formatters;
+using Stacker.Cli.Contracts.Tasks;
+using Stacker.Cli.Converters;
+using Stacker.Cli.Domain.Publication;
+using Stacker.Cli.Domain.Universal;
+
+namespace Stacker.Cli.Tasks;
+
+public class ContentTasks : IContentTasks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Newtonsoft.Json;
-    using NodaTime;
-    using Stacker.Cli.Configuration;
-    using Stacker.Cli.Contracts.Buffer;
-    using Stacker.Cli.Contracts.Configuration;
-    using Stacker.Cli.Contracts.Formatters;
-    using Stacker.Cli.Contracts.Tasks;
-    using Stacker.Cli.Converters;
-    using Stacker.Cli.Domain.Publication;
-    using Stacker.Cli.Domain.Universal;
+    private readonly IBufferClient bufferClient;
+    private readonly IStackerSettingsManager settingsManager;
 
-    public class ContentTasks : IContentTasks
+    public ContentTasks(IBufferClient bufferClient, IStackerSettingsManager settingsManager)
     {
-        private readonly IBufferClient bufferClient;
-        private readonly IStackerSettingsManager settingsManager;
+        this.bufferClient = bufferClient;
+        this.settingsManager = settingsManager;
+    }
 
-        public ContentTasks(IBufferClient bufferClient, IStackerSettingsManager settingsManager)
+    public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+        where TContentFormatter : class, IContentFormatter, new()
+    {
+        TContentFormatter formatter = new TContentFormatter();
+
+        string profileKey = profilePrefix + profileName;
+
+        var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+
+        if (settings.BufferProfiles.ContainsKey(profileKey))
         {
-            this.bufferClient = bufferClient;
-            this.settingsManager = settingsManager;
+            var profileId = settings.BufferProfiles[profileKey];
+
+            Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
+            Console.WriteLine($"Loading: {contentFilePath}");
+
+            var contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
+            var formattedContentItems = formatter.Format("social", profileName, contentItems);
+
+            await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
         }
-
-        public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
-            where TContentFormatter : class, IContentFormatter, new()
+        else
         {
-            TContentFormatter formatter = new TContentFormatter();
-
-            string profileKey = profilePrefix + profileName;
-
-            var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-
-            if (settings.BufferProfiles.ContainsKey(profileKey))
-            {
-                var profileId = settings.BufferProfiles[profileKey];
-
-                Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
-                Console.WriteLine($"Loading: {contentFilePath}");
-
-                var contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
-                var formattedContentItems = formatter.Format("social", profileName, contentItems);
-
-                await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
-            }
-            else
-            {
-                Console.WriteLine($"Settings for {profileKey} not found. Please check your Stacker configuration.");
-            }
+            Console.WriteLine($"Settings for {profileKey} not found. Please check your Stacker configuration.");
         }
+    }
 
-        public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    {
+        var content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
+
+        if (publicationPeriod != PublicationPeriod.None)
         {
-            var content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
+            var dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
 
-            if (publicationPeriod != PublicationPeriod.None)
+            content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End));
+        }
+        else
+        {
+            // if fromDate is specified, but toDate isn't, set toDate to now. If toDate is specified, use that.
+            if (fromDate != DateTime.MinValue)
             {
-                var dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
-
-                content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End));
-            }
-            else
-            {
-                // if fromDate is specified, but toDate isn't, set toDate to now. If toDate is specified, use that.
-                if (fromDate != DateTime.MinValue)
+                if (toDate == DateTime.MinValue)
                 {
-                    if (toDate == DateTime.MinValue)
-                    {
-                        toDate = DateTime.Now;
-                    }
-                    else
-                    {
-                        if (toDate.ToString("HH:mm:ss") == "00:00:00")
-                        {
-                            toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
-                        }
-                    }
-
-                    content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
+                    toDate = DateTime.Now;
                 }
                 else
                 {
-                    // if fromDate isn't specified, but toDate is
-                    if (toDate != DateTime.MinValue)
+                    if (toDate.ToString("HH:mm:ss") == "00:00:00")
                     {
-                        content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
+                        toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                     }
                 }
+
+                content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
             }
-
-            // Sort so that content with the shortest lifespan are first.
-            content = content.OrderBy(p => p.PromoteUntil).ToList();
-
-            var contentItems = content.ToList();
-
-            if (itemCount == 0)
+            else
             {
-                itemCount = contentItems.Count;
+                // if fromDate isn't specified, but toDate is
+                if (toDate != DateTime.MinValue)
+                {
+                    content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
+                }
             }
-
-            Console.WriteLine($"Total Posts: {contentItems.Count}");
-            Console.WriteLine($"Promoting first: {itemCount}");
-
-            return contentItems.Take(itemCount);
         }
+
+        // Sort so that content with the shortest lifespan are first.
+        content = content.OrderBy(p => p.PromoteUntil).ToList();
+
+        var contentItems = content.ToList();
+
+        if (itemCount == 0)
+        {
+            itemCount = contentItems.Count;
+        }
+
+        Console.WriteLine($"Total Posts: {contentItems.Count}");
+        Console.WriteLine($"Promoting first: {itemCount}");
+
+        return contentItems.Take(itemCount);
     }
 }

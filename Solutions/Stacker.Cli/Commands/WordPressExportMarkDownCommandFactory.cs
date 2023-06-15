@@ -2,320 +2,319 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands
+using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using Stacker.Cli.Cleaners;
+using Stacker.Cli.Configuration;
+using Stacker.Cli.Contracts.Commands;
+using Stacker.Cli.Contracts.Configuration;
+using Stacker.Cli.Domain.Universal;
+using Stacker.Cli.Domain.WordPress;
+using Stacker.Cli.Serialization;
+using Stacker.Cli.Tasks;
+using YamlDotNet.Serialization;
+
+namespace Stacker.Cli.Commands;
+
+public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressExportMarkDownCommandFactory>
 {
-    using System;
-    using System.Collections.Generic;
-    using System.CommandLine;
-    using System.CommandLine.Invocation;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Xml.Linq;
-    using Stacker.Cli.Cleaners;
-    using Stacker.Cli.Configuration;
-    using Stacker.Cli.Contracts.Commands;
-    using Stacker.Cli.Contracts.Configuration;
-    using Stacker.Cli.Domain.Universal;
-    using Stacker.Cli.Domain.WordPress;
-    using Stacker.Cli.Serialization;
-    using Stacker.Cli.Tasks;
-    using YamlDotNet.Serialization;
+    private readonly IDownloadTasks downloadTasks;
+    private readonly IStackerSettingsManager settingsManager;
+    private readonly ContentItemCleaner cleanerManager;
+    private readonly IYamlSerializerFactory serializerFactory;
+    private ISerializer serializer;
+    private StackerSettings settings;
 
-    public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressExportMarkDownCommandFactory>
+    public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
     {
-        private readonly IDownloadTasks downloadTasks;
-        private readonly IStackerSettingsManager settingsManager;
-        private readonly ContentItemCleaner cleanerManager;
-        private readonly IYamlSerializerFactory serializerFactory;
-        private ISerializer serializer;
-        private StackerSettings settings;
+        this.settingsManager = settingsManager;
+        this.downloadTasks = downloadTasks;
+        this.cleanerManager = cleanerManager;
+        this.serializerFactory = serializerFactory;
+    }
 
-        public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
+    public Command Create()
+    {
+        var cmd = new Command("markdown", "Convert WordPress export files into a markdown format.")
         {
-            this.settingsManager = settingsManager;
-            this.downloadTasks = downloadTasks;
-            this.cleanerManager = cleanerManager;
-            this.serializerFactory = serializerFactory;
-        }
-
-        public Command Create()
-        {
-            var cmd = new Command("markdown", "Convert WordPress export files into a markdown format.")
+            Handler = CommandHandler.Create(async (string wpexportFilePath, string exportFilePath) =>
             {
-                Handler = CommandHandler.Create(async (string wpexportFilePath, string exportFilePath) =>
+                this.settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+
+                if (!File.Exists(wpexportFilePath))
                 {
-                    this.settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+                    Console.WriteLine($"File not found {wpexportFilePath}");
 
-                    if (!File.Exists(wpexportFilePath))
-                    {
-                        Console.WriteLine($"File not found {wpexportFilePath}");
-
-                        return;
-                    }
-
-                    this.serializer = this.serializerFactory.GetSerializer();
-
-                    BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
-
-                    var feed = this.LoadFeed(blogSite);
-
-                    var sb = new StringBuilder();
-                    FileInfo fi = new FileInfo(exportFilePath);
-                    DirectoryInfo tempHtmlFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "html"));
-                    DirectoryInfo tempMarkdownFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "md"));
-                    string inputTempHtmlFilePath;
-                    string outputTempMarkdownFilePath;
-                    string outputFilePath;
-
-                    if (!fi.Directory.Exists)
-                    {
-                        fi.Directory.Create();
-                    }
-
-                    if (!tempHtmlFolder.Exists)
-                    {
-                        tempHtmlFolder.Create();
-                    }
-
-                    if (!tempMarkdownFolder.Exists)
-                    {
-                        tempMarkdownFolder.Create();
-                    }
-
-                    // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
-                    foreach (var ci in feed)
-                    {
-                        var contentItem = this.cleanerManager.PostDownload(ci);
-
-                        sb.AppendLine("---");
-                        sb.Append(this.CreateYamlHeader(contentItem));
-                        sb.Append("---");
-                        sb.Append(Environment.NewLine);
-                        sb.Append(Environment.NewLine);
-
-                        await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
-                        {
-                            await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
-                        }
-
-                        inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html");
-                        outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
-                        outputFilePath = Path.Combine(exportFilePath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
-
-                        FileInfo outputFile = new FileInfo(outputFilePath);
-
-                        if (!outputFile.Directory.Exists)
-                        {
-                            outputFile.Directory.Create();
-                        }
-
-                        if (this.ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
-                        {
-                            sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
-
-                            string content = sb.ToString();
-
-                            Console.WriteLine(outputFilePath);
-
-                            try
-                            {
-                                content = this.cleanerManager.PostConvert(content);
-                            }
-                            catch (Exception exception)
-                            {
-                                Console.WriteLine(exception.Message);
-                            }
-
-                            await using (var writer = File.CreateText(outputFilePath))
-                            {
-                                await writer.WriteAsync(content).ConfigureAwait(false);
-                            }
-                        }
-
-                        // Remote the temporary html file.
-                        File.Delete(inputTempHtmlFilePath);
-
-                        sb.Clear();
-                    }
-                }),
-            };
-
-            cmd.AddArgument(new Argument<string>("wp-export-file-path") { Description = "WordPress Export file path." });
-            cmd.AddArgument(new Argument<string>("export-file-path") { Description = "File path for the exported files." });
-
-            return cmd;
-        }
-
-        private string CreateYamlHeader(ContentItem contentItem)
-        {
-            if (string.IsNullOrEmpty(contentItem.Slug))
-            {
-                contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
-            }
-
-            var frontmatter = new
-            {
-                Title = contentItem.Content.Title.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'"),
-                Date = contentItem.PublishedOn.ToString("O"),
-                Author = contentItem.Author.Username,
-                Category = contentItem.Categories,
-                Tags = contentItem.Tags,
-                Slug = contentItem.Slug,
-                Status = contentItem.Status,
-                HeaderImageUrl = this.GetHeaderImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()),
-                Excerpt = contentItem.Content.Excerpt.Replace("\n", string.Empty).Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'").Trim(),
-                Attachments = contentItem.Content.Attachments.Select(x => x.Path).Distinct(),
-            };
-
-            return this.serializer.Serialize(frontmatter);
-        }
-
-        private List<ContentItem> LoadFeed(BlogSite blogSite)
-        {
-            Console.WriteLine($"Processing...");
-
-            var feed = new List<ContentItem>();
-            var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-            var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
-
-            Console.WriteLine($"Total Posts: {posts.Count}");
-
-            // var attachments = posts.Where(x => x.Attachments.Any());
-            foreach (var post in posts)
-            {
-                var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
-
-                if (user == null)
-                {
-                    throw new NotImplementedException($"User {post.Author.Email} has not been configured. Update the settings file.");
+                    return;
                 }
 
-                var ci = new ContentItem
-                {
-                    Author = new AuthorDetails
-                    {
-                        DisplayName = post.Author.DisplayName,
-                        Email = post.Author.Email,
-                        TwitterHandle = user.Twitter,
-                        Username = post.Author.Username,
-                    },
-                    Categories = post.Categories.Select(c => c.Name).Where(x => !this.IsCategoryExcluded(x)),
-                    Content = new ContentDetails
-                    {
-                        Attachments = post.Attachments.Select(x => new ContentAttachment { Path = x.Path, Url = x.Url }).ToList(),
-                        Body = post.Body,
-                        Excerpt = post.Excerpt,
-                        Link = post.Link,
-                        Title = post.Title,
-                    },
-                    Id = post.Id,
-                    PublishedOn = post.PublishedAtUtc,
-                    Promote = post.Promote,
-                    PromoteUntil = post.PromoteUntil,
-                    Slug = post.Slug,
-                    Status = post.Status,
-                    Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
-                };
+                this.serializer = this.serializerFactory.GetSerializer();
 
-                // Search the body for any missing images.
-                var matches = Regex.Matches(post.Body, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
 
-                if (matches.Count > 0)
+                var feed = this.LoadFeed(blogSite);
+
+                var sb = new StringBuilder();
+                FileInfo fi = new FileInfo(exportFilePath);
+                DirectoryInfo tempHtmlFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "html"));
+                DirectoryInfo tempMarkdownFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "md"));
+                string inputTempHtmlFilePath;
+                string outputTempMarkdownFilePath;
+                string outputFilePath;
+
+                if (!fi.Directory.Exists)
                 {
-                    foreach (Match match in matches)
-                    {
-                        if (!ci.Content.Attachments.Any(x => string.Equals(x.Url, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)) && this.IsRelevantHost(match.Groups[1].Value))
-                        {
-                            ci.Content.Attachments.Add(new ContentAttachment { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
-                        }
-                    }
+                    fi.Directory.Create();
                 }
 
-                ci = this.cleanerManager.PreDownload(ci);
+                if (!tempHtmlFolder.Exists)
+                {
+                    tempHtmlFolder.Create();
+                }
 
-                feed.Add(ci);
-            }
+                if (!tempMarkdownFolder.Exists)
+                {
+                    tempMarkdownFolder.Create();
+                }
 
-            return feed;
+                // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
+                foreach (var ci in feed)
+                {
+                    var contentItem = this.cleanerManager.PostDownload(ci);
+
+                    sb.AppendLine("---");
+                    sb.Append(this.CreateYamlHeader(contentItem));
+                    sb.Append("---");
+                    sb.Append(Environment.NewLine);
+                    sb.Append(Environment.NewLine);
+
+                    await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
+                    {
+                        await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
+                    }
+
+                    inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html");
+                    outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
+                    outputFilePath = Path.Combine(exportFilePath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
+
+                    FileInfo outputFile = new FileInfo(outputFilePath);
+
+                    if (!outputFile.Directory.Exists)
+                    {
+                        outputFile.Directory.Create();
+                    }
+
+                    if (this.ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
+                    {
+                        sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
+
+                        string content = sb.ToString();
+
+                        Console.WriteLine(outputFilePath);
+
+                        try
+                        {
+                            content = this.cleanerManager.PostConvert(content);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine(exception.Message);
+                        }
+
+                        await using (var writer = File.CreateText(outputFilePath))
+                        {
+                            await writer.WriteAsync(content).ConfigureAwait(false);
+                        }
+                    }
+
+                    // Remote the temporary html file.
+                    File.Delete(inputTempHtmlFilePath);
+
+                    sb.Clear();
+                }
+            }),
+        };
+
+        cmd.AddArgument(new Argument<string>("wp-export-file-path") { Description = "WordPress Export file path." });
+        cmd.AddArgument(new Argument<string>("export-file-path") { Description = "File path for the exported files." });
+
+        return cmd;
+    }
+
+    private string CreateYamlHeader(ContentItem contentItem)
+    {
+        if (string.IsNullOrEmpty(contentItem.Slug))
+        {
+            contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
         }
 
-        private async Task<BlogSite> LoadWordPressExportAsync(string wpexportFilePath)
+        var frontmatter = new
         {
-            BlogSite blogSite;
+            Title = contentItem.Content.Title.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'"),
+            Date = contentItem.PublishedOn.ToString("O"),
+            Author = contentItem.Author.Username,
+            Category = contentItem.Categories,
+            Tags = contentItem.Tags,
+            Slug = contentItem.Slug,
+            Status = contentItem.Status,
+            HeaderImageUrl = this.GetHeaderImage(contentItem.Content.Attachments.Select(x => x.Path).Distinct().ToList()),
+            Excerpt = contentItem.Content.Excerpt.Replace("\n", string.Empty).Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'").Trim(),
+            Attachments = contentItem.Content.Attachments.Select(x => x.Path).Distinct(),
+        };
 
-            Console.WriteLine($"Reading {wpexportFilePath}");
+        return this.serializer.Serialize(frontmatter);
+    }
 
-            using (var reader = File.OpenText(wpexportFilePath))
+    private List<ContentItem> LoadFeed(BlogSite blogSite)
+    {
+        Console.WriteLine($"Processing...");
+
+        var feed = new List<ContentItem>();
+        var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+        var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
+
+        Console.WriteLine($"Total Posts: {posts.Count}");
+
+        // var attachments = posts.Where(x => x.Attachments.Any());
+        foreach (var post in posts)
+        {
+            var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+
+            if (user == null)
             {
-                var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
-                blogSite = new BlogSite(document);
+                throw new NotImplementedException($"User {post.Author.Email} has not been configured. Update the settings file.");
             }
 
-            return blogSite;
-        }
-
-        private bool ExecutePandoc(string inputTempHtmlFilePath, string outputTempMarkdownFilePath)
-        {
-            bool success = false;
-
-            string arguments = $"-f html+raw_html --to=markdown_github-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
-
-            var psi = new ProcessStartInfo
+            var ci = new ContentItem
             {
-                FileName = "pandoc",
-                Arguments = arguments,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardInput = true,
+                Author = new AuthorDetails
+                {
+                    DisplayName = post.Author.DisplayName,
+                    Email = post.Author.Email,
+                    TwitterHandle = user.Twitter,
+                    Username = post.Author.Username,
+                },
+                Categories = post.Categories.Select(c => c.Name).Where(x => !this.IsCategoryExcluded(x)),
+                Content = new ContentDetails
+                {
+                    Attachments = post.Attachments.Select(x => new ContentAttachment { Path = x.Path, Url = x.Url }).ToList(),
+                    Body = post.Body,
+                    Excerpt = post.Excerpt,
+                    Link = post.Link,
+                    Title = post.Title,
+                },
+                Id = post.Id,
+                PublishedOn = post.PublishedAtUtc,
+                Promote = post.Promote,
+                PromoteUntil = post.PromoteUntil,
+                Slug = post.Slug,
+                Status = post.Status,
+                Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
             };
 
-            var process = new System.Diagnostics.Process { StartInfo = psi };
-            process.Start();
-            process.WaitForExit();
+            // Search the body for any missing images.
+            var matches = Regex.Matches(post.Body, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-            if (process.ExitCode != 0)
+            if (matches.Count > 0)
             {
-                Console.WriteLine("Failed to convert " + outputTempMarkdownFilePath);
-                Console.WriteLine(process.StandardError.ReadToEnd());
-            }
-            else
-            {
-                success = true;
+                foreach (Match match in matches)
+                {
+                    if (!ci.Content.Attachments.Any(x => string.Equals(x.Url, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)) && this.IsRelevantHost(match.Groups[1].Value))
+                    {
+                        ci.Content.Attachments.Add(new ContentAttachment { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
+                    }
+                }
             }
 
-            return success;
+            ci = this.cleanerManager.PreDownload(ci);
+
+            feed.Add(ci);
         }
 
-        private bool IsCategoryExcluded(string category)
+        return feed;
+    }
+
+    private async Task<BlogSite> LoadWordPressExportAsync(string wpexportFilePath)
+    {
+        BlogSite blogSite;
+
+        Console.WriteLine($"Reading {wpexportFilePath}");
+
+        using (var reader = File.OpenText(wpexportFilePath))
         {
-            return this.settings.WordPressToMarkdown.TagsToRemove.Contains(category);
+            var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
+            blogSite = new BlogSite(document);
         }
 
-        private string GetHeaderImage(List<string> attachments)
+        return blogSite;
+    }
+
+    private bool ExecutePandoc(string inputTempHtmlFilePath, string outputTempMarkdownFilePath)
+    {
+        bool success = false;
+
+        string arguments = $"-f html+raw_html --to=markdown_github-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
+
+        var psi = new ProcessStartInfo
         {
-            if (attachments.Count == 1)
-            {
-                return attachments[0];
-            }
+            FileName = "pandoc",
+            Arguments = arguments,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardInput = true,
+        };
 
-            var header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
+        var process = new System.Diagnostics.Process { StartInfo = psi };
+        process.Start();
+        process.WaitForExit();
 
-            if (!string.IsNullOrEmpty(header))
-            {
-                return header.Trim();
-            }
-
-            return string.Empty;
-        }
-
-        private bool IsRelevantHost(string url)
+        if (process.ExitCode != 0)
         {
-            return this.settings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+            Console.WriteLine("Failed to convert " + outputTempMarkdownFilePath);
+            Console.WriteLine(process.StandardError.ReadToEnd());
         }
+        else
+        {
+            success = true;
+        }
+
+        return success;
+    }
+
+    private bool IsCategoryExcluded(string category)
+    {
+        return this.settings.WordPressToMarkdown.TagsToRemove.Contains(category);
+    }
+
+    private string GetHeaderImage(List<string> attachments)
+    {
+        if (attachments.Count == 1)
+        {
+            return attachments[0];
+        }
+
+        var header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
+
+        if (!string.IsNullOrEmpty(header))
+        {
+            return header.Trim();
+        }
+
+        return string.Empty;
+    }
+
+    private bool IsRelevantHost(string url)
+    {
+        return this.settings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
     }
 }

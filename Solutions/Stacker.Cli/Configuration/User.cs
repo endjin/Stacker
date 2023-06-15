@@ -2,17 +2,16 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Configuration
+using System.Diagnostics;
+
+namespace Stacker.Cli.Configuration;
+
+[DebuggerDisplay("{Email} IsActive = {IsActive}")]
+public class User
 {
-    using System.Diagnostics;
+    public string Email { get; set; }
 
-    [DebuggerDisplay("{Email} IsActive = {IsActive}")]
-    public class User
-    {
-        public string Email { get; set; }
+    public bool IsActive { get; set; }
 
-        public bool IsActive { get; set; }
-
-        public string Twitter { get; set; }
-    }
+    public string Twitter { get; set; }
 }

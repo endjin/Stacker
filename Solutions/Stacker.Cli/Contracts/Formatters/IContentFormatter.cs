@@ -2,13 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Contracts.Formatters
-{
-    using System.Collections.Generic;
-    using Stacker.Cli.Domain.Universal;
+using System.Collections.Generic;
+using Stacker.Cli.Domain.Universal;
 
-    public interface IContentFormatter
-    {
-        IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems);
-    }
+namespace Stacker.Cli.Contracts.Formatters;
+
+public interface IContentFormatter
+{
+    IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems);
 }

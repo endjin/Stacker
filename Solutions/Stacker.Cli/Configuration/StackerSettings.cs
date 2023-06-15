@@ -2,21 +2,20 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Configuration
+using System.Collections.Generic;
+
+namespace Stacker.Cli.Configuration;
+
+public class StackerSettings
 {
-    using System.Collections.Generic;
+    /// <summary>
+    /// Gets or sets the selected ADR template name.
+    /// </summary>
+    public List<User> Users { get; set; } = new List<User>();
 
-    public class StackerSettings
-    {
-        /// <summary>
-        /// Gets or sets the selected ADR template name.
-        /// </summary>
-        public List<User> Users { get; set; } = new List<User>();
+    public string BufferAccessToken { get; set; }
 
-        public string BufferAccessToken { get; set; }
+    public Dictionary<string, string> BufferProfiles { get; set; }
 
-        public Dictionary<string, string> BufferProfiles { get; set; }
-
-        public WordPressToMarkdown WordPressToMarkdown { get; set; }
-    }
+    public WordPressToMarkdown WordPressToMarkdown { get; set; }
 }

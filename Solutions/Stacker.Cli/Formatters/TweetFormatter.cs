@@ -2,86 +2,85 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Formatters
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Stacker.Cli.Contracts.Formatters;
+using Stacker.Cli.Converters;
+using Stacker.Cli.Domain.Universal;
+
+namespace Stacker.Cli.Formatters;
+
+public class TweetFormatter : IContentFormatter
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Stacker.Cli.Contracts.Formatters;
-    using Stacker.Cli.Converters;
-    using Stacker.Cli.Domain.Universal;
+    private const int MaxContentLength = 280;
+    private string campaignSource = "twitter";
 
-    public class TweetFormatter : IContentFormatter
+    public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
     {
-        private const int MaxContentLength = 280;
-        private string campaignSource = "twitter";
+        var tweets = new List<string>();
+        var sb = new StringBuilder();
+        var sbTracking = new StringBuilder();
+        var hashTagConverter = new WordPressTagToHashTagConverter();
 
-        public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
+        foreach (var item in feedItems)
         {
-            var tweets = new List<string>();
-            var sb = new StringBuilder();
-            var sbTracking = new StringBuilder();
-            var hashTagConverter = new WordPressTagToHashTagConverter();
+            sbTracking.Append(" ");
+            sbTracking.Append(item.Content.Link);
+            sbTracking.Append("?utm_source=");
+            sbTracking.Append(this.campaignSource.ToLowerInvariant());
+            sbTracking.Append("&utm_medium=");
+            sbTracking.Append(campaignMedium.ToLowerInvariant());
+            sbTracking.Append("&utm_campaign=");
+            sbTracking.Append(campaignName.ToLowerInvariant());
+            sbTracking.AppendLine();
 
-            foreach (var item in feedItems)
+            sb.Append(item.Content.Title);
+            sb.Append(" by ");
+
+            if (string.IsNullOrEmpty(item.Author.TwitterHandle))
             {
-                sbTracking.Append(" ");
-                sbTracking.Append(item.Content.Link);
-                sbTracking.Append("?utm_source=");
-                sbTracking.Append(this.campaignSource.ToLowerInvariant());
-                sbTracking.Append("&utm_medium=");
-                sbTracking.Append(campaignMedium.ToLowerInvariant());
-                sbTracking.Append("&utm_campaign=");
-                sbTracking.Append(campaignName.ToLowerInvariant());
-                sbTracking.AppendLine();
-
-                sb.Append(item.Content.Title);
-                sb.Append(" by ");
-
-                if (string.IsNullOrEmpty(item.Author.TwitterHandle))
-                {
-                    sb.Append(item.Author.DisplayName);
-                }
-                else
-                {
-                    sb.Append("@");
-                    sb.Append(item.Author.TwitterHandle);
-                }
-
-                if (item.Tags != null && item.Tags.Any())
-                {
-                    var tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
-                    int tagsToInclude = 0;
-
-                    foreach (var tag in item.Tags)
-                    {
-                        // 2 Offset = Space + #
-                        if (tweetLength + tag.Length + 2 <= MaxContentLength)
-                        {
-                            tagsToInclude++;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    foreach (var tag in item.Tags.Take(tagsToInclude))
-                    {
-                        sb.Append(" #");
-                        sb.Append(hashTagConverter.Convert(tag));
-                    }
-                }
-
-                sb.Append(sbTracking.ToString());
-
-                tweets.Add(sb.ToString());
-
-                sb.Clear();
-                sbTracking.Clear();
+                sb.Append(item.Author.DisplayName);
+            }
+            else
+            {
+                sb.Append("@");
+                sb.Append(item.Author.TwitterHandle);
             }
 
-            return tweets;
+            if (item.Tags != null && item.Tags.Any())
+            {
+                var tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
+                int tagsToInclude = 0;
+
+                foreach (var tag in item.Tags)
+                {
+                    // 2 Offset = Space + #
+                    if (tweetLength + tag.Length + 2 <= MaxContentLength)
+                    {
+                        tagsToInclude++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                foreach (var tag in item.Tags.Take(tagsToInclude))
+                {
+                    sb.Append(" #");
+                    sb.Append(hashTagConverter.Convert(tag));
+                }
+            }
+
+            sb.Append(sbTracking.ToString());
+
+            tweets.Add(sb.ToString());
+
+            sb.Clear();
+            sbTracking.Clear();
         }
+
+        return tweets;
     }
 }

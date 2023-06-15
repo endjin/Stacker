@@ -2,27 +2,26 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands
+using System.CommandLine;
+using Stacker.Cli.Contracts.Commands;
+
+namespace Stacker.Cli.Commands;
+
+public class EnvironmentCommandFactory : ICommandFactory<EnvironmentCommandFactory>
 {
-    using System.CommandLine;
-    using Stacker.Cli.Contracts.Commands;
+    private readonly ICommandFactory<EnvironmentInitCommandFactory> environmentResetCommandFactory;
 
-    public class EnvironmentCommandFactory : ICommandFactory<EnvironmentCommandFactory>
+    public EnvironmentCommandFactory(ICommandFactory<EnvironmentInitCommandFactory> environmentResetCommandFactory)
     {
-        private readonly ICommandFactory<EnvironmentInitCommandFactory> environmentResetCommandFactory;
+        this.environmentResetCommandFactory = environmentResetCommandFactory;
+    }
 
-        public EnvironmentCommandFactory(ICommandFactory<EnvironmentInitCommandFactory> environmentResetCommandFactory)
-        {
-            this.environmentResetCommandFactory = environmentResetCommandFactory;
-        }
+    public Command Create()
+    {
+        var cmd = new Command("environment", "Manipulate the stacker environment.");
 
-        public Command Create()
-        {
-            var cmd = new Command("environment", "Manipulate the stacker environment.");
+        cmd.AddCommand(this.environmentResetCommandFactory.Create());
 
-            cmd.AddCommand(this.environmentResetCommandFactory.Create());
-
-            return cmd;
-        }
+        return cmd;
     }
 }

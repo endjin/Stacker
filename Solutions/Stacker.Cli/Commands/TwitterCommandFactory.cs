@@ -2,27 +2,26 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Commands
+using System.CommandLine;
+using Stacker.Cli.Contracts.Commands;
+
+namespace Stacker.Cli.Commands;
+
+public class TwitterCommandFactory : ICommandFactory<TwitterCommandFactory>
 {
-    using System.CommandLine;
-    using Stacker.Cli.Contracts.Commands;
+    private readonly ICommandFactory<TwitterBufferCommandFactory> twitterBufferCommandFactory;
 
-    public class TwitterCommandFactory : ICommandFactory<TwitterCommandFactory>
+    public TwitterCommandFactory(ICommandFactory<TwitterBufferCommandFactory> twitterBufferCommandFactory)
     {
-        private readonly ICommandFactory<TwitterBufferCommandFactory> twitterBufferCommandFactory;
+        this.twitterBufferCommandFactory = twitterBufferCommandFactory;
+    }
 
-        public TwitterCommandFactory(ICommandFactory<TwitterBufferCommandFactory> twitterBufferCommandFactory)
-        {
-            this.twitterBufferCommandFactory = twitterBufferCommandFactory;
-        }
+    public Command Create()
+    {
+        var cmd = new Command("twitter", "Twitter functionality.");
 
-        public Command Create()
-        {
-            var cmd = new Command("twitter", "Twitter functionality.");
+        cmd.AddCommand(this.twitterBufferCommandFactory.Create());
 
-            cmd.AddCommand(this.twitterBufferCommandFactory.Create());
-
-            return cmd;
-        }
+        return cmd;
     }
 }

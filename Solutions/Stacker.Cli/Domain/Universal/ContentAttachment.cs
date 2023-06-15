@@ -2,12 +2,11 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Domain.Universal
-{
-    public class ContentAttachment
-    {
-        public string Url { get; set; }
+namespace Stacker.Cli.Domain.Universal;
 
-        public string Path { get; set; }
-    }
+public class ContentAttachment
+{
+    public string Url { get; set; }
+
+    public string Path { get; set; }
 }

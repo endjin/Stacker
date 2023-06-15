@@ -2,12 +2,11 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Serialization
-{
-    using YamlDotNet.Serialization;
+using YamlDotNet.Serialization;
 
-    public interface IYamlSerializerFactory
-    {
-        ISerializer GetSerializer();
-    }
+namespace Stacker.Cli.Serialization;
+
+public interface IYamlSerializerFactory
+{
+    ISerializer GetSerializer();
 }

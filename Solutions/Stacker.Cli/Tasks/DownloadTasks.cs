@@ -2,56 +2,56 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-namespace Stacker.Cli.Tasks
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
+using Corvus.Retry;
+using Corvus.Retry.Policies;
+using Corvus.Retry.Strategies;
+using Stacker.Cli.Domain.Universal;
+
+namespace Stacker.Cli.Tasks;
+
+public class DownloadTasks : IDownloadTasks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Threading.Tasks.Dataflow;
-    using Corvus.Retry;
-    using Corvus.Retry.Policies;
-    using Corvus.Retry.Strategies;
-    using Stacker.Cli.Domain.Universal;
+    private readonly IHttpClientFactory httpClientFactory;
 
-    public class DownloadTasks : IDownloadTasks
+    public DownloadTasks(IHttpClientFactory httpClientFactory)
     {
-        private readonly IHttpClientFactory httpClientFactory;
+        this.httpClientFactory = httpClientFactory;
+    }
 
-        public DownloadTasks(IHttpClientFactory httpClientFactory)
+    public async Task DownloadAsync(List<ContentItem> feed, string outputPath)
+    {
+        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
+
+        foreach (var contentItem in feed)
         {
-            this.httpClientFactory = httpClientFactory;
-        }
-
-        public async Task DownloadAsync(List<ContentItem> feed, string outputPath)
-        {
-            var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
-
-            foreach (var contentItem in feed)
+            foreach (var attachment in contentItem.Content.Attachments)
             {
-                foreach (var attachment in contentItem.Content.Attachments)
-                {
-                    var context = new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) };
+                var context = new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) };
 
-                    downloadFeedBlock.Post(context);
-                }
+                downloadFeedBlock.Post(context);
             }
-
-            downloadFeedBlock.Complete();
-
-            await downloadFeedBlock.Completion.ConfigureAwait(false);
-
-            Console.WriteLine("File Download Completed");
         }
 
-        private async Task<DataflowContext> DownloadFeedAsync(DataflowContext context)
+        downloadFeedBlock.Complete();
+
+        await downloadFeedBlock.Completion.ConfigureAwait(false);
+
+        Console.WriteLine("File Download Completed");
+    }
+
+    private async Task<DataflowContext> DownloadFeedAsync(DataflowContext context)
+    {
+        try
         {
-            try
-            {
-                await Retriable.RetryAsync(
-                    async () =>
+            await Retriable.RetryAsync(
+                async () =>
                 {
                     if (File.Exists(context.Destination))
                     {
@@ -90,20 +90,19 @@ namespace Stacker.Cli.Tasks
                         response.EnsureSuccessStatusCode();
                     }
                 },
-                    CancellationToken.None,
-                    new Backoff(5, TimeSpan.FromSeconds(1)),
-                    new AnyExceptionPolicy()).ConfigureAwait(false);
-                context.IsFaulted = false;
-            }
-            catch (Exception ex)
-            {
-                context.IsFaulted = true;
-                context.FaultError = ex.Message;
-
-                Console.WriteLine("Error Downloading: " + context.Destination);
-            }
-
-            return context;
+                CancellationToken.None,
+                new Backoff(5, TimeSpan.FromSeconds(1)),
+                new AnyExceptionPolicy()).ConfigureAwait(false);
+            context.IsFaulted = false;
         }
+        catch (Exception ex)
+        {
+            context.IsFaulted = true;
+            context.FaultError = ex.Message;
+
+            Console.WriteLine("Error Downloading: " + context.Destination);
+        }
+
+        return context;
     }
 }
