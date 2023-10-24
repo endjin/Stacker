@@ -62,12 +62,12 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
                 BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
 
-                var feed = this.LoadFeed(blogSite);
+                List<ContentItem> feed = this.LoadFeed(blogSite);
 
                 var sb = new StringBuilder();
-                FileInfo fi = new FileInfo(exportFilePath);
-                DirectoryInfo tempHtmlFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "html"));
-                DirectoryInfo tempMarkdownFolder = new DirectoryInfo(Path.Join(Path.GetTempPath(), "stacker", "md"));
+                FileInfo fi = new(exportFilePath);
+                DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html"));
+                DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md"));
                 string inputTempHtmlFilePath;
                 string outputTempMarkdownFilePath;
                 string outputFilePath;
@@ -88,9 +88,9 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                 }
 
                 // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
-                foreach (var ci in feed)
+                foreach (ContentItem ci in feed)
                 {
-                    var contentItem = this.cleanerManager.PostDownload(ci);
+                    ContentItem contentItem = this.cleanerManager.PostDownload(ci);
 
                     sb.AppendLine("---");
                     sb.Append(this.CreateYamlHeader(contentItem));
@@ -98,7 +98,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                     sb.Append(Environment.NewLine);
                     sb.Append(Environment.NewLine);
 
-                    await using (var writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
+                    await using (StreamWriter writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
                     {
                         await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
                     }
@@ -107,7 +107,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                     outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
                     outputFilePath = Path.Combine(exportFilePath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
 
-                    FileInfo outputFile = new FileInfo(outputFilePath);
+                    FileInfo outputFile = new(outputFilePath);
 
                     if (!outputFile.Directory.Exists)
                     {
@@ -131,7 +131,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                             Console.WriteLine(exception.Message);
                         }
 
-                        await using (var writer = File.CreateText(outputFilePath))
+                        await using (StreamWriter writer = File.CreateText(outputFilePath))
                         {
                             await writer.WriteAsync(content).ConfigureAwait(false);
                         }
@@ -155,7 +155,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
     {
         if (string.IsNullOrEmpty(contentItem.Slug))
         {
-            contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+            contentItem.Slug = new(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
         }
 
         var frontmatter = new
@@ -180,15 +180,15 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
         Console.WriteLine($"Processing...");
 
         var feed = new List<ContentItem>();
-        var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
         var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
 
         Console.WriteLine($"Total Posts: {posts.Count}");
 
         // var attachments = posts.Where(x => x.Attachments.Any());
-        foreach (var post in posts)
+        foreach (Post post in posts)
         {
-            var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
             if (user == null)
             {
@@ -197,7 +197,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
             var ci = new ContentItem
             {
-                Author = new AuthorDetails
+                Author = new()
                 {
                     DisplayName = post.Author.DisplayName,
                     Email = post.Author.Email,
@@ -205,7 +205,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                     Username = post.Author.Username,
                 },
                 Categories = post.Categories.Select(c => c.Name).Where(x => !this.IsCategoryExcluded(x)),
-                Content = new ContentDetails
+                Content = new()
                 {
                     Attachments = post.Attachments.Select(x => new ContentAttachment { Path = x.Path, Url = x.Url }).ToList(),
                     Body = post.Body,
@@ -223,7 +223,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
             };
 
             // Search the body for any missing images.
-            var matches = Regex.Matches(post.Body, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            MatchCollection matches = Regex.Matches(post.Body, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             if (matches.Count > 0)
             {
@@ -231,7 +231,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
                 {
                     if (!ci.Content.Attachments.Any(x => string.Equals(x.Url, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)) && this.IsRelevantHost(match.Groups[1].Value))
                     {
-                        ci.Content.Attachments.Add(new ContentAttachment { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
+                        ci.Content.Attachments.Add(new() { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
                     }
                 }
             }
@@ -250,10 +250,10 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
         Console.WriteLine($"Reading {wpexportFilePath}");
 
-        using (var reader = File.OpenText(wpexportFilePath))
+        using (StreamReader reader = File.OpenText(wpexportFilePath))
         {
-            var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
-            blogSite = new BlogSite(document);
+            XDocument document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
+            blogSite = new(document);
         }
 
         return blogSite;
@@ -303,7 +303,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
             return attachments[0];
         }
 
-        var header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
+        string header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
 
         if (!string.IsNullOrEmpty(header))
         {

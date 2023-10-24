@@ -32,10 +32,10 @@ public class FacebookBufferCommandFactory : ICommandFactory<FacebookBufferComman
         cmd.Add(new Argument<string>("content-file-path") { Description = "Content file path." });
         cmd.Add(new Argument<string>("profile-name") { Description = "Facebook profile to Buffer." });
 
-        cmd.AddOption(new Option("--item-count",  "Number of content items to buffer. If omitted all content is buffered.") { Argument = new Argument<int>() });
-        cmd.AddOption(new Option("--publication-period", "Publication period to filter content items by. If specified --from-date and --to-date are ignored.") { Argument = new Argument<PublicationPeriod>() });
-        cmd.AddOption(new Option("--from-date", "Include content items published on, or after this date. Use YYYY/MM/DD Format. If omitted DateTime.MinValue is used.") { Argument = new Argument<DateTime>() });
-        cmd.AddOption(new Option("--to-date", "Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used.") { Argument = new Argument<DateTime>() });
+        cmd.AddOption(new("--item-count",  "Number of content items to buffer. If omitted all content is buffered.") { Argument = new Argument<int>() });
+        cmd.AddOption(new("--publication-period", "Publication period to filter content items by. If specified --from-date and --to-date are ignored.") { Argument = new Argument<PublicationPeriod>() });
+        cmd.AddOption(new("--from-date", "Include content items published on, or after this date. Use YYYY/MM/DD Format. If omitted DateTime.MinValue is used.") { Argument = new Argument<DateTime>() });
+        cmd.AddOption(new("--to-date", "Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used.") { Argument = new Argument<DateTime>() });
 
         return cmd;
     }

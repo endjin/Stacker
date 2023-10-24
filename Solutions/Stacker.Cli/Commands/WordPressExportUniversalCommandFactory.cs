@@ -46,15 +46,15 @@ public class WordPressExportUniversalCommandFactory : ICommandFactory<WordPressE
 
                 Console.WriteLine($"Reading {wpexportFilePath}");
 
-                using (var reader = File.OpenText(wpexportFilePath))
+                using (StreamReader reader = File.OpenText(wpexportFilePath))
                 {
-                    var document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
-                    blogSite = new BlogSite(document);
+                    XDocument document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
+                    blogSite = new(document);
                 }
 
                 Console.WriteLine($"Processing...");
 
-                var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+                StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
                 var posts = blogSite.GetAllPosts().ToList();
                 var validPosts = posts.FilterByValid(settings).ToList();
                 var promotablePosts = validPosts.FilterByPromotable().ToList();
@@ -65,19 +65,19 @@ public class WordPressExportUniversalCommandFactory : ICommandFactory<WordPressE
                 Console.WriteLine($"Valid Posts: {validPosts.Count()}");
                 Console.WriteLine($"Promotable Posts: {promotablePosts.Count()}");
 
-                foreach (var post in promotablePosts)
+                foreach (Post post in promotablePosts)
                 {
-                    var user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+                    User user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
-                    feed.Add(new ContentItem
+                    feed.Add(new()
                     {
-                        Author = new AuthorDetails
+                        Author = new()
                         {
                             DisplayName = post.Author.DisplayName,
                             Email = post.Author.Email,
                             TwitterHandle = user.Twitter,
                         },
-                        Content = new ContentDetails
+                        Content = new()
                         {
                             Body = post.Body,
                             Excerpt = post.Excerpt,
@@ -93,7 +93,7 @@ public class WordPressExportUniversalCommandFactory : ICommandFactory<WordPressE
                     });
                 }
 
-                await using (var writer = File.CreateText(universalFilePath))
+                await using (StreamWriter writer = File.CreateText(universalFilePath))
                 {
                     await writer.WriteAsync(JsonConvert.SerializeObject(feed, Formatting.Indented)).ConfigureAwait(false);
                 }

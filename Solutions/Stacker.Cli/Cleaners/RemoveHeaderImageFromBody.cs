@@ -11,7 +11,7 @@ public class RemoveHeaderImageFromBody : IPostConvertCleaner
 {
     public string Clean(string content)
     {
-        Regex regexp = new Regex(@"(\[?!\[.*\]\(.*\))", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new(@"(\[?!\[.*\]\(.*\))", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
         return regexp.Replace(content, string.Empty, 1, 0);
     }

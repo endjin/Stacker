@@ -11,12 +11,12 @@ namespace Stacker.Cli.Serialization;
 
 public class ForceQuotedStringValuesEventEmitter : ChainedEventEmitter
 {
-    private readonly Stack<EmitterState> state = new Stack<EmitterState>();
+    private readonly Stack<EmitterState> state = new();
 
     public ForceQuotedStringValuesEventEmitter(IEventEmitter nextEmitter)
         : base(nextEmitter)
     {
-        this.state.Push(new EmitterState(1));
+        this.state.Push(new(1));
     }
 
     public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
@@ -35,7 +35,7 @@ public class ForceQuotedStringValuesEventEmitter : ChainedEventEmitter
     public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
     {
         this.state.Peek().VisitNext();
-        this.state.Push(new EmitterState(2));
+        this.state.Push(new(2));
         base.Emit(eventInfo, emitter);
     }
 
@@ -48,7 +48,7 @@ public class ForceQuotedStringValuesEventEmitter : ChainedEventEmitter
     public override void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
     {
         this.state.Peek().VisitNext();
-        this.state.Push(new EmitterState(1));
+        this.state.Push(new(1));
         base.Emit(eventInfo, emitter);
     }
 

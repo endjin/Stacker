@@ -11,7 +11,7 @@ public class ReplaceWpUploadPath : IPostConvertCleaner
 {
     public string Clean(string content)
     {
-        Regex regexp = new Regex(@"\((\/wp-content\/uploads\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new(@"\((\/wp-content\/uploads\/)", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
         return regexp.Replace(content, "(/assets/images/blog/");
     }

@@ -11,7 +11,7 @@ public class RemoveThreeBlankLinesFromStartBody : IPostConvertCleaner
 {
     public string Clean(string content)
     {
-        Regex regexp = new Regex(@"(\r\n){3,3}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new(@"(\r\n){3,3}", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
         return regexp.Replace(content, Environment.NewLine);
     }

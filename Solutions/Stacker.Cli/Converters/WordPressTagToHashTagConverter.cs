@@ -10,9 +10,9 @@ public class WordPressTagToHashTagConverter
 {
     public string Convert(string wordpressTag)
     {
-        var textInfo = CultureInfo.InvariantCulture.TextInfo;
+        TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
 
-        var formatted = textInfo.ToTitleCase(wordpressTag.Replace("-", " ")).Replace(" ", string.Empty);
+        string formatted = textInfo.ToTitleCase(wordpressTag.Replace("-", " ")).Replace(" ", string.Empty);
 
         if (formatted.Length == 2)
         {

@@ -3,6 +3,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Stacker.Cli.Domain.Universal;
@@ -20,19 +21,19 @@ public class ContentItemCleaner
 
     public ContentItem PreDownload(ContentItem content)
     {
-        var cleaners = this.serviceProvider.GetServices<IPreDownloadCleaner>();
+        IEnumerable<IPreDownloadCleaner> cleaners = this.serviceProvider.GetServices<IPreDownloadCleaner>();
         return cleaners.Aggregate(content, (current, cleaner) => cleaner.Clean(current));
     }
 
     public ContentItem PostDownload(ContentItem content)
     {
-        var cleaners = this.serviceProvider.GetServices<IPostDownloadCleaner>();
+        IEnumerable<IPostDownloadCleaner> cleaners = this.serviceProvider.GetServices<IPostDownloadCleaner>();
         return cleaners.Aggregate(content, (current, cleaner) => cleaner.Clean(current));
     }
 
     internal string PostConvert(string content)
     {
-        var cleaners = this.serviceProvider.GetServices<IPostConvertCleaner>();
+        IEnumerable<IPostConvertCleaner> cleaners = this.serviceProvider.GetServices<IPostConvertCleaner>();
         return cleaners.Aggregate(content, (current, cleaner) => cleaner.Clean(current));
     }
 }

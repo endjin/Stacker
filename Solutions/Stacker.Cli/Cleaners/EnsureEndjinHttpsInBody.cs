@@ -14,7 +14,7 @@ public class EnsureEndjinHttpsInBody : IPreDownloadCleaner
     {
         string pattern = @"(http:\/\/endjin.com)";
 
-        Regex regexp = new Regex(pattern, RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new(pattern, RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
         contentItem.Content.Body = regexp.Replace(contentItem.Content.Body, "https://endjin.com");
 

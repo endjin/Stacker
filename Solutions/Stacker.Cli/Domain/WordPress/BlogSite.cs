@@ -67,7 +67,7 @@ public class BlogSite
 
     private void InitializeChannelElement(XDocument document)
     {
-        var rssRootElement = document.Root;
+        XElement rssRootElement = document.Root;
         if (rssRootElement == null)
         {
             throw new XmlException("No document root.");
@@ -98,7 +98,7 @@ public class BlogSite
 
     private string GetBasicProperty(string elementName)
     {
-        var element = this.channelElement.Element(elementName);
+        XElement element = this.channelElement.Element(elementName);
         if (element == null)
         {
             throw new XmlException($"Missing {elementName}.");
@@ -115,17 +115,17 @@ public class BlogSite
 
     private Author ParseAuthorElement(XElement authorElement)
     {
-        var authorIdElement = authorElement.Element(WordpressNamespace + "author_id");
-        var authorUsernameElement = authorElement.Element(WordpressNamespace + "author_login");
-        var authorEmailElement = authorElement.Element(WordpressNamespace + "author_email");
-        var authorDisplayNameElement = authorElement.Element(WordpressNamespace + "author_display_name");
+        XElement authorIdElement = authorElement.Element(WordpressNamespace + "author_id");
+        XElement authorUsernameElement = authorElement.Element(WordpressNamespace + "author_login");
+        XElement authorEmailElement = authorElement.Element(WordpressNamespace + "author_email");
+        XElement authorDisplayNameElement = authorElement.Element(WordpressNamespace + "author_display_name");
 
         if (authorIdElement == null || authorUsernameElement == null || authorEmailElement == null || authorDisplayNameElement == null)
         {
             throw new XmlException("Unable to parse malformed author.");
         }
 
-        return new Author
+        return new()
         {
             Id = authorIdElement.Value,
             Username = authorUsernameElement.Value,
@@ -141,16 +141,16 @@ public class BlogSite
 
     private Category ParseCategoryElement(XElement categoryElement)
     {
-        var categoryIdElement = categoryElement.Element(WordpressNamespace + "term_id");
-        var categoryNameElement = categoryElement.Element(WordpressNamespace + "cat_name");
-        var categorySlugElement = categoryElement.Element(WordpressNamespace + "category_nicename");
+        XElement categoryIdElement = categoryElement.Element(WordpressNamespace + "term_id");
+        XElement categoryNameElement = categoryElement.Element(WordpressNamespace + "cat_name");
+        XElement categorySlugElement = categoryElement.Element(WordpressNamespace + "category_nicename");
 
         if (categoryIdElement == null || categoryNameElement == null || categorySlugElement == null)
         {
             throw new XmlException("Unable to parse malformed category.");
         }
 
-        return new Category
+        return new()
         {
             Id = categoryIdElement.Value,
             Name = categoryNameElement.Value,
@@ -165,16 +165,16 @@ public class BlogSite
 
     private Tag ParseTagElement(XElement tagElement)
     {
-        var tagIdElement = tagElement.Element(WordpressNamespace + "term_id");
-        var tagNameElement = tagElement.Element(WordpressNamespace + "tag_name");
-        var tagSlugElement = tagElement.Element(WordpressNamespace + "tag_slug");
+        XElement tagIdElement = tagElement.Element(WordpressNamespace + "term_id");
+        XElement tagNameElement = tagElement.Element(WordpressNamespace + "tag_name");
+        XElement tagSlugElement = tagElement.Element(WordpressNamespace + "tag_slug");
 
         if (tagIdElement == null || tagSlugElement == null)
         {
             throw new XmlException("Unable to parse malformed category.");
         }
 
-        return new Tag
+        return new()
         {
             Id = tagIdElement?.Value,
             Name = tagNameElement?.Value,
@@ -211,13 +211,13 @@ public class BlogSite
 
     private Attachment ParseAttachmentElement(XElement attachmentElement)
     {
-        var attachmentIdElement = attachmentElement.Element(WordpressNamespace + "post_id");
-        var attachmentPostIdElement = attachmentElement.Element(WordpressNamespace + "post_parent");
-        var attachmentTitleElement = attachmentElement.Element("title");
-        var attachmentUrlElement = attachmentElement.Element(WordpressNamespace + "attachment_url");
+        XElement attachmentIdElement = attachmentElement.Element(WordpressNamespace + "post_id");
+        XElement attachmentPostIdElement = attachmentElement.Element(WordpressNamespace + "post_parent");
+        XElement attachmentTitleElement = attachmentElement.Element("title");
+        XElement attachmentUrlElement = attachmentElement.Element(WordpressNamespace + "attachment_url");
 
-        var postMetaElements = attachmentElement.Elements(WordpressNamespace + "postmeta");
-        var metaValueElement = postMetaElements.Elements(WordpressNamespace + "meta_value").FirstOrDefault(x => ((XElement)x.PreviousNode).Value == "_wp_attached_file");
+        IEnumerable<XElement> postMetaElements = attachmentElement.Elements(WordpressNamespace + "postmeta");
+        XElement metaValueElement = postMetaElements.Elements(WordpressNamespace + "meta_value").FirstOrDefault(x => ((XElement)x.PreviousNode).Value == "_wp_attached_file");
 
         if (attachmentIdElement == null ||
             attachmentTitleElement == null ||
@@ -226,7 +226,7 @@ public class BlogSite
             throw new XmlException("Unable to parse malformed attachment.");
         }
 
-        return new Attachment()
+        return new()
         {
             Id = attachmentIdElement?.Value,
             Path = metaValueElement?.Value,
@@ -238,14 +238,14 @@ public class BlogSite
 
     private Post ParsePostElement(XElement postElement)
     {
-        var postTitleElement = postElement.Element("title");
-        var postLinkElement = postElement.Element("link");
-        var postUsernameElement = postElement.Element(DublinCoreNamespace + "creator");
-        var postBodyElement = postElement.Element(ContentNamespace + "encoded");
-        var postPublishedAtUtcElement = postElement.Element(WordpressNamespace + "post_date_gmt");
-        var postSlugElement = postElement.Element(WordpressNamespace + "post_name");
-        var postPostIdElement = postElement.Element(WordpressNamespace + "post_id");
-        var postStautsElement = postElement.Element(WordpressNamespace + "status");
+        XElement postTitleElement = postElement.Element("title");
+        XElement postLinkElement = postElement.Element("link");
+        XElement postUsernameElement = postElement.Element(DublinCoreNamespace + "creator");
+        XElement postBodyElement = postElement.Element(ContentNamespace + "encoded");
+        XElement postPublishedAtUtcElement = postElement.Element(WordpressNamespace + "post_date_gmt");
+        XElement postSlugElement = postElement.Element(WordpressNamespace + "post_name");
+        XElement postPostIdElement = postElement.Element(WordpressNamespace + "post_id");
+        XElement postStautsElement = postElement.Element(WordpressNamespace + "status");
 
         if (postTitleElement == null ||
             postUsernameElement == null ||
@@ -256,9 +256,9 @@ public class BlogSite
             throw new XmlException("Unable to parse malformed post.");
         }
 
-        var postExcerptElement = postElement.Element(ExcerptNamespace + "encoded");
+        XElement postExcerptElement = postElement.Element(ExcerptNamespace + "encoded");
 
-        if (!DateTimeOffset.TryParse(postPublishedAtUtcElement.Value, out var publicationData))
+        if (!DateTimeOffset.TryParse(postPublishedAtUtcElement.Value, out DateTimeOffset publicationData))
         {
             publicationData = DateTimeOffset.MaxValue;
         }
@@ -282,9 +282,9 @@ public class BlogSite
         var tags = new List<Tag>();
         var metaData = new Dictionary<string, string>();
 
-        foreach (var wpCategory in postElement.Elements("category"))
+        foreach (XElement wpCategory in postElement.Elements("category"))
         {
-            var domainAttribute = wpCategory.Attribute("domain");
+            XAttribute domainAttribute = wpCategory.Attribute("domain");
             if (domainAttribute == null)
             {
                 throw new XmlException("Unable to parse malformed wordpress categorization.");
@@ -293,13 +293,13 @@ public class BlogSite
             if (domainAttribute.Value == "category")
             {
                 string categorySlug = wpCategory.Attribute("nicename")?.Value;
-                var category = this.GetCategoryBySlug(categorySlug);
+                Category category = this.GetCategoryBySlug(categorySlug);
                 categories.Add(category);
             }
             else if (domainAttribute.Value == "post_tag")
             {
                 string tagSlug = wpCategory.Attribute("nicename")?.Value;
-                var tag = this.GetTagBySlug(tagSlug);
+                Tag tag = this.GetTagBySlug(tagSlug);
                 tags.Add(tag);
             }
         }
@@ -307,10 +307,10 @@ public class BlogSite
         post.Categories = categories;
         post.Tags = tags;
 
-        var postMetaElements = postElement.Elements(WordpressNamespace + "postmeta");
-        foreach (var postMeta in postMetaElements)
+        IEnumerable<XElement> postMetaElements = postElement.Elements(WordpressNamespace + "postmeta");
+        foreach (XElement postMeta in postMetaElements)
         {
-            var metaKeyElement = postMeta.Element(WordpressNamespace + "meta_key");
+            XElement metaKeyElement = postMeta.Element(WordpressNamespace + "meta_key");
 
             // this.ParseSsoMetaData(metaKeyElement, postMeta, metaData);
             this.ParseFeaturedImage(metaKeyElement, postMeta, post);
@@ -326,7 +326,7 @@ public class BlogSite
     {
         if (metaKeyElement?.Value == "_thumbnail_id")
         {
-            var metaValueElement = postMeta.Element(WordpressNamespace + "meta_value");
+            XElement metaValueElement = postMeta.Element(WordpressNamespace + "meta_value");
             string attachmentId = metaValueElement?.Value;
             post.FeaturedImage = this.GetAttachmentById(attachmentId);
         }
@@ -376,7 +376,7 @@ public class BlogSite
         */
         if (metaKeyElement?.Value == "_wpsso_meta")
         {
-            var metaValueElement = postMeta.Element(WordpressNamespace + "meta_value");
+            XElement metaValueElement = postMeta.Element(WordpressNamespace + "meta_value");
             string rawMetaData = metaValueElement?.Value;
 
             rawMetaData = Regex.Replace(rawMetaData, @"(?<prefix>^\w:\d+:)", string.Empty);
@@ -384,12 +384,12 @@ public class BlogSite
             rawMetaData = Regex.Replace(rawMetaData, "(?<trailing>;)(?:})", "}");
 
             var regexp = new Regex(@"(?<separators>;\w:\d+?:)(?:"")");
-            var matches = regexp.Matches(rawMetaData);
-            var itemMatchIndex = 0;
+            MatchCollection matches = regexp.Matches(rawMetaData);
+            int itemMatchIndex = 0;
 
             foreach (Match match in matches.OrderByDescending(m => m.Index))
             {
-                var group = match.Groups["separators"];
+                Group group = match.Groups["separators"];
 
                 rawMetaData = rawMetaData.Remove(@group.Index, @group.Value.Length);
                 rawMetaData = rawMetaData.Insert(@group.Index, itemMatchIndex % 2 == 0 ? ":" : ",");
@@ -397,12 +397,12 @@ public class BlogSite
                 itemMatchIndex++;
             }
 
-            regexp = new Regex(@"(?::""(?<value>.*?)(?="",|""}))");
+            regexp = new(@"(?::""(?<value>.*?)(?="",|""}))");
             matches = regexp.Matches(rawMetaData);
 
             foreach (Match match in matches.OrderByDescending(m => m.Index))
             {
-                var group = match.Groups["value"];
+                Group group = match.Groups["value"];
 
                 rawMetaData = rawMetaData.Remove(@group.Index, @group.Value.Length);
                 rawMetaData = rawMetaData.Insert(@group.Index, HttpUtility.HtmlEncode(@group.Value));
@@ -410,9 +410,9 @@ public class BlogSite
 
             try
             {
-                var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(rawMetaData);
+                Dictionary<string, string> data = JsonConvert.DeserializeObject<Dictionary<string, string>>(rawMetaData);
 
-                foreach (var (key, value) in data)
+                foreach ((string key, string value) in data)
                 {
                     metaData.Add(key, value);
                 }

@@ -2,6 +2,7 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ public static class StackerCli
 
         ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-        var cmd = new CommandLineBuilder()
+        Parser cmd = new CommandLineBuilder()
             .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<FacebookCommandFactory>>().Create())
             .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<LinkedInCommandFactory>>().Create())
             .AddCommand(serviceProvider.GetRequiredService<ICommandFactory<TwitterCommandFactory>>().Create())

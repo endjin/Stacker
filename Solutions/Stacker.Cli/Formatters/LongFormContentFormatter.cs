@@ -29,7 +29,7 @@ public abstract class LongFormContentFormatter : IContentFormatter
         var sbTracking = new StringBuilder();
         var hashTagConverter = new WordPressTagToHashTagConverter();
 
-        foreach (var item in feedItems)
+        foreach (ContentItem item in feedItems)
         {
             sbTracking.AppendLine();
             sbTracking.Append(item.Content.Link);
@@ -45,10 +45,10 @@ public abstract class LongFormContentFormatter : IContentFormatter
 
             if (item.Tags?.Any() == true)
             {
-                var contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
+                int contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
-                foreach (var tag in item.Tags)
+                foreach (string tag in item.Tags)
                 {
                     // 2 Offset = Space + #
                     if (contentLength + tag.Length + 2 <= this.maxContentLength)
@@ -67,7 +67,7 @@ public abstract class LongFormContentFormatter : IContentFormatter
                     sb.AppendLine();
                 }
 
-                foreach (var tag in item.Tags.Take(tagsToInclude))
+                foreach (string tag in item.Tags.Take(tagsToInclude))
                 {
                     sb.Append(" #");
                     sb.Append(hashTagConverter.Convert(tag));

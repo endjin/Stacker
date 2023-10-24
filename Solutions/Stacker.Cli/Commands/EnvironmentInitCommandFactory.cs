@@ -25,24 +25,24 @@ public class EnvironmentInitCommandFactory : ICommandFactory<EnvironmentInitComm
 
     public Command Create()
     {
-        return new Command("init", "Initializes the stacker environment.")
+        return new("init", "Initializes the stacker environment.")
         {
             Handler = CommandHandler.Create(() =>
             {
                 this.appEnvironment.Initialize();
                 this.settingsManager.SaveSettings(
-                    new StackerSettings
+                    new()
                     {
                         BufferAccessToken = "<ADD YOUR ACCESS TOKEN>",
-                        BufferProfiles = new Dictionary<string, string>
+                        BufferProfiles = new()
                         {
                             { "facebook|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                             { "linkedin|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                             { "twitter|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                         },
-                        Users = new List<User>
+                        Users = new()
                         {
-                            new User
+                            new()
                             {
                                 Email = string.Empty,
                                 IsActive = true,

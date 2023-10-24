@@ -35,8 +35,8 @@ public class BufferClient : IBufferClient
     {
         var postData = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("text", content),
-            new KeyValuePair<string, string>("shorten", "false"),
+            new("text", content),
+            new("shorten", "false"),
         };
 
         postData.AddRange(profileIds.Select(profileId => new KeyValuePair<string, string>("profile_ids[]", profileId)));
@@ -46,27 +46,27 @@ public class BufferClient : IBufferClient
 
     public async Task UploadAsync(IEnumerable<string> content, string profileId)
     {
-        using (var client = this.httpClientFactory.CreateClient())
+        using (HttpClient client = this.httpClientFactory.CreateClient())
         {
-            client.BaseAddress = new Uri(BaseUri);
+            client.BaseAddress = new(BaseUri);
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+            client.DefaultRequestHeaders.Accept.Add(new("application/x-www-form-urlencoded"));
 
-            var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-            var updateOperationUrl = $"{UpdateOperation}?access_token={settings.BufferAccessToken}";
+            StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+            string updateOperationUrl = $"{UpdateOperation}?access_token={settings.BufferAccessToken}";
 
-            foreach (var item in content)
+            foreach (string item in content)
             {
                 HttpContent payload = new FormUrlEncodedContent(this.ConvertToPayload(item, new string[] { profileId }));
 
                 Console.WriteLine($"Buffering: {item}");
 
-                var response = await client.PostAsync(updateOperationUrl, payload).ConfigureAwait(false);
+                HttpResponseMessage response = await client.PostAsync(updateOperationUrl, payload).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var error = JsonConvert.DeserializeObject<BufferError>(errorContent);
+                    string errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    BufferError error = JsonConvert.DeserializeObject<BufferError>(errorContent);
 
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Buffering Failed: {error.Message}");
