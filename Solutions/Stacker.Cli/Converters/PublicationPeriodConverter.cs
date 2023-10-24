@@ -3,8 +3,10 @@
 // </copyright>
 
 using System;
+
 using NodaTime;
 using NodaTime.Calendars;
+
 using Stacker.Cli.Domain.Publication;
 
 namespace Stacker.Cli.Converters;
@@ -21,24 +23,24 @@ public class PublicationPeriodConverter
         {
             case PublicationPeriod.ThisWeek:
                 LocalDate startOfThisWeek = LocalDate.FromWeekYearWeekAndDay(today.Year, weekNumber, IsoDayOfWeek.Monday);
-                return new(startOfThisWeek, LocalDate.FromDateTime(DateTime.Today));
+                return new DateInterval(startOfThisWeek, LocalDate.FromDateTime(DateTime.Today));
             case PublicationPeriod.LastWeek:
                 LocalDate startOfLastWeek = LocalDate.FromWeekYearWeekAndDay(today.Year, rule.GetWeekOfWeekYear(today.PlusWeeks(-1)), IsoDayOfWeek.Monday);
-                return new(startOfLastWeek, startOfLastWeek.PlusWeeks(1).PlusDays(-1));
+                return new DateInterval(startOfLastWeek, startOfLastWeek.PlusWeeks(1).PlusDays(-1));
             case PublicationPeriod.ThisMonth:
-                var startOfThisMonth = LocalDate.FromDateTime(new(today.Year, today.Month, 1));
-                return new(startOfThisMonth, today);
+                var startOfThisMonth = LocalDate.FromDateTime(new DateTime(today.Year, today.Month, 1));
+                return new DateInterval(startOfThisMonth, today);
             case PublicationPeriod.LastMonth:
-                LocalDate startOfLastMonth = LocalDate.FromDateTime(new(today.Year, today.Month, 1)).PlusMonths(-1);
+                LocalDate startOfLastMonth = LocalDate.FromDateTime(new DateTime(today.Year, today.Month, 1)).PlusMonths(-1);
                 var endOfLastMonth = new LocalDate(startOfLastMonth.Year, startOfLastMonth.Month, startOfLastMonth.Calendar.GetDaysInMonth(startOfLastMonth.Year, startOfLastMonth.Month));
-                return new(startOfLastMonth, endOfLastMonth);
+                return new DateInterval(startOfLastMonth, endOfLastMonth);
             case PublicationPeriod.ThisYear:
-                var startOfThisYear = LocalDate.FromDateTime(new(today.Year, 1, 1));
-                return new(startOfThisYear, today);
+                var startOfThisYear = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1));
+                return new DateInterval(startOfThisYear, today);
             case PublicationPeriod.LastYear:
-                LocalDate startOfLastYear = LocalDate.FromDateTime(new(today.Year, 1, 1)).PlusYears(-1);
-                LocalDate endOfLastYear = LocalDate.FromDateTime(new(today.Year, 12, 31)).PlusYears(-1);
-                return new(startOfLastYear, endOfLastYear);
+                LocalDate startOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1)).PlusYears(-1);
+                LocalDate endOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 12, 31)).PlusYears(-1);
+                return new DateInterval(startOfLastYear, endOfLastYear);
             default:
                 throw new ArgumentOutOfRangeException(nameof(publicationPeriod), publicationPeriod, null);
         }

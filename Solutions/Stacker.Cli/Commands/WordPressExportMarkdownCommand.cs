@@ -1,12 +1,12 @@
-﻿// <copyright file="WordPressExportMarkDownCommandFactory.cs" company="Endjin Limited">
+﻿// <copyright file="WordPressExportMarkdownCommand.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,141 +14,142 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
+using Spectre.Console;
+using Spectre.Console.Cli;
+using Spectre.IO;
+
 using Stacker.Cli.Cleaners;
 using Stacker.Cli.Configuration;
-using Stacker.Cli.Contracts.Commands;
 using Stacker.Cli.Contracts.Configuration;
 using Stacker.Cli.Domain.Universal;
 using Stacker.Cli.Domain.WordPress;
 using Stacker.Cli.Serialization;
 using Stacker.Cli.Tasks;
+
 using YamlDotNet.Serialization;
+
+using Environment = System.Environment;
+using Path = System.IO.Path;
 
 namespace Stacker.Cli.Commands;
 
-public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressExportMarkDownCommandFactory>
+public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdownCommand.Settings>
 {
     private readonly IDownloadTasks downloadTasks;
     private readonly IStackerSettingsManager settingsManager;
     private readonly ContentItemCleaner cleanerManager;
     private readonly IYamlSerializerFactory serializerFactory;
     private ISerializer serializer;
-    private StackerSettings settings;
+    private StackerSettings stackerSettings;
 
-    public WordPressExportMarkDownCommandFactory(IStackerSettingsManager settingsManager, IDownloadTasks downloadTasks, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
+    public WordPressExportMarkdownCommand(IDownloadTasks downloadTasks, IStackerSettingsManager settingsManager, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
     {
-        this.settingsManager = settingsManager;
         this.downloadTasks = downloadTasks;
+        this.settingsManager = settingsManager;
         this.cleanerManager = cleanerManager;
         this.serializerFactory = serializerFactory;
     }
 
-    public Command Create()
+    /// <inheritdoc/>
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        var cmd = new Command("markdown", "Convert WordPress export files into a markdown format.")
+        this.stackerSettings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+
+        if (!File.Exists(settings.WordPressExportFilePath.FullPath))
         {
-            Handler = CommandHandler.Create(async (string wpexportFilePath, string exportFilePath) =>
+            AnsiConsole.WriteLine($"File not found {settings.WordPressExportFilePath.FullPath}");
+
+            return 1;
+        }
+
+        this.serializer = this.serializerFactory.GetSerializer();
+
+        BlogSite blogSite = await this.LoadWordPressExportAsync(settings.WordPressExportFilePath.FullPath).ConfigureAwait(false);
+
+        List<ContentItem> feed = this.LoadFeed(blogSite);
+
+        var sb = new StringBuilder();
+        FileInfo fi = new(settings.OutputDirectoryPath.FullPath);
+        DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html"));
+        DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md"));
+
+        string inputTempHtmlFilePath;
+        string outputTempMarkdownFilePath;
+        string outputFilePath;
+
+        if (!fi.Directory.Exists)
+        {
+            fi.Directory.Create();
+        }
+
+        if (!tempHtmlFolder.Exists)
+        {
+            tempHtmlFolder.Create();
+        }
+
+        if (!tempMarkdownFolder.Exists)
+        {
+            tempMarkdownFolder.Create();
+        }
+
+        // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
+        foreach (ContentItem ci in feed)
+        {
+            ContentItem contentItem = this.cleanerManager.PostDownload(ci);
+
+            sb.AppendLine("---");
+            sb.Append(this.CreateYamlHeader(contentItem));
+            sb.Append("---");
+            sb.Append(Environment.NewLine);
+            sb.Append(Environment.NewLine);
+
+            await using (StreamWriter writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
             {
-                this.settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+                await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
+            }
 
-                if (!File.Exists(wpexportFilePath))
+            inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html");
+            outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
+            outputFilePath = Path.Combine(settings.OutputDirectoryPath.FullPath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
+
+            FileInfo outputFile = new(outputFilePath);
+
+            if (!outputFile.Directory.Exists)
+            {
+                outputFile.Directory.Create();
+            }
+
+            if (this.ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
+            {
+                sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
+
+                string content = sb.ToString();
+
+                AnsiConsole.WriteLine(outputFilePath);
+
+                try
                 {
-                    Console.WriteLine($"File not found {wpexportFilePath}");
-
-                    return;
+                    content = this.cleanerManager.PostConvert(content);
+                }
+                catch (Exception exception)
+                {
+                    AnsiConsole.WriteLine(exception.Message);
                 }
 
-                this.serializer = this.serializerFactory.GetSerializer();
-
-                BlogSite blogSite = await this.LoadWordPressExportAsync(wpexportFilePath).ConfigureAwait(false);
-
-                List<ContentItem> feed = this.LoadFeed(blogSite);
-
-                var sb = new StringBuilder();
-                FileInfo fi = new(exportFilePath);
-                DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html"));
-                DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md"));
-                string inputTempHtmlFilePath;
-                string outputTempMarkdownFilePath;
-                string outputFilePath;
-
-                if (!fi.Directory.Exists)
+                await using (StreamWriter writer = File.CreateText(outputFilePath))
                 {
-                    fi.Directory.Create();
+                    await writer.WriteAsync(content).ConfigureAwait(false);
                 }
+            }
 
-                if (!tempHtmlFolder.Exists)
-                {
-                    tempHtmlFolder.Create();
-                }
+            // Remote the temporary html file.
+            File.Delete(inputTempHtmlFilePath);
 
-                if (!tempMarkdownFolder.Exists)
-                {
-                    tempMarkdownFolder.Create();
-                }
+            sb.Clear();
+        }
 
-                // await this.downloadTasks.DownloadAsync(feed, exportFilePath).ConfigureAwait(false);
-                foreach (ContentItem ci in feed)
-                {
-                    ContentItem contentItem = this.cleanerManager.PostDownload(ci);
-
-                    sb.AppendLine("---");
-                    sb.Append(this.CreateYamlHeader(contentItem));
-                    sb.Append("---");
-                    sb.Append(Environment.NewLine);
-                    sb.Append(Environment.NewLine);
-
-                    await using (StreamWriter writer = File.CreateText(Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html")))
-                    {
-                        await writer.WriteAsync(contentItem.Content.Body).ConfigureAwait(false);
-                    }
-
-                    inputTempHtmlFilePath = Path.Combine(tempHtmlFolder.FullName, contentItem.UniqueId + ".html");
-                    outputTempMarkdownFilePath = Path.Combine(tempMarkdownFolder.FullName, contentItem.UniqueId + ".md");
-                    outputFilePath = Path.Combine(exportFilePath, contentItem.Author.Username.ToLowerInvariant(), contentItem.UniqueId + ".md");
-
-                    FileInfo outputFile = new(outputFilePath);
-
-                    if (!outputFile.Directory.Exists)
-                    {
-                        outputFile.Directory.Create();
-                    }
-
-                    if (this.ExecutePandoc(inputTempHtmlFilePath, outputTempMarkdownFilePath))
-                    {
-                        sb.Append(await File.ReadAllTextAsync(outputTempMarkdownFilePath).ConfigureAwait(false));
-
-                        string content = sb.ToString();
-
-                        Console.WriteLine(outputFilePath);
-
-                        try
-                        {
-                            content = this.cleanerManager.PostConvert(content);
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine(exception.Message);
-                        }
-
-                        await using (StreamWriter writer = File.CreateText(outputFilePath))
-                        {
-                            await writer.WriteAsync(content).ConfigureAwait(false);
-                        }
-                    }
-
-                    // Remote the temporary html file.
-                    File.Delete(inputTempHtmlFilePath);
-
-                    sb.Clear();
-                }
-            }),
-        };
-
-        cmd.AddArgument(new Argument<string>("wp-export-file-path") { Description = "WordPress Export file path." });
-        cmd.AddArgument(new Argument<string>("export-file-path") { Description = "File path for the exported files." });
-
-        return cmd;
+        return 0;
     }
 
     private string CreateYamlHeader(ContentItem contentItem)
@@ -177,13 +178,13 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
     private List<ContentItem> LoadFeed(BlogSite blogSite)
     {
-        Console.WriteLine($"Processing...");
+        AnsiConsole.WriteLine($"Processing...");
 
         var feed = new List<ContentItem>();
         StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
         var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
 
-        Console.WriteLine($"Total Posts: {posts.Count}");
+        AnsiConsole.WriteLine($"Total Posts: {posts.Count}");
 
         // var attachments = posts.Where(x => x.Attachments.Any());
         foreach (Post post in posts)
@@ -248,7 +249,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
     {
         BlogSite blogSite;
 
-        Console.WriteLine($"Reading {wpexportFilePath}");
+        AnsiConsole.WriteLine($"Reading {wpexportFilePath}");
 
         using (StreamReader reader = File.OpenText(wpexportFilePath))
         {
@@ -280,8 +281,8 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
         if (process.ExitCode != 0)
         {
-            Console.WriteLine("Failed to convert " + outputTempMarkdownFilePath);
-            Console.WriteLine(process.StandardError.ReadToEnd());
+            AnsiConsole.WriteLine("Failed to convert " + outputTempMarkdownFilePath);
+            AnsiConsole.WriteLine(process.StandardError.ReadToEnd());
         }
         else
         {
@@ -293,7 +294,7 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
     private bool IsCategoryExcluded(string category)
     {
-        return this.settings.WordPressToMarkdown.TagsToRemove.Contains(category);
+        return this.stackerSettings.WordPressToMarkdown.TagsToRemove.Contains(category);
     }
 
     private string GetHeaderImage(List<string> attachments)
@@ -315,6 +316,20 @@ public class WordPressExportMarkDownCommandFactory : ICommandFactory<WordPressEx
 
     private bool IsRelevantHost(string url)
     {
-        return this.settings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+        return this.stackerSettings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    /// <summary>
+    /// The settings for the command.
+    /// </summary>
+    public class Settings : CommandSettings
+    {
+        [CommandOption("-w|--wp-export-file-path <WordPressExportFilePath>")]
+        [Description("WordPress Export file path.")]
+        public FilePath WordPressExportFilePath { get; init; }
+
+        [CommandOption("-o|--output-directory-path <OutputDirectoryPath>")]
+        [Description("Directory path for the exported files.")]
+        public DirectoryPath OutputDirectoryPath { get; init; }
     }
 }

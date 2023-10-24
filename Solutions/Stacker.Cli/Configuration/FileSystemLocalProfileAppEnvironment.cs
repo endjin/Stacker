@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+
 using Stacker.Cli.Contracts.Configuration;
 
 namespace Stacker.Cli.Configuration;

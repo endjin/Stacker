@@ -72,6 +72,21 @@
         "resolved": "0.47.0",
         "contentHash": "B2t1ha50pgEn1er2j5cv9RnJRX0bGhJDubkWr+KOcX5KjwVD83DvLXBVfixkiawuPFvh/Ggm1Wu07Qk96BbazA=="
       },
+      "Spectre.Console.Cli": {
+        "type": "Direct",
+        "requested": "[0.47.0, )",
+        "resolved": "0.47.0",
+        "contentHash": "S2cZCbve4fAgRtigNUNZbF+NLQJcAapSqSbbDYqLtqXJcIZ6tKiRTveYe05d+oLY2bAmP7sgnLdzVknGXruy2Q==",
+        "dependencies": {
+          "Spectre.Console": "0.47.0"
+        }
+      },
+      "Spectre.IO": {
+        "type": "Direct",
+        "requested": "[0.13.0, )",
+        "resolved": "0.13.0",
+        "contentHash": "K4NvyhogxTsqjFHYRmxgmoS3oXaRNRYEa+BaCvKws7a/OCtyRB16BUjXh92ZKa1piQrMc51HmiMdRnAx8nGD/g=="
+      },
       "StyleCop.Analyzers": {
         "type": "Direct",
         "requested": "[1.2.0-beta.507, )",
@@ -79,16 +94,6 @@
         "contentHash": "/FtugDT66cKJJ+GGH7rNpG6UDrT4iIWz45M6lrXXHobDUFDHw+q5VgkbiR+6ffTO564ge7w6fQh/eoQhVdJO8Q==",
         "dependencies": {
           "StyleCop.Analyzers.Unstable": "1.2.0.507"
-        }
-      },
-      "System.CommandLine.Experimental": {
-        "type": "Direct",
-        "requested": "[0.3.0-alpha.19577.1, )",
-        "resolved": "0.3.0-alpha.19577.1",
-        "contentHash": "d6t9G4NGBq7rB2Gvo5WjV4YuIJcplYj1fGeTef77TQJNXaExW1C4kDsyee9kHlHLejxEEtCrPvZ4pfj0IjfgHQ==",
-        "dependencies": {
-          "Microsoft.CSharp": "4.4.1",
-          "system.memory": "4.5.3"
         }
       },
       "System.Threading.Tasks.Dataflow": {
@@ -115,11 +120,6 @@
         "type": "Transitive",
         "resolved": "1.1.1",
         "contentHash": "AT3HlgTjsqHnWpBHSNeR0KxbLZD7bztlZVj7I8vgeYG9SYqbeFGh0TM/KVtC6fg53nrWHl3VfZFvb5BiQFcY6Q=="
-      },
-      "Microsoft.CSharp": {
-        "type": "Transitive",
-        "resolved": "4.4.1",
-        "contentHash": "A5hI3gk6WpcBI0QGZY6/d5CCaYUxJgi7iENn1uYEng+Olo8RfI5ReGVkjXjeu3VR3srLvVYREATXa2M0X7FYJA=="
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
@@ -173,6 +173,14 @@
           "Microsoft.SourceLink.Common": "1.1.1"
         }
       },
+      "Spectre.Console": {
+        "type": "Transitive",
+        "resolved": "0.47.0",
+        "contentHash": "wz8mszcZr0cSOo8GyoG9e2DFW0SkMT8/n78Q/lIXX7EbCtHNXOoOKWpJ9Str+rCYtmQOGGyDutZzubrUHK/XkA==",
+        "dependencies": {
+          "System.Memory": "4.5.5"
+        }
+      },
       "StyleCop.Analyzers.Unstable": {
         "type": "Transitive",
         "resolved": "1.2.0.507",
@@ -180,8 +188,8 @@
       },
       "System.Memory": {
         "type": "Transitive",
-        "resolved": "4.5.3",
-        "contentHash": "3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA=="
+        "resolved": "4.5.5",
+        "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",

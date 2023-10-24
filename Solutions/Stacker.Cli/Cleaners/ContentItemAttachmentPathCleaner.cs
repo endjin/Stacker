@@ -4,7 +4,9 @@
 
 using System;
 using System.Text.RegularExpressions;
+
 using Flurl;
+
 using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Cleaners;

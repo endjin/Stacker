@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using Spectre.Console;
+
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Buffer;
 using Stacker.Cli.Contracts.Configuration;
@@ -48,9 +50,9 @@ public class BufferClient : IBufferClient
     {
         using (HttpClient client = this.httpClientFactory.CreateClient())
         {
-            client.BaseAddress = new(BaseUri);
+            client.BaseAddress = new Uri(BaseUri);
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new("application/x-www-form-urlencoded"));
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 
             StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
             string updateOperationUrl = $"{UpdateOperation}?access_token={settings.BufferAccessToken}";
@@ -59,7 +61,7 @@ public class BufferClient : IBufferClient
             {
                 HttpContent payload = new FormUrlEncodedContent(this.ConvertToPayload(item, new string[] { profileId }));
 
-                Console.WriteLine($"Buffering: {item}");
+                AnsiConsole.WriteLine($"Buffering: {item}");
 
                 HttpResponseMessage response = await client.PostAsync(updateOperationUrl, payload).ConfigureAwait(false);
 
@@ -68,10 +70,10 @@ public class BufferClient : IBufferClient
                     string errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     BufferError error = JsonConvert.DeserializeObject<BufferError>(errorContent);
 
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Buffering Failed: {error.Message}");
-                    Console.WriteLine();
-                    Console.ResetColor();
+                    AnsiConsole.Foreground = ConsoleColor.Red;
+                    AnsiConsole.WriteLine($"Buffering Failed: {error.Message}");
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.ResetColors();
                 }
             }
         }

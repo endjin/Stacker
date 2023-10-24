@@ -3,7 +3,9 @@
 // </copyright>
 
 using System.IO;
+
 using Newtonsoft.Json;
+
 using Stacker.Cli.Contracts.Configuration;
 
 namespace Stacker.Cli.Configuration;

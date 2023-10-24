@@ -7,8 +7,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
+
 using NodaTime;
+
+using Spectre.Console;
+using Spectre.IO;
+
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Buffer;
 using Stacker.Cli.Contracts.Configuration;
@@ -31,7 +37,7 @@ public class ContentTasks : IContentTasks
         this.settingsManager = settingsManager;
     }
 
-    public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    public async Task BufferContentItemsAsync<TContentFormatter>(FilePath contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
         where TContentFormatter : class, IContentFormatter, new()
     {
         TContentFormatter formatter = new();
@@ -44,8 +50,8 @@ public class ContentTasks : IContentTasks
         {
             string profileId = settings.BufferProfiles[profileKey];
 
-            Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
-            Console.WriteLine($"Loading: {contentFilePath}");
+            AnsiConsole.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
+            AnsiConsole.WriteLine($"Loading: {contentFilePath}");
 
             IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
             IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems);
@@ -54,13 +60,13 @@ public class ContentTasks : IContentTasks
         }
         else
         {
-            Console.WriteLine($"Settings for {profileKey} not found. Please check your Stacker configuration.");
+            AnsiConsole.WriteLine($"Settings for {profileKey} not found. Please check your Stacker configuration.");
         }
     }
 
-    public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(FilePath contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
     {
-        IEnumerable<ContentItem> content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
+        IEnumerable<ContentItem> content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
 
         if (publicationPeriod != PublicationPeriod.None)
         {
@@ -107,8 +113,8 @@ public class ContentTasks : IContentTasks
             itemCount = contentItems.Count;
         }
 
-        Console.WriteLine($"Total Posts: {contentItems.Count}");
-        Console.WriteLine($"Promoting first: {itemCount}");
+        AnsiConsole.WriteLine($"Total Posts: {contentItems.Count}");
+        AnsiConsole.WriteLine($"Promoting first: {itemCount}");
 
         return contentItems.Take(itemCount);
     }

@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Collections.Generic;
+
 using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Contracts.Formatters;
