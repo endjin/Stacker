@@ -15,7 +15,7 @@ public class WordPressImageResizerCleaner : IPreDownloadCleaner
 
         contentItem.Content.Body = Regex.Replace(contentItem.Content.Body, pattern, string.Empty);
 
-        foreach (var attachment in contentItem.Content.Attachments)
+        foreach (ContentAttachment attachment in contentItem.Content.Attachments)
         {
             attachment.Path = Regex.Replace(attachment.Path, pattern, string.Empty);
             attachment.Url = Regex.Replace(attachment.Url, pattern,  string.Empty);

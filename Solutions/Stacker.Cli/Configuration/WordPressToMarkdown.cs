@@ -8,7 +8,7 @@ namespace Stacker.Cli.Configuration;
 
 public class WordPressToMarkdown
 {
-    public List<string> Hosts { get; set; } = new List<string>();
+    public List<string> Hosts { get; set; } = new();
 
-    public List<string> TagsToRemove { get; set; } = new List<string>();
+    public List<string> TagsToRemove { get; set; } = new();
 }

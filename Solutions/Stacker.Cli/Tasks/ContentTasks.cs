@@ -34,21 +34,21 @@ public class ContentTasks : IContentTasks
     public async Task BufferContentItemsAsync<TContentFormatter>(string contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
         where TContentFormatter : class, IContentFormatter, new()
     {
-        TContentFormatter formatter = new TContentFormatter();
+        TContentFormatter formatter = new();
 
         string profileKey = profilePrefix + profileName;
 
-        var settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
 
         if (settings.BufferProfiles.ContainsKey(profileKey))
         {
-            var profileId = settings.BufferProfiles[profileKey];
+            string profileId = settings.BufferProfiles[profileKey];
 
             Console.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
             Console.WriteLine($"Loading: {contentFilePath}");
 
-            var contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
-            var formattedContentItems = formatter.Format("social", profileName, contentItems);
+            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
+            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems);
 
             await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
         }
@@ -60,11 +60,11 @@ public class ContentTasks : IContentTasks
 
     public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(string contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
     {
-        var content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
+        IEnumerable<ContentItem> content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath).ConfigureAwait(false));
 
         if (publicationPeriod != PublicationPeriod.None)
         {
-            var dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
+            DateInterval dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
 
             content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End));
         }
@@ -81,7 +81,7 @@ public class ContentTasks : IContentTasks
                 {
                     if (toDate.ToString("HH:mm:ss") == "00:00:00")
                     {
-                        toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
+                        toDate = new(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                     }
                 }
 

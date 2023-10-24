@@ -16,9 +16,9 @@ public class ContentItemAttachmentPathCleaner : IPreDownloadCleaner
         string pattern = @"(https?:\/\/(?:(?:blogs?.endjin.com)|(?:endjinblog.azurewebsites.net))\/wp-content\/uploads)";
         string path = "/assets/images/blog";
 
-        Regex regexp = new Regex(pattern, RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+        Regex regexp = new(pattern, RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
-        foreach (var attachment in contentItem.Content.Attachments)
+        foreach (ContentAttachment attachment in contentItem.Content.Attachments)
         {
             attachment.Path = regexp.Replace(attachment.Path, path);
 

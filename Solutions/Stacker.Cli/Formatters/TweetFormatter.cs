@@ -23,7 +23,7 @@ public class TweetFormatter : IContentFormatter
         var sbTracking = new StringBuilder();
         var hashTagConverter = new WordPressTagToHashTagConverter();
 
-        foreach (var item in feedItems)
+        foreach (ContentItem item in feedItems)
         {
             sbTracking.Append(" ");
             sbTracking.Append(item.Content.Link);
@@ -50,10 +50,10 @@ public class TweetFormatter : IContentFormatter
 
             if (item.Tags != null && item.Tags.Any())
             {
-                var tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
+                int tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
-                foreach (var tag in item.Tags)
+                foreach (string tag in item.Tags)
                 {
                     // 2 Offset = Space + #
                     if (tweetLength + tag.Length + 2 <= MaxContentLength)
@@ -66,7 +66,7 @@ public class TweetFormatter : IContentFormatter
                     }
                 }
 
-                foreach (var tag in item.Tags.Take(tagsToInclude))
+                foreach (string tag in item.Tags.Take(tagsToInclude))
                 {
                     sb.Append(" #");
                     sb.Append(hashTagConverter.Convert(tag));

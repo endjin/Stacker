@@ -27,11 +27,11 @@ public class DownloadTasks : IDownloadTasks
 
     public async Task DownloadAsync(List<ContentItem> feed, string outputPath)
     {
-        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
+        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new() { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
-        foreach (var contentItem in feed)
+        foreach (ContentItem contentItem in feed)
         {
-            foreach (var attachment in contentItem.Content.Attachments)
+            foreach (ContentAttachment attachment in contentItem.Content.Attachments)
             {
                 var context = new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) };
 
