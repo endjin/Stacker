@@ -38,7 +38,15 @@ public static class StackerCli
             config.CaseSensitivity(CaseSensitivity.None);
             config.SetApplicationName("stacker");
 
+            config.AddExample("linkedin", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
+            config.AddExample("facebook", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
+            config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
+            config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--item-count", "10");
+            config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--publication-period", "ThisMonth");
+            config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
+            config.AddExample("environment", "init");
             config.AddExample("wordpress", "export", "markdown", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog""");
+            config.AddExample("wordpress", "export", "universal", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog\export.json""");
 
             config.AddBranch("facebook", process =>
             {

@@ -60,7 +60,7 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
         public int ItemCount { get; init; }
 
         [CommandOption("-p|--publication-period <PublicationPeriod>")]
-        [Description("Publication period to filter content items by. If specified --from-date and --to-date are ignored.")]
+        [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
         public PublicationPeriod PublicationPeriod { get; init; }
 
         [CommandOption("-f|--from-date <FromDate>")]

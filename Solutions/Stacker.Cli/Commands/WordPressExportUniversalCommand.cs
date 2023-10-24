@@ -115,7 +115,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
         [Description("WordPress Export file path.")]
         public FilePath WordPressExportFilePath { get; init; }
 
-        [CommandOption("-f|--universal-file-path <UniversalFilePath>")]
+        [CommandOption("-o|--universal-file-path <UniversalFilePath>")]
         [Description("Universal file path.")]
         public FilePath UniversalFilePath { get; init; }
     }
