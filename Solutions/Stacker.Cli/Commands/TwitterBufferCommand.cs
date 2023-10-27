@@ -29,7 +29,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<TweetFormatter>(
             settings.ContentFilePath,
             $"twitter|",
             settings.ProfileName,

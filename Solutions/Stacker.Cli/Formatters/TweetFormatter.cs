@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Formatters;
 using Stacker.Cli.Converters;
 using Stacker.Cli.Domain.Universal;
@@ -15,9 +15,9 @@ namespace Stacker.Cli.Formatters;
 public class TweetFormatter : IContentFormatter
 {
     private const int MaxContentLength = 280;
-    private string campaignSource = "twitter";
+    private readonly string campaignSource = "twitter";
 
-    public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
+    public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
         var tweets = new List<string>();
         var sb = new StringBuilder();
@@ -53,6 +53,8 @@ public class TweetFormatter : IContentFormatter
             {
                 int tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
+
+                item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
 
                 foreach (string tag in item.Tags)
                 {

@@ -92,7 +92,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
                 PromoteUntil = post.PromoteUntil,
                 Status = post.Status,
                 Slug = post.Slug,
-                Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
+                Tags = post.Tags.Where(t => t != null).Select(t => t.Name).ToList(),
             });
         }
 

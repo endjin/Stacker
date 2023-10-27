@@ -220,7 +220,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
                 PromoteUntil = post.PromoteUntil,
                 Slug = post.Slug,
                 Status = post.Status,
-                Tags = post.Tags.Where(t => t != null).Select(t => t.Name),
+                Tags = post.Tags.Where(t => t != null).Select(t => t.Name).ToList(),
             };
 
             // Search the body for any missing images.
