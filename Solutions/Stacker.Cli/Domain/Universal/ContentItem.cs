@@ -38,7 +38,7 @@ public class ContentItem
 
     public string Status { get; internal set; }
 
-    public IEnumerable<string> Tags { get; set; }
+    public List<string> Tags { get; set; }
 
     public string UniqueId
     {

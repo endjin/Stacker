@@ -46,17 +46,15 @@ public class ContentTasks : IContentTasks
 
         StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
 
-        if (settings.BufferProfiles.ContainsKey(profileKey))
+        if (settings.BufferProfiles.TryGetValue(profileKey, out string profile))
         {
-            string profileId = settings.BufferProfiles[profileKey];
-
-            AnsiConsole.WriteLine($"Buffer Profile: {profileKey} = {profileId}");
+            AnsiConsole.WriteLine($"Buffer Profile: {profileKey} = {profile}");
             AnsiConsole.WriteLine($"Loading: {contentFilePath}");
 
             IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
-            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems);
+            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, settings);
 
-            await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
+            // await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
         }
         else
         {
