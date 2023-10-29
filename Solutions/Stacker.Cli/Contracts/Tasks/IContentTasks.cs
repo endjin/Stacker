@@ -24,7 +24,8 @@ public interface IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
-        string filterByTag)
+        string filterByTag,
+        bool whatIf)
         where TContentFormatter : class, IContentFormatter, new();
 
     Task<IEnumerable<ContentItem>> LoadContentItemsAsync(

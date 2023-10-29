@@ -45,7 +45,8 @@ public class ContentTasks : IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
-        string filterByTag)
+        string filterByTag,
+        bool whatIf)
         where TContentFormatter : class, IContentFormatter, new()
     {
         TContentFormatter formatter = new();
@@ -56,13 +57,13 @@ public class ContentTasks : IContentTasks
 
         if (settings.BufferProfiles.TryGetValue(profileKey, out string profile))
         {
-            AnsiConsole.WriteLine($"Buffer Profile: {profileKey} = {profile}");
-            AnsiConsole.WriteLine($"Loading: {contentFilePath}");
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Buffer Profile:[/] {profileKey} = {profile}");
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFilePath}");
 
             IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
             IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, settings);
 
-            // await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
+            await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
         }
         else
         {
@@ -140,8 +141,9 @@ public class ContentTasks : IContentTasks
             itemCount = content.Count;
         }
 
-        AnsiConsole.WriteLine($"Total Posts: {content.Count}");
-        AnsiConsole.WriteLine($"Promoting first: {itemCount}");
+        AnsiConsole.MarkupLineInterpolated($"[yellow1]Total Posts:[/] {content.Count}");
+        AnsiConsole.MarkupLineInterpolated($"[yellow1]Promoting first:[/] {itemCount}");
+        AnsiConsole.WriteLine();
 
         return content.Take(itemCount);
     }

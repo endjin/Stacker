@@ -19,7 +19,7 @@ public class TweetFormatter : IContentFormatter
     public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
         List<string> tweets = new();
-        StringBuilder sb = new();
+        StringBuilder content = new();
         StringBuilder campaignTracking = new();
 
         foreach (ContentItem item in feedItems)
@@ -34,22 +34,22 @@ public class TweetFormatter : IContentFormatter
             campaignTracking.Append(campaignName.ToLowerInvariant());
             campaignTracking.AppendLine();
 
-            sb.Append(item.Content.Title);
-            sb.Append(" by ");
+            content.Append(item.Content.Title);
+            content.Append(" by ");
 
             if (string.IsNullOrEmpty(item.Author.TwitterHandle))
             {
-                sb.Append(item.Author.DisplayName);
+                content.Append(item.Author.DisplayName);
             }
             else
             {
-                sb.Append('@');
-                sb.Append(item.Author.TwitterHandle);
+                content.Append('@');
+                content.Append(item.Author.TwitterHandle);
             }
 
             if (item?.Tags != null && item.Tags.Any())
             {
-                int tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
+                int tweetLength = content.Length + (item.Content.Link.Length + 1) + campaignTracking.Length; // 1 = extra space before link
                 int tagsToInclude = 0;
 
                 item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
@@ -69,16 +69,16 @@ public class TweetFormatter : IContentFormatter
 
                 foreach (string tag in item.Tags.Distinct().Take(tagsToInclude))
                 {
-                    sb.Append(" #");
-                    sb.Append(tag);
+                    content.Append(" #");
+                    content.Append(tag);
                 }
             }
 
-            sb.Append(campaignTracking);
+            content.Append(campaignTracking);
 
-            tweets.Add(sb.ToString());
+            tweets.Add(content.ToString());
 
-            sb.Clear();
+            content.Clear();
             campaignTracking.Clear();
         }
 

@@ -37,7 +37,8 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
             settings.FromDate,
             settings.ToDate,
             settings.ItemCount,
-            settings.FilterByTag).ConfigureAwait(false);
+            settings.FilterByTag,
+            settings.WhatIf).ConfigureAwait(false);
 
         return 0;
     }
@@ -76,6 +77,10 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         [CommandOption("-t|--to-date <ToDate>")]
         [Description("Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used.")]
         public DateTime ToDate { get; init; }
+
+        [CommandOption("-w|--what-if <WhatIf>")]
+        [Description("See what the command would do without submitting the content to Buffer.")]
+        public bool WhatIf { get; set; }
 
 #nullable enable annotations
     }
