@@ -61,7 +61,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
         List<Post> posts = blogSite.GetAllPosts().ToList();
         List<Post> validPosts = posts.FilterByValid(stackerSettings).ToList();
         List<Post> promotablePosts = validPosts.FilterByPromotable().ToList();
-        WordPressTagToHashTagConverter hashTagConverter = new();
+        TagToHashTagConverter hashTagConverter = new();
         List<ContentItem> feed = new();
 
         AnsiConsole.WriteLine($"Total Posts: {posts.Count()}");

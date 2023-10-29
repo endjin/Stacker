@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Formatters;
-using Stacker.Cli.Converters;
 using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Formatters;
@@ -19,22 +18,21 @@ public class TweetFormatter : IContentFormatter
 
     public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
-        var tweets = new List<string>();
-        var sb = new StringBuilder();
-        var sbTracking = new StringBuilder();
-        var hashTagConverter = new WordPressTagToHashTagConverter();
+        List<string> tweets = new();
+        StringBuilder sb = new();
+        StringBuilder campaignTracking = new();
 
         foreach (ContentItem item in feedItems)
         {
-            sbTracking.Append(" ");
-            sbTracking.Append(item.Content.Link);
-            sbTracking.Append("?utm_source=");
-            sbTracking.Append(this.campaignSource.ToLowerInvariant());
-            sbTracking.Append("&utm_medium=");
-            sbTracking.Append(campaignMedium.ToLowerInvariant());
-            sbTracking.Append("&utm_campaign=");
-            sbTracking.Append(campaignName.ToLowerInvariant());
-            sbTracking.AppendLine();
+            campaignTracking.Append(' ');
+            campaignTracking.Append(item.Content.Link);
+            campaignTracking.Append("?utm_source=");
+            campaignTracking.Append(this.campaignSource.ToLowerInvariant());
+            campaignTracking.Append("&utm_medium=");
+            campaignTracking.Append(campaignMedium.ToLowerInvariant());
+            campaignTracking.Append("&utm_campaign=");
+            campaignTracking.Append(campaignName.ToLowerInvariant());
+            campaignTracking.AppendLine();
 
             sb.Append(item.Content.Title);
             sb.Append(" by ");
@@ -45,18 +43,18 @@ public class TweetFormatter : IContentFormatter
             }
             else
             {
-                sb.Append("@");
+                sb.Append('@');
                 sb.Append(item.Author.TwitterHandle);
             }
 
-            if (item.Tags != null && item.Tags.Any())
+            if (item?.Tags != null && item.Tags.Any())
             {
                 int tweetLength = sb.Length + item.Content.Link.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
                 item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
 
-                foreach (string tag in item.Tags)
+                foreach (string tag in item.Tags.Distinct())
                 {
                     // 2 Offset = Space + #
                     if (tweetLength + tag.Length + 2 <= MaxContentLength)
@@ -69,19 +67,19 @@ public class TweetFormatter : IContentFormatter
                     }
                 }
 
-                foreach (string tag in item.Tags.Take(tagsToInclude))
+                foreach (string tag in item.Tags.Distinct().Take(tagsToInclude))
                 {
                     sb.Append(" #");
-                    sb.Append(hashTagConverter.Convert(tag));
+                    sb.Append(tag);
                 }
             }
 
-            sb.Append(sbTracking.ToString());
+            sb.Append(campaignTracking);
 
             tweets.Add(sb.ToString());
 
             sb.Clear();
-            sbTracking.Clear();
+            campaignTracking.Clear();
         }
 
         return tweets;

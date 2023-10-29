@@ -37,7 +37,15 @@ public class ContentTasks : IContentTasks
         this.settingsManager = settingsManager;
     }
 
-    public async Task BufferContentItemsAsync<TContentFormatter>(FilePath contentFilePath, string profilePrefix, string profileName, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    public async Task BufferContentItemsAsync<TContentFormatter>(
+        FilePath contentFilePath,
+        string profilePrefix,
+        string profileName,
+        PublicationPeriod publicationPeriod,
+        DateTime fromDate,
+        DateTime toDate,
+        int itemCount,
+        string filterByTag)
         where TContentFormatter : class, IContentFormatter, new()
     {
         TContentFormatter formatter = new();
@@ -51,7 +59,7 @@ public class ContentTasks : IContentTasks
             AnsiConsole.WriteLine($"Buffer Profile: {profileKey} = {profile}");
             AnsiConsole.WriteLine($"Loading: {contentFilePath}");
 
-            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount).ConfigureAwait(false);
+            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
             IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, settings);
 
             // await this.bufferClient.UploadAsync(formattedContentItems, profileId).ConfigureAwait(false);
@@ -62,15 +70,21 @@ public class ContentTasks : IContentTasks
         }
     }
 
-    public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(FilePath contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount)
+    public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
+        FilePath contentFilePath,
+        PublicationPeriod publicationPeriod,
+        DateTime fromDate,
+        DateTime toDate,
+        int itemCount,
+        string filterByTag)
     {
-        IEnumerable<ContentItem> content = JsonConvert.DeserializeObject<IEnumerable<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
+        List<ContentItem> content = JsonConvert.DeserializeObject<List<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
 
         if (publicationPeriod != PublicationPeriod.None)
         {
             DateInterval dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
 
-            content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End));
+            content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End)).ToList();
         }
         else
         {
@@ -85,35 +99,50 @@ public class ContentTasks : IContentTasks
                 {
                     if (toDate.ToString("HH:mm:ss") == "00:00:00")
                     {
-                        toDate = new(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
+                        toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                     }
                 }
 
-                content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
+                content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate).ToList();
             }
             else
             {
                 // if fromDate isn't specified, but toDate is
                 if (toDate != DateTime.MinValue)
                 {
-                    content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate);
+                    content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate).ToList();
                 }
             }
+        }
+
+        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
+
+        foreach (ContentItem contentItem in content)
+        {
+            // Use TagAliases to convert tags into their canonical form.
+            contentItem.Tags = contentItem.Tags?.Select(tag =>
+            {
+                TagAliases matchedAlias = settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
+                return matchedAlias != null ? matchedAlias.Tag : tag.Replace("-", " ").Replace(" ", string.Empty);
+            }).ToList();
         }
 
         // Sort so that content with the shortest lifespan are first.
         content = content.OrderBy(p => p.PromoteUntil).ToList();
 
-        var contentItems = content.ToList();
+        if (!string.IsNullOrEmpty(filterByTag))
+        {
+            content = content.Where(x => x.Tags.Contains(filterByTag, StringComparer.InvariantCultureIgnoreCase)).ToList();
+        }
 
         if (itemCount == 0)
         {
-            itemCount = contentItems.Count;
+            itemCount = content.Count;
         }
 
-        AnsiConsole.WriteLine($"Total Posts: {contentItems.Count}");
+        AnsiConsole.WriteLine($"Total Posts: {content.Count}");
         AnsiConsole.WriteLine($"Promoting first: {itemCount}");
 
-        return contentItems.Take(itemCount);
+        return content.Take(itemCount);
     }
 }

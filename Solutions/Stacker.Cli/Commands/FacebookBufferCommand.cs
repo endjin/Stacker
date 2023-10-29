@@ -35,7 +35,8 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
                 settings.PublicationPeriod,
                 settings.FromDate,
                 settings.ToDate,
-                settings.ItemCount).ConfigureAwait(false);
+                settings.ItemCount,
+                settings.FilterByTag).ConfigureAwait(false);
 
         return 0;
     }
@@ -54,6 +55,10 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
         [CommandOption("-n|--profile-name <ProfileName>")]
         [Description("Facebook profile to Buffer.")]
         public string ProfileName { get; init; }
+
+        [CommandOption("-g|--filter-by-tag <FilterByTag>")]
+        [Description("Tag to filter the content items by.")]
+        public string FilterByTag { get; init; }
 
         [CommandOption("-i|--item-count <ItemCount>")]
         [Description("Number of content items to buffer. If omitted all content is buffered.")]

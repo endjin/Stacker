@@ -23,8 +23,15 @@ public interface IContentTasks
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
-        int itemCount)
+        int itemCount,
+        string filterByTag)
         where TContentFormatter : class, IContentFormatter, new();
 
-    Task<IEnumerable<ContentItem>> LoadContentItemsAsync(FilePath contentFilePath, PublicationPeriod publicationPeriod, DateTime fromDate, DateTime toDate, int itemCount);
+    Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
+        FilePath contentFilePath,
+        PublicationPeriod publicationPeriod,
+        DateTime fromDate,
+        DateTime toDate,
+        int itemCount,
+        string filterByTag);
 }

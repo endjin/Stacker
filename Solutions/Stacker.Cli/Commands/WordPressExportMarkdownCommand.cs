@@ -137,10 +137,8 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
                     AnsiConsole.WriteLine(exception.Message);
                 }
 
-                await using (StreamWriter writer = File.CreateText(outputFilePath))
-                {
-                    await writer.WriteAsync(content).ConfigureAwait(false);
-                }
+                await using StreamWriter writer = File.CreateText(outputFilePath);
+                await writer.WriteAsync(content).ConfigureAwait(false);
             }
 
             // Remote the temporary html file.
@@ -156,10 +154,10 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     {
         if (string.IsNullOrEmpty(contentItem.Slug))
         {
-            contentItem.Slug = new(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+            contentItem.Slug = new string(Regex.Replace(contentItem.Content.Title.ToLowerInvariant().Replace(" ", "-"), @"\-+", "-").Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
         }
 
-        var frontmatter = new
+        var frontMatter = new
         {
             Title = contentItem.Content.Title.Replace("“", "\"").Replace("”", "\"").Replace("’", "'").Replace("‘", "'"),
             Date = contentItem.PublishedOn.ToString("O"),
@@ -173,12 +171,12 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
             Attachments = contentItem.Content.Attachments.Select(x => x.Path).Distinct(),
         };
 
-        return this.serializer.Serialize(frontmatter);
+        return this.serializer.Serialize(frontMatter);
     }
 
     private List<ContentItem> LoadFeed(BlogSite blogSite)
     {
-        AnsiConsole.WriteLine($"Processing...");
+        AnsiConsole.WriteLine("Processing...");
 
         var feed = new List<ContentItem>();
         StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
@@ -198,7 +196,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
             var ci = new ContentItem
             {
-                Author = new()
+                Author = new AuthorDetails
                 {
                     DisplayName = post.Author.DisplayName,
                     Email = post.Author.Email,
@@ -206,7 +204,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
                     Username = post.Author.Username,
                 },
                 Categories = post.Categories.Select(c => c.Name).Where(x => !this.IsCategoryExcluded(x)),
-                Content = new()
+                Content = new ContentDetails
                 {
                     Attachments = post.Attachments.Select(x => new ContentAttachment { Path = x.Path, Url = x.Url }).ToList(),
                     Body = post.Body,
@@ -232,7 +230,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
                 {
                     if (!ci.Content.Attachments.Any(x => string.Equals(x.Url, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)) && this.IsRelevantHost(match.Groups[1].Value))
                     {
-                        ci.Content.Attachments.Add(new() { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
+                        ci.Content.Attachments.Add(new ContentAttachment { Path = match.Groups[1].Value, Url = match.Groups[1].Value });
                     }
                 }
             }
@@ -245,17 +243,13 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
         return feed;
     }
 
-    private async Task<BlogSite> LoadWordPressExportAsync(string wpexportFilePath)
+    private async Task<BlogSite> LoadWordPressExportAsync(string exportFilePath)
     {
-        BlogSite blogSite;
+        AnsiConsole.WriteLine($"Reading {exportFilePath}");
 
-        AnsiConsole.WriteLine($"Reading {wpexportFilePath}");
-
-        using (StreamReader reader = File.OpenText(wpexportFilePath))
-        {
-            XDocument document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
-            blogSite = new(document);
-        }
+        using StreamReader reader = File.OpenText(exportFilePath);
+        XDocument document = await XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None).ConfigureAwait(false);
+        BlogSite blogSite = new(document);
 
         return blogSite;
     }
@@ -275,7 +269,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
             RedirectStandardInput = true,
         };
 
-        var process = new System.Diagnostics.Process { StartInfo = psi };
+        var process = new Process { StartInfo = psi };
         process.Start();
         process.WaitForExit();
 

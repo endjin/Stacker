@@ -29,7 +29,7 @@ public abstract class LongFormContentFormatter : IContentFormatter
         var postings = new List<string>();
         var sb = new StringBuilder();
         var sbTracking = new StringBuilder();
-        var hashTagConverter = new WordPressTagToHashTagConverter();
+        var hashTagConverter = new TagToHashTagConverter();
 
         foreach (ContentItem item in feedItems)
         {

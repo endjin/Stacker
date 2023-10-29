@@ -44,14 +44,7 @@ public class ContentItem
     {
         get
         {
-            if (string.IsNullOrEmpty(this.Slug))
-            {
-                return this.Id;
-            }
-            else
-            {
-                return this.CleanSlug;
-            }
+            return string.IsNullOrEmpty(this.Slug) ? this.Id : this.CleanSlug;
         }
     }
 }
