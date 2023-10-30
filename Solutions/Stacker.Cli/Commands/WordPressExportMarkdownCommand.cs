@@ -69,7 +69,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
         List<ContentItem> feed = this.LoadFeed(blogSite);
 
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
         FileInfo fi = new(settings.OutputDirectoryPath.FullPath);
         DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html"));
         DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md"));
@@ -178,9 +178,9 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     {
         AnsiConsole.WriteLine("Processing...");
 
-        var feed = new List<ContentItem>();
+        List<ContentItem> feed = new();
         StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-        var posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
+        List<Post> posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
 
         AnsiConsole.WriteLine($"Total Posts: {posts.Count}");
 
@@ -189,12 +189,12 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
         {
             User user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
-            if (user == null)
+            if (user is null)
             {
                 throw new NotImplementedException($"User {post.Author.Email} has not been configured. Update the settings file.");
             }
 
-            var ci = new ContentItem
+            ContentItem ci = new()
             {
                 Author = new AuthorDetails
                 {
@@ -260,7 +260,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
         string arguments = $"-f html+raw_html --to=markdown_github-raw_html --wrap=preserve -o \"{outputTempMarkdownFilePath}\" \"{inputTempHtmlFilePath}\" ";
 
-        var psi = new ProcessStartInfo
+        ProcessStartInfo psi = new()
         {
             FileName = "pandoc",
             Arguments = arguments,
@@ -269,7 +269,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
             RedirectStandardInput = true,
         };
 
-        var process = new Process { StartInfo = psi };
+        Process process = new() { StartInfo = psi };
         process.Start();
         process.WaitForExit();
 
@@ -300,12 +300,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
         string header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
 
-        if (!string.IsNullOrEmpty(header))
-        {
-            return header.Trim();
-        }
-
-        return string.Empty;
+        return !string.IsNullOrEmpty(header) ? header.Trim() : string.Empty;
     }
 
     private bool IsRelevantHost(string url)

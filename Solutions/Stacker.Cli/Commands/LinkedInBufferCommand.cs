@@ -20,6 +20,7 @@ namespace Stacker.Cli.Commands;
 public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
+    private readonly string profilePrefix = "linkedin|";
 
     public LinkedInBufferCommand(IContentTasks contentTasks)
     {
@@ -31,7 +32,7 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
     {
         await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
             settings.ContentFilePath,
-            $"linkedin|",
+            this.profilePrefix,
             settings.ProfileName,
             settings.PublicationPeriod,
             settings.FromDate,

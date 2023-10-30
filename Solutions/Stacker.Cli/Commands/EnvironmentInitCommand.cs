@@ -32,7 +32,7 @@ public class EnvironmentInitCommand : Command
             new StackerSettings
             {
                 BufferAccessToken = "<ADD YOUR ACCESS TOKEN>",
-                BufferProfiles = new()
+                BufferProfiles = new Dictionary<string, string>
                 {
                     { "facebook|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                     { "linkedin|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },

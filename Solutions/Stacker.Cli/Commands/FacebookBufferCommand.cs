@@ -19,6 +19,7 @@ namespace Stacker.Cli.Commands;
 public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
+    private readonly string profilePrefix = "facebook|";
 
     public FacebookBufferCommand(IContentTasks contentTasks)
     {
@@ -30,7 +31,7 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
     {
         await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
                 settings.ContentFilePath,
-                $"facebook|",
+                this.profilePrefix,
                 settings.ProfileName,
                 settings.PublicationPeriod,
                 settings.FromDate,

@@ -20,6 +20,7 @@ namespace Stacker.Cli.Commands;
 public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
+    private readonly string profilePrefix = "twitter|";
 
     public TwitterBufferCommand(IContentTasks contentTasks)
     {
@@ -31,7 +32,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     {
         await this.contentTasks.BufferContentItemsAsync<TweetFormatter>(
             settings.ContentFilePath,
-            $"twitter|",
+            this.profilePrefix,
             settings.ProfileName,
             settings.PublicationPeriod,
             settings.FromDate,
