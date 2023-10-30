@@ -1,15 +1,12 @@
 # Stacker
-A .NET Global Tool for automating marketing content across social channels. It supports extracting content from WordPress Export files and then republishing via Buffer to Twitter & LinkedIn, with automatically generated leader copy.
 
-`stacker` is built using Microsoft's `System.CommandLine` [libraries](https://github.com/dotnet/command-line-api). These packages, while still marked as experimental, are seeing lots of real-world usage, including tools such as [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet). 
-
-A useful blog post for understanding `System.CommandLine` is [Radu Matei's](https://twitter.com/matei_radu) blog post "[Building self-contained, single executable .NET Core 3 CLI tools](https://radu-matei.com/blog/self-contained-dotnet-cli/)".
+A .NET Global Tool for automating marketing content across social channels. It supports extracting content from Vellum and then republishing via Buffer to Twitter, Mastodon, Facebook & LinkedIn, with automatically generated leader copy.
 
 ## Prerequisites
 
-`stacker` used Pandoc to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html) and add it to the `PATH`.
+`stacker` uses Pandoc for WordPress export functionality, to convert from wordpress to markdown. You will need to install [Pandoc](https://pandoc.org/installing.html) and add it to the `PATH` or use `winget install JohnMacFarlane.Pandoc`.
 
-## dotnet global tools
+## Installation
 
 `stacker` is a [.NET global tool](https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools), which means once installed, it's available on the PATH of your machine. 
 
@@ -20,6 +17,8 @@ To list all the global tools installed on your machine, open a command prompt an
 To install the `stacker` global tool use the following command:
 
 `dotnet tool install -g stacker`
+
+Then use `stacker environment init` to create a default `StackerSettings.json` file with placeholder values in `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`.
 
 To install a specific version, use:
 
@@ -33,41 +32,27 @@ To uninstall the tool, use:
 
 `dotnet tool uninstall -g stacker`
 
-## dotnet-suggest
-
-`stacker` supports [dotnet suggest](https://github.com/dotnet/command-line-api/wiki/dotnet-suggest), for tab based auto completion.
-
-To install dotnet suggest:
-
-`dotnet tool install -g dotnet-suggest`
-
-Next check if you have a PowerShell profile configured, by opening a PowerShell prompt and typing the following:
-
-`echo $profile`
-
-You should see something like:
-
-`$ENV:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`
-
-If you don't see such a file run the following command:
-
-`Invoke-WebRequest -Uri https://raw.githubusercontent.com/dotnet/command-line-api/master/src/System.CommandLine.Suggest/dotnet-suggest-shim.ps1 -OutFile $profile`
-
-Otherwise, copy the contents of the file above and paste it into your pre-existing profile.
-
 ## Commands
 
-Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to explore the available commands. Here is a detailed list of the available commands:
+Here are some usage examples:
 
-`stacker environment` - Manipulate the stacker environment. Root command for environment operations. Will list available sub-commands.
+```PowerShell
+stacker linkedin buffer -c c:\temp\content.json -n endjin
 
-`stacker environment init` - Initialises the `stacker` environment. Write's a default `StackerSettings.json` file to `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`
+stacker facebook buffer -c c:\temp\content.json -n endjin
 
-`stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
+stacker twitter buffer -c c:\temp\content.json -n endjin
+stacker twitter buffer -c c:\temp\content.json -n endjin --item-count 10
+stacker twitter buffer -c c:\temp\content.json -n endjin --publication-period ThisMonth
+stacker twitter buffer -c c:\temp\content.json -n endjin --filter-by-tag "MicrosoftFabric" --what-if
+stacker twitter buffer -c c:\temp\content.json -n endjin --from-date "2023/06/01" --to-date "2023/06/30"
+stacker twitter buffer -c c:\temp\content.json -n endjin --filter-by-tag "PowerBI" --from-date "2023/06/01" --to-date "2023/06/30"
 
-`stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
+stacker environment init
 
-`wordpress export markdown` - Exports blog posts from WordPress and converts them into Markdown. Various clean up routes are also run.
+stacker wordpress export markdown -w C:\temp\wordpress-export.xml -o C:\Temp\Blog
+stacker wordpress export universal -w C:\temp\wordpress-export.xml -o C:\Temp\Blog\export.json
+```
 
 ### Buffer commands
 
@@ -80,12 +65,31 @@ Once you have `dotnet-suggest` installed, you can use `stacker` then TAB to expl
 The `buffer` command also takes the following options to filter the content items to be buffered.
 
 ```
-Options:
-  --item-count <item-count>                                                              Number of content items to buffer. If omitted all content is buffered.
-  --publication-period <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear>    Publication period to filter content items by. If specified --from-date and --to-date are ignored.
-  --from-date <from-date>                                                                Include content items published on, or after this date. If omitted DateTime.MinValue is used.
-  --to-date <to-date>                                                                    Include content items published on, or before this date. If omitted DateTime.MaxValue is used.
+OPTIONS:
+    -h, --help                  Prints help information
+    -c, --content-file-path     Content file path
+    -n, --profile-name          Twitter profile to Buffer
+    -g, --filter-by-tag         Tag to filter the content items by
+    -i, --item-count            Number of content items to buffer. If omitted all content is buffered
+    -p, --publication-period    Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored
+    -f, --from-date             Include content items published on, or after this date. Use YYYY/MM/DD Format. If omitted DateTime.MinValue is used
+    -t, --to-date               Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used
+    -w, --what-if               See what the command would do without submitting the content to Buffer
 ```
+
+### WordPress commands
+
+`stacker wordpress` - Interact with WordPress. Root command for WordPress operations. Will list available sub-commands.
+
+`stacker wordpress export universal` - Exports blog posts from WordPress into a reusable format suitable for publishing across social channels.
+
+`wordpress export markdown` - Exports blog posts from WordPress and converts them into Markdown. Various clean up routes are also run.
+
+### Environment commands
+
+`stacker environment` - Manipulate the stacker environment. Root command for environment operations. Will list available sub-commands.
+
+`stacker environment init` - Initialises the `stacker` environment. Writes a default `StackerSettings.json` file with placeholder values to `%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration`
 
 ## System Details
 
@@ -95,11 +99,11 @@ An application profile folder is created in:
 
 Configuration is stored in:
 
-`configuration\`
+`%%UserProfile%%\AppData\Roaming\endjin\stacker\configuration\`
 
-## CI / CD
+## DevOps
 
-The project is [hosted on Azure DevOps](https://dev.azure.com/endjin-labs/stacker) under the `endjin-labs` org.
+The project is [built using GitHub Actions](https://github.com/endjin/Stacker/actions) using [Endjin.RecommendedPractices.Build](https://www.powershellgallery.com/packages/Endjin.RecommendedPractices.Build/) and [Endjin.RecommendedPractices.GitHubActions](https://github.com/endjin/Endjin.RecommendedPractices.GitHubActions). Solution-level Engineering Practices are enforced using [Endjin.RecommendedPractices.NuGet](https://github.com/endjin/Endjin.RecommendedPractices.NuGet).
 
 ## Packages
 
@@ -129,27 +133,44 @@ For any licensing questions, please email [&#108;&#105;&#99;&#101;&#110;&#115;&#
 
 ## Project Sponsor
 
-This project is sponsored by [endjin](https://endjin.com), a UK based Microsoft Gold Partner for Cloud Platform, Data Platform, Data Analytics, DevOps, a Power BI Partner, and .NET Foundation Corporate Sponsor.
+This project is sponsored by [endjin](https://endjin.com), a UK based Technology Consultancy which specializes in Data, AI, DevOps & Cloud, and is a [.NET Foundation Corporate Sponsor](https://dotnetfoundation.org/membership/corporate-sponsorship).
 
-We help small teams achieve big things.
+> We help small teams achieve big things.
 
-For more information about our products and services, or for commercial support of this project, please [contact us](https://endjin.com/contact-us). 
+We produce two free weekly newsletters: 
 
-We produce two free weekly newsletters; [Azure Weekly](https://azureweekly.info) for all things about the Microsoft Azure Platform, and [Power BI Weekly](https://powerbiweekly.info).
+ - [Azure Weekly](https://azureweekly.info) for all things about the Microsoft Azure Platform
+ - [Power BI Weekly](https://powerbiweekly.info) for all things Power BI, Microsoft Fabric, and Azure Synapse Analytics
 
-Keep up with everything that's going on at endjin via our [blog](https://blogs.endjin.com/), follow us on [Twitter](https://twitter.com/endjin), or [LinkedIn](https://www.linkedin.com/company/1671851/).
+Keep up with everything that's going on at endjin via our [blog](https://endjin.com/blog), follow us on [Twitter](https://twitter.com/endjin), [YouTube](https://www.youtube.com/c/endjin) or [LinkedIn](https://www.linkedin.com/company/endjin).
 
-Our other Open Source projects can be found on [our website](https://endjin.com/open-source)
+We have become the maintainers of a number of popular .NET Open Source Projects:
+
+- [Reactive Extensions for .NET](https://github.com/dotnet/reactive)
+- [Reaqtor](https://github.com/reaqtive)
+- [Argotic Syndication Framework](https://github.com/argotic-syndication-framework/)
+
+And we have over 50 Open Source projects of our own, spread across the following GitHub Orgs:
+
+- [endjin](https://github.com/endjin/)
+- [Corvus](https://github.com/corvus-dotnet)
+- [Menes](https://github.com/menes-dotnet)
+- [Marain](https://github.com/marain-dotnet)
+- [AIS.NET](https://github.com/ais-dotnet)
+
+And the DevOps tooling we have created for managing all these projects is available on the [PowerShell Gallery](https://www.powershellgallery.com/profiles/endjin).
+
+For more information about our consulting services, please [contact us](https://endjin.com/contact-us).
 
 ## Code of conduct
 
-This project has adopted a code of conduct adapted from the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behavior in our community. This code of conduct has been [adopted by many other projects](http://contributor-covenant.org/adopters/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [&#104;&#101;&#108;&#108;&#111;&#064;&#101;&#110;&#100;&#106;&#105;&#110;&#046;&#099;&#111;&#109;](&#109;&#097;&#105;&#108;&#116;&#111;:&#104;&#101;&#108;&#108;&#111;&#064;&#101;&#110;&#100;&#106;&#105;&#110;&#046;&#099;&#111;&#109;) with any additional questions or comments.
+This project has adopted a code of conduct adapted from the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behaviour in our community. This code of conduct has been [adopted by many other projects](http://contributor-covenant.org/adopters/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [&#104;&#101;&#108;&#108;&#111;&#064;&#101;&#110;&#100;&#106;&#105;&#110;&#046;&#099;&#111;&#109;](&#109;&#097;&#105;&#108;&#116;&#111;:&#104;&#101;&#108;&#108;&#111;&#064;&#101;&#110;&#100;&#106;&#105;&#110;&#046;&#099;&#111;&#109;) with any additional questions or comments.
 
-## IP Maturity Matrix (IMM)
+## IP Maturity Model (IMM)
 
-The [IP Maturity Matrix](https://github.com/endjin/Endjin.Ip.Maturity.Matrix) is endjin's IP quality framework; it defines a [configurable set of rules](https://github.com/endjin/Endjin.Ip.Maturity.Matrix.RuleDefinitions), which are committed into the [root of a repo](imm.yaml), and a [Azure Function HttpTrigger](https://github.com/endjin/Endjin.Ip.Maturity.Matrix/tree/master/Solutions/Endjin.Ip.Maturity.Matrix.Host) which can evaluate the ruleset, and render an svg badge for display in repo's `readme.md`.
+The [IP Maturity Model](https://github.com/endjin/Endjin.Ip.Maturity.Matrix) is endjin's IP quality framework; it defines a [configurable set of rules](https://github.com/endjin/Endjin.Ip.Maturity.Matrix.RuleDefinitions), which are committed into the [root of a repo](imm.yaml), and a [Azure Function HttpTrigger](https://github.com/endjin/Endjin.Ip.Maturity.Matrix/tree/master/Solutions/Endjin.Ip.Maturity.Matrix.Host) which can evaluate the ruleset, and render an svg badge for display in repo's `readme.md`.
 
-This approach is based on our 10+ years experience of delivering complex, high performance, bleeding-edge projects, and due diligence assessments of 3rd party systems. For detailed information about the ruleset see the [IP Maturity Matrix repo](https://github.com/endjin/Endjin.Ip.Maturity.Matrix).
+This approach is based on our 10+ years experience of delivering complex, high performance, bleeding-edge projects, and due diligence assessments of 3rd party systems. For detailed information about the ruleset see the [IP Maturity Model repo](https://github.com/endjin/Endjin.Ip.Maturity.Matrix).
 
 ## IMM for stacker
 
@@ -186,6 +207,5 @@ This approach is based on our 10+ years experience of delivering complex, high p
 [![Packaging](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/547fd9f5-9caf-449f-82d9-4fba9e7ce13a?cache=false)](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/547fd9f5-9caf-449f-82d9-4fba9e7ce13a?cache=false)
 
 [![Deployment](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/edea4593-d2dd-485b-bc1b-aaaf18f098f9?cache=false)](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/edea4593-d2dd-485b-bc1b-aaaf18f098f9?cache=false)
+
 [![OpenChain](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/66efac1a-662c-40cf-b4ec-8b34c29e9fd7?cache=false)](https://imm.endjin.com/api/imm/github/endjin/Stacker/rule/66efac1a-662c-40cf-b4ec-8b34c29e9fd7?cache=false)
-
-
