@@ -56,11 +56,11 @@ stacker wordpress export universal -w C:\temp\wordpress-export.xml -o C:\Temp\Bl
 
 ### Buffer commands
 
-`stacker twitter buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified Twitter profile.
+`stacker twitter buffer` - Upload content items into buffer for the specified Twitter profile.
 
-`stacker linkedin buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified LinkedIn profile.
+`stacker linkedin buffer` - Upload content items into buffer for the specified LinkedIn profile.
 
-`stacker facebook buffer <CONTENT-PATH> <ACCOUNT>` - Upload content items into buffer for the specified Facebook profile.
+`stacker facebook buffer` - Upload content items into buffer for the specified Facebook profile.
 
 The `buffer` command also takes the following options to filter the content items to be buffered.
 
