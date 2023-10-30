@@ -3,22 +3,21 @@
 // </copyright>
 
 using System.Collections.Generic;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Stacker.Cli;
 
 public class BufferError
 {
-    [JsonProperty("success")]
+    [JsonPropertyName("success")]
     public bool Success { get; set; }
 
-    [JsonProperty("message")]
+    [JsonPropertyName("message")]
     public string Message { get; set; }
 
-    [JsonProperty("code")]
+    [JsonPropertyName("code")]
     public int Code { get; set; }
 
-    [JsonProperty("errored_profiles")]
+    [JsonPropertyName("errored_profiles")]
     public IEnumerable<Profiles> ErroredProfiles { get; set; }
 }

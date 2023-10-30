@@ -7,9 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
 
 using Spectre.Console;
 
@@ -72,7 +71,7 @@ public class BufferClient : IBufferClient
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                BufferError error = JsonConvert.DeserializeObject<BufferError>(errorContent);
+                BufferError error = JsonSerializer.Deserialize<BufferError>(errorContent);
 
                 AnsiConsole.MarkupLineInterpolated($"[red]Buffering Failed:[/] {error.Message}");
                 AnsiConsole.WriteLine();

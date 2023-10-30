@@ -3,8 +3,7 @@
 // </copyright>
 
 using System.IO;
-
-using Newtonsoft.Json;
+using System.Text.Json;
 
 using Stacker.Cli.Contracts.Configuration;
 
@@ -24,13 +23,13 @@ public class SettingsManager<T> : ISettingsManager<T>
     {
         string filePath = $"{this.GetLocalFilePath(fileName)}.json";
 
-        return File.Exists(filePath) ? JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath)) : null;
+        return File.Exists(filePath) ? JsonSerializer.Deserialize<T>(File.ReadAllText(filePath)) : null;
     }
 
     public void SaveSettings(T settings, string fileName)
     {
         string filePath = this.GetLocalFilePath(fileName);
-        string json = JsonConvert.SerializeObject(settings);
+        string json = JsonSerializer.Serialize(settings);
 
         File.WriteAllText($"{filePath}.json", json);
     }

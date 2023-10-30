@@ -6,9 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
 
 using NodaTime;
 
@@ -79,7 +78,7 @@ public class ContentTasks : IContentTasks
         int itemCount,
         string filterByTag)
     {
-        List<ContentItem> content = JsonConvert.DeserializeObject<List<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
+        List<ContentItem> content = JsonSerializer.Deserialize<List<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
 
         if (publicationPeriod != PublicationPeriod.None)
         {

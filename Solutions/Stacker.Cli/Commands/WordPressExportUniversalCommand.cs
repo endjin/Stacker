@@ -8,11 +8,10 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
-using Newtonsoft.Json;
 
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -98,7 +97,8 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
 
         await using (StreamWriter writer = File.CreateText(settings.UniversalFilePath.FullPath))
         {
-            await writer.WriteAsync(JsonConvert.SerializeObject(feed, Formatting.Indented)).ConfigureAwait(false);
+            JsonSerializerOptions options = new() { WriteIndented = true };
+            await writer.WriteAsync(JsonSerializer.Serialize(feed, options)).ConfigureAwait(false);
         }
 
         AnsiConsole.WriteLine($"Content written to {settings.UniversalFilePath.FullPath}");

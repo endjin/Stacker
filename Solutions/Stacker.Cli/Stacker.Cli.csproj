@@ -57,7 +57,6 @@
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NodaTime" Version="3.1.9" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.47.0" />
     <PackageReference Include="Spectre.IO" Version="0.13.0" />
