@@ -68,7 +68,7 @@ The `buffer` command also takes the following options to filter the content item
 OPTIONS:
     -h, --help                  Prints help information
     -c, --content-file-path     Content file path
-    -n, --profile-name          Twitter profile to Buffer
+    -n, --profile-name          Buffer channel profile (e.g. twitter, linkedin, facebook) name (e.g. endjin, azureweekly, powerbiweekly)
     -g, --filter-by-tag         Tag to filter the content items by
     -i, --item-count            Number of content items to buffer. If omitted all content is buffered
     -p, --publication-period    Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored
