@@ -111,11 +111,11 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
     /// </summary>
     public class Settings : CommandSettings
     {
-        [CommandOption("-w|--wp-export-file-path <WordPressExportFilePath>")]
+        [CommandOption("-w|--wp-export-file-path")]
         [Description("WordPress Export file path.")]
         public FilePath WordPressExportFilePath { get; init; }
 
-        [CommandOption("-o|--universal-file-path <UniversalFilePath>")]
+        [CommandOption("-o|--universal-file-path")]
         [Description("Universal file path.")]
         public FilePath UniversalFilePath { get; init; }
     }

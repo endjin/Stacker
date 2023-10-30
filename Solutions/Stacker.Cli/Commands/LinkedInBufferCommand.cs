@@ -51,35 +51,35 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
     {
 #nullable disable annotations
 
-        [CommandOption("-c|--content-file-path <ContentFilePath>")]
+        [CommandOption("-c|--content-file-path")]
         [Description("Content file path.")]
         public FilePath ContentFilePath { get; init; }
 
-        [CommandOption("-n|--profile-name <ProfileName>")]
+        [CommandOption("-n|--profile-name")]
         [Description("LinkedIn profile to Buffer.")]
         public string ProfileName { get; init; }
 
-        [CommandOption("-g|--filter-by-tag <FilterByTag>")]
+        [CommandOption("-g|--filter-by-tag")]
         [Description("Tag to filter the content items by.")]
         public string FilterByTag { get; init; }
 
-        [CommandOption("-i|--item-count <ItemCount>")]
+        [CommandOption("-i|--item-count")]
         [Description("Number of content items to buffer. If omitted all content is buffered.")]
         public int ItemCount { get; init; }
 
-        [CommandOption("-p|--publication-period <PublicationPeriod>")]
+        [CommandOption("-p|--publication-period")]
         [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
         public PublicationPeriod PublicationPeriod { get; init; }
 
-        [CommandOption("-f|--from-date <FromDate>")]
+        [CommandOption("-f|--from-date")]
         [Description("Include content items published on, or after this date. Use YYYY/MM/DD Format. If omitted DateTime.MinValue is used.")]
         public DateTime FromDate { get; init; }
 
-        [CommandOption("-t|--to-date <ToDate>")]
+        [CommandOption("-t|--to-date")]
         [Description("Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used.")]
         public DateTime ToDate { get; init; }
 
-        [CommandOption("-w|--what-if <WhatIf>")]
+        [CommandOption("-w|--what-if")]
         [Description("See what the command would do without submitting the content to Buffer.")]
         public bool WhatIf { get; set; }
 
