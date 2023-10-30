@@ -313,11 +313,11 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     /// </summary>
     public class Settings : CommandSettings
     {
-        [CommandOption("-w|--wp-export-file-path <WordPressExportFilePath>")]
+        [CommandOption("-w|--wp-export-file-path")]
         [Description("WordPress Export file path.")]
         public FilePath WordPressExportFilePath { get; init; }
 
-        [CommandOption("-o|--output-directory-path <OutputDirectoryPath>")]
+        [CommandOption("-o|--output-directory-path")]
         [Description("Directory path for the exported files.")]
         public DirectoryPath OutputDirectoryPath { get; init; }
     }
