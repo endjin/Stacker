@@ -5,11 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
 using System.Xml.Linq;
-using Newtonsoft.Json;
 
 namespace Stacker.Cli.Domain.WordPress;
 
@@ -410,7 +410,7 @@ public class BlogSite
 
             try
             {
-                Dictionary<string, string> data = JsonConvert.DeserializeObject<Dictionary<string, string>>(rawMetaData);
+                Dictionary<string, string> data = JsonSerializer.Deserialize<Dictionary<string, string>>(rawMetaData);
 
                 foreach ((string key, string value) in data)
                 {

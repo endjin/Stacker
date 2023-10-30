@@ -9,9 +9,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+
 using Corvus.Retry;
 using Corvus.Retry.Policies;
 using Corvus.Retry.Strategies;
+
+using Spectre.Console;
+
 using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Tasks;
@@ -27,7 +31,7 @@ public class DownloadTasks : IDownloadTasks
 
     public async Task DownloadAsync(List<ContentItem> feed, string outputPath)
     {
-        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new() { MaxDegreeOfParallelism = Environment.ProcessorCount });
+        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
         foreach (ContentItem contentItem in feed)
         {
@@ -43,7 +47,7 @@ public class DownloadTasks : IDownloadTasks
 
         await downloadFeedBlock.Completion.ConfigureAwait(false);
 
-        Console.WriteLine("File Download Completed");
+        AnsiConsole.WriteLine("File Download Completed");
     }
 
     private async Task<DataflowContext> DownloadFeedAsync(DataflowContext context)
@@ -57,7 +61,7 @@ public class DownloadTasks : IDownloadTasks
                     {
                         context.AlreadyDownloaded = true;
 
-                        Console.WriteLine("Already Downloaded: " + context.Destination);
+                        AnsiConsole.WriteLine("Already Downloaded: " + context.Destination);
 
                         return;
                     }
@@ -85,7 +89,7 @@ public class DownloadTasks : IDownloadTasks
                             }
                         }
 
-                        Console.WriteLine("Downloaded: " + context.Destination);
+                        AnsiConsole.WriteLine("Downloaded: " + context.Destination);
 
                         response.EnsureSuccessStatusCode();
                     }
@@ -100,7 +104,7 @@ public class DownloadTasks : IDownloadTasks
             context.IsFaulted = true;
             context.FaultError = ex.Message;
 
-            Console.WriteLine("Error Downloading: " + context.Destination);
+            AnsiConsole.WriteLine("Error Downloading: " + context.Destination);
         }
 
         return context;

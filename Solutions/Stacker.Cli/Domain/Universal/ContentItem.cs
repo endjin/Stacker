@@ -38,20 +38,13 @@ public class ContentItem
 
     public string Status { get; internal set; }
 
-    public IEnumerable<string> Tags { get; set; }
+    public List<string> Tags { get; set; }
 
     public string UniqueId
     {
         get
         {
-            if (string.IsNullOrEmpty(this.Slug))
-            {
-                return this.Id;
-            }
-            else
-            {
-                return this.CleanSlug;
-            }
+            return string.IsNullOrEmpty(this.Slug) ? this.Id : this.CleanSlug;
         }
     }
 }

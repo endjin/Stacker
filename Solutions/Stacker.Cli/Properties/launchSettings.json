@@ -2,7 +2,7 @@
   "profiles": {
     "Endjin.Stacker.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "wordpress export markdown \"C:\\Users\\HowardvanRooijen\\AppData\\Roaming\\endjin\\stacker\\data\\endjinblog.WordPress.2020-06-23.xml\" \"C:\\Temp\\Blog\""
+      "commandLineArgs": "wordpress export markdown"
     }
   }
 }

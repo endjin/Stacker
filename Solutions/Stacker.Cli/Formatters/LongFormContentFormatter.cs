@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Formatters;
 using Stacker.Cli.Converters;
 using Stacker.Cli.Domain.Universal;
@@ -22,12 +24,12 @@ public abstract class LongFormContentFormatter : IContentFormatter
         this.maxContentLength = maxContentLength;
     }
 
-    public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems)
+    public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
         var postings = new List<string>();
         var sb = new StringBuilder();
         var sbTracking = new StringBuilder();
-        var hashTagConverter = new WordPressTagToHashTagConverter();
+        var hashTagConverter = new TagToHashTagConverter();
 
         foreach (ContentItem item in feedItems)
         {

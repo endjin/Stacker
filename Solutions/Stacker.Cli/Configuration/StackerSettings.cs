@@ -17,5 +17,11 @@ public class StackerSettings
 
     public Dictionary<string, string> BufferProfiles { get; set; }
 
+    public List<string> ExcludedTags { get; set; }
+
+    public List<TagAliases> TagAliases { get; set; }
+
+    public List<string> PriorityTags { get; set; }
+
     public WordPressToMarkdown WordPressToMarkdown { get; set; }
 }

@@ -9,5 +9,5 @@ namespace Stacker.Cli.Contracts.Buffer;
 
 public interface IBufferClient
 {
-    Task UploadAsync(IEnumerable<string> content, string profileId);
+    Task UploadAsync(IEnumerable<string> content, string profileId, bool whatIf);
 }

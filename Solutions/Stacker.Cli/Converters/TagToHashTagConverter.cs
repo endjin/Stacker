@@ -1,4 +1,4 @@
-﻿// <copyright file="WordPressTagToHashTagConverter.cs" company="Endjin Limited">
+﻿// <copyright file="TagToHashTagConverter.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Stacker.Cli.Converters;
 
-public class WordPressTagToHashTagConverter
+public class TagToHashTagConverter
 {
     public string Convert(string wordpressTag)
     {

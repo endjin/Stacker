@@ -2,12 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Stacker.Cli;
 
 public class Profiles
 {
-    [JsonProperty("profile_id")]
+    [JsonPropertyName("profile_id")]
     public string ProfileId { get; set; }
 }

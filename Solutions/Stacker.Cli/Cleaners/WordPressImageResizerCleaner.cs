@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text.RegularExpressions;
+
 using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Cleaners;

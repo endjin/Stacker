@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Stacker.Cli.Configuration;
 
 namespace Stacker.Cli.Domain.WordPress;
