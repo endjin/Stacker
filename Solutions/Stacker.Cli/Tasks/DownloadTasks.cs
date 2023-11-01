@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,14 +32,12 @@ public class DownloadTasks : IDownloadTasks
 
     public async Task DownloadAsync(List<ContentItem> feed, string outputPath)
     {
-        var downloadFeedBlock = new ActionBlock<DataflowContext>(context => this.DownloadFeedAsync(context), new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
+        var downloadFeedBlock = new ActionBlock<DataflowContext>(this.DownloadFeedAsync, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = Environment.ProcessorCount });
 
         foreach (ContentItem contentItem in feed)
         {
-            foreach (ContentAttachment attachment in contentItem.Content.Attachments)
+            foreach (DataflowContext context in contentItem.Content.Attachments.Select(attachment => new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) }))
             {
-                var context = new DataflowContext { Source = attachment.Url, Destination = Path.GetFullPath(Path.Join(outputPath, attachment.Path)) };
-
                 downloadFeedBlock.Post(context);
             }
         }
@@ -75,24 +74,20 @@ public class DownloadTasks : IDownloadTasks
                         }
                     }
 
-                    using (HttpClient client = this.httpClientFactory.CreateClient())
+                    using HttpClient client = this.httpClientFactory.CreateClient();
+                    var request = new HttpRequestMessage(HttpMethod.Get, context.Source);
+
+                    HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
+
+                    await using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        var request = new HttpRequestMessage(HttpMethod.Get, context.Source);
-
-                        HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
-
-                        using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
-                        {
-                            using (Stream streamToWriteTo = File.Open(context.Destination, FileMode.Create))
-                            {
-                                await streamToReadFrom.CopyToAsync(streamToWriteTo).ConfigureAwait(false);
-                            }
-                        }
-
-                        AnsiConsole.WriteLine("Downloaded: " + context.Destination);
-
-                        response.EnsureSuccessStatusCode();
+                        await using Stream streamToWriteTo = File.Open(context.Destination, FileMode.Create);
+                        await streamToReadFrom.CopyToAsync(streamToWriteTo).ConfigureAwait(false);
                     }
+
+                    AnsiConsole.WriteLine("Downloaded: " + context.Destination);
+
+                    response.EnsureSuccessStatusCode();
                 },
                 CancellationToken.None,
                 new Backoff(5, TimeSpan.FromSeconds(1)),

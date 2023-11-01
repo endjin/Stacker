@@ -34,10 +34,10 @@ public class BufferClient : IBufferClient
 
     public IEnumerable<KeyValuePair<string, string>> ConvertToPayload(string content, string[] profileIds)
     {
-        var postData = new List<KeyValuePair<string, string>>
+        List<KeyValuePair<string, string>> postData = new()
         {
-            new("text", content),
-            new("shorten", "false"),
+            new KeyValuePair<string, string>("text", content),
+            new KeyValuePair<string, string>("shorten", "false"),
         };
 
         postData.AddRange(profileIds.Select(profileId => new KeyValuePair<string, string>("profile_ids[]", profileId)));
