@@ -2,6 +2,7 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,16 +36,22 @@ public class TweetFormatter : IContentFormatter
             campaignTracking.AppendLine();
 
             content.Append(item.Content.Title);
-            content.Append(" by ");
 
-            if (string.IsNullOrEmpty(item.Author.TwitterHandle))
+            User match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
+
+            if (match is not null && match.IsActive)
             {
-                content.Append(item.Author.DisplayName);
-            }
-            else
-            {
-                content.Append('@');
-                content.Append(item.Author.TwitterHandle);
+                content.Append(" by ");
+
+                if (string.IsNullOrEmpty(item.Author.TwitterHandle))
+                {
+                    content.Append(item.Author.DisplayName);
+                }
+                else
+                {
+                    content.Append('@');
+                    content.Append(item.Author.TwitterHandle);
+                }
             }
 
             if (item?.Tags != null && item.Tags.Any())
