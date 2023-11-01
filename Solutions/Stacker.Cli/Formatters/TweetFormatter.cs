@@ -39,7 +39,7 @@ public class TweetFormatter : IContentFormatter
 
             User match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
 
-            if (match is not null && match.IsActive)
+            if (match?.IsActive == true)
             {
                 content.Append(" by ");
 
@@ -56,15 +56,15 @@ public class TweetFormatter : IContentFormatter
 
             if (item?.Tags != null && item.Tags.Any())
             {
-                int tweetLength = content.Length + (item.Content.Link.Length + 1) + campaignTracking.Length; // 1 = extra space before link
+                int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
                 item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
 
                 foreach (string tag in item.Tags.Distinct())
                 {
-                    // 2 Offset = Space + #
-                    if (tweetLength + tag.Length + 2 <= MaxContentLength)
+                    tweetLength += tag.Length + 2; // 2 Offset = Space + #
+                    if (tweetLength <= MaxContentLength)
                     {
                         tagsToInclude++;
                     }

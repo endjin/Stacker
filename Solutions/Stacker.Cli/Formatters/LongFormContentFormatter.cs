@@ -27,33 +27,35 @@ public abstract class LongFormContentFormatter : IContentFormatter
     public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
         var postings = new List<string>();
-        var sb = new StringBuilder();
-        var sbTracking = new StringBuilder();
+        var content = new StringBuilder();
+        var campaignTracking = new StringBuilder();
         var hashTagConverter = new TagToHashTagConverter();
 
         foreach (ContentItem item in feedItems)
         {
-            sbTracking.AppendLine();
-            sbTracking.Append(item.Content.Link);
-            sbTracking.Append("?utm_source=");
-            sbTracking.Append(this.campaignSource.ToLowerInvariant());
-            sbTracking.Append("&utm_medium=");
-            sbTracking.Append(campaignMedium.ToLowerInvariant());
-            sbTracking.Append("&utm_campaign=");
-            sbTracking.Append(campaignName.ToLowerInvariant());
-            sbTracking.AppendLine();
+            campaignTracking.AppendLine();
+            campaignTracking.Append(item.Content.Link);
+            campaignTracking.Append("?utm_source=");
+            campaignTracking.Append(this.campaignSource.ToLowerInvariant());
+            campaignTracking.Append("&utm_medium=");
+            campaignTracking.Append(campaignMedium.ToLowerInvariant());
+            campaignTracking.Append("&utm_campaign=");
+            campaignTracking.Append(campaignName.ToLowerInvariant());
+            campaignTracking.AppendLine();
 
-            sb.Append(item.Content.Excerpt);
+            content.Append(item.Content.Excerpt);
 
-            if (item.Tags?.Any() == true)
+            if (item?.Tags != null && item.Tags.Any())
             {
-                int contentLength = sb.Length + sbTracking.Length + 1; // 1 = extra space before link
+                int contentLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
-                foreach (string tag in item.Tags)
+                item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
+
+                foreach (string tag in item.Tags.Distinct())
                 {
-                    // 2 Offset = Space + #
-                    if (contentLength + tag.Length + 2 <= this.maxContentLength)
+                    contentLength += tag.Length + 2; // 2 Offset = Space + #
+                    if (contentLength <= this.maxContentLength)
                     {
                         tagsToInclude++;
                     }
@@ -65,24 +67,24 @@ public abstract class LongFormContentFormatter : IContentFormatter
 
                 if (item.Tags.Any())
                 {
-                    sb.AppendLine();
-                    sb.AppendLine();
+                    content.AppendLine();
+                    content.AppendLine();
                 }
 
                 foreach (string tag in item.Tags.Take(tagsToInclude))
                 {
-                    sb.Append(" #");
-                    sb.Append(hashTagConverter.Convert(tag));
-                    sb.AppendLine();
+                    content.Append(" #");
+                    content.Append(hashTagConverter.Convert(tag));
+                    content.AppendLine();
                 }
             }
 
-            sb.Append(sbTracking.ToString());
+            content.Append(campaignTracking.ToString());
 
-            postings.Add(sb.ToString());
+            postings.Add(content.ToString());
 
-            sb.Clear();
-            sbTracking.Clear();
+            content.Clear();
+            campaignTracking.Clear();
         }
 
         return postings;
