@@ -2,6 +2,7 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,29 +36,35 @@ public class TweetFormatter : IContentFormatter
             campaignTracking.AppendLine();
 
             content.Append(item.Content.Title);
-            content.Append(" by ");
 
-            if (string.IsNullOrEmpty(item.Author.TwitterHandle))
+            User match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
+
+            if (match?.IsActive == true)
             {
-                content.Append(item.Author.DisplayName);
-            }
-            else
-            {
-                content.Append('@');
-                content.Append(item.Author.TwitterHandle);
+                content.Append(" by ");
+
+                if (string.IsNullOrEmpty(item.Author.TwitterHandle))
+                {
+                    content.Append(item.Author.DisplayName);
+                }
+                else
+                {
+                    content.Append('@');
+                    content.Append(item.Author.TwitterHandle);
+                }
             }
 
             if (item?.Tags != null && item.Tags.Any())
             {
-                int tweetLength = content.Length + (item.Content.Link.Length + 1) + campaignTracking.Length; // 1 = extra space before link
+                int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
                 item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
 
                 foreach (string tag in item.Tags.Distinct())
                 {
-                    // 2 Offset = Space + #
-                    if (tweetLength + tag.Length + 2 <= MaxContentLength)
+                    tweetLength += tag.Length + 2; // 2 Offset = Space + #
+                    if (tweetLength <= MaxContentLength)
                     {
                         tagsToInclude++;
                     }
