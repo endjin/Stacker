@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,6 +33,11 @@ public static class ServiceCollectionExtensions
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH")))
         {
             builder.AddJsonFile(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH"), optional: false);
+        }
+
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STACKER_SETTINGS_JSON")))
+        {
+            builder.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("STACKER_SETTINGS_JSON"))));
         }
 
         builder.AddEnvironmentVariables();
