@@ -12,13 +12,11 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.IO;
 
 using Stacker.Cli.Configuration;
-using Stacker.Cli.Contracts.Configuration;
 using Stacker.Cli.Converters;
 using Stacker.Cli.Domain.Universal;
 using Stacker.Cli.Domain.WordPress;
@@ -27,11 +25,11 @@ namespace Stacker.Cli.Commands;
 
 public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUniversalCommand.Settings>
 {
-    private readonly IStackerSettingsManager settingsManager;
+    private readonly StackerSettings settings;
 
-    public WordPressExportUniversalCommand(IStackerSettingsManager settingsManager)
+    public WordPressExportUniversalCommand(StackerSettings settings)
     {
-        this.settingsManager = settingsManager;
+        this.settings = settings;
     }
 
     /// <inheritdoc/>
@@ -56,9 +54,8 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
 
         AnsiConsole.WriteLine($"Processing...");
 
-        StackerSettings stackerSettings = this.settingsManager.LoadSettings(nameof(StackerSettings));
         List<Post> posts = blogSite.GetAllPosts().ToList();
-        List<Post> validPosts = posts.FilterByValid(stackerSettings).ToList();
+        List<Post> validPosts = posts.FilterByValid(this.settings).ToList();
         List<Post> promotablePosts = validPosts.FilterByPromotable().ToList();
         TagToHashTagConverter hashTagConverter = new();
         List<ContentItem> feed = new();
@@ -69,7 +66,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
 
         foreach (Post post in promotablePosts)
         {
-            User user = stackerSettings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User user = this.settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
             feed.Add(new ContentItem
             {

@@ -2,7 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using Spectre.IO;
 
 using Stacker.Cli.Cleaners;
 using Stacker.Cli.Configuration;
@@ -11,6 +16,8 @@ using Stacker.Cli.Contracts.Configuration;
 using Stacker.Cli.Contracts.Tasks;
 using Stacker.Cli.Serialization;
 using Stacker.Cli.Tasks;
+using Environment = System.Environment;
+using Path = System.IO.Path;
 
 namespace Stacker.Cli.Extensions;
 
@@ -18,6 +25,24 @@ public static class ServiceCollectionExtensions
 {
     public static void ConfigureDependencies(this ServiceCollection serviceCollection)
     {
+        IConfigurationBuilder builder = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "endjin", "stacker", "configuration"))
+            .AddJsonFile("StackerSettings.json", optional: true, reloadOnChange: false);
+
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH")))
+        {
+            builder.AddJsonFile(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH"), optional: false);
+        }
+
+        builder.AddEnvironmentVariables();
+
+        IConfigurationRoot configurationRoot = builder.Build();
+
+        StackerSettings options = new();
+        configurationRoot.Bind(options);
+
+        serviceCollection.AddSingleton(options);
+
         serviceCollection.AddTransient<IAppEnvironment, FileSystemLocalProfileAppEnvironment>();
         serviceCollection.AddTransient<IStackerSettingsManager, StackerSettingsManager>();
 
