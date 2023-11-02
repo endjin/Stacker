@@ -71,10 +71,16 @@ param (
     [string] $BuildModulePath,
 
     [Parameter()]
-    [version] $BuildModuleVersion = "1.3.11",
+    [version] $BuildModuleVersion = "1.4.0",
 
     [Parameter()]
-    [version] $InvokeBuildModuleVersion = "5.7.1"
+    [string] $BuildModulePackageVersion = "1.4.0-beta0003",
+
+    [Parameter()]
+    [bool] $BuildModuleAllowPreRelease = $true,
+
+    [Parameter()]
+    [version] $InvokeBuildModuleVersion = "5.10.1"
 )
 
 $ErrorActionPreference = $ErrorActionPreference ? $ErrorActionPreference : 'Stop'
@@ -105,7 +111,7 @@ if ($MyInvocation.ScriptName -notlike '*Invoke-Build.ps1') {
 if (!($BuildModulePath)) {
     if (!(Get-Module -ListAvailable Endjin.RecommendedPractices.Build | ? { $_.Version -eq $BuildModuleVersion })) {
         Write-Information "Installing 'Endjin.RecommendedPractices.Build' module..."
-        Install-Module Endjin.RecommendedPractices.Build -RequiredVersion $BuildModuleVersion -Scope CurrentUser -Force -Repository PSGallery
+        Install-Module Endjin.RecommendedPractices.Build -RequiredVersion $BuildModulePackageVersion -Scope CurrentUser -Force -Repository PSGallery -AllowPrerelease:$BuildModuleAllowPreRelease
     }
     $BuildModulePath = "Endjin.RecommendedPractices.Build"
 }
@@ -151,6 +157,12 @@ $NuSpecFilesToPackage = @(
 # - Use single or multiple paths (separated by comma) (e.g. **/dir1/class1.cs,**/dir2/*.cs,**/dir3/**/*.cs)
 #
 $ExcludeFilesFromCodeCoverage = ""
+
+# Enable GitHub release functionality
+$CreateGitHubRelease = $true
+$GitHubReleaseArtefacts = @()
+$PublishNuGetPackagesAsGitHubReleaseArtefacts = $true
+
 
 # Synopsis: Build, Test and Package
 task . FullBuild
