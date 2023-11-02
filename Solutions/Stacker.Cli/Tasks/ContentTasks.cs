@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-
 using NodaTime;
 
 using Spectre.Console;
@@ -16,7 +15,6 @@ using Spectre.IO;
 
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Buffer;
-using Stacker.Cli.Contracts.Configuration;
 using Stacker.Cli.Contracts.Formatters;
 using Stacker.Cli.Contracts.Tasks;
 using Stacker.Cli.Converters;
@@ -28,12 +26,12 @@ namespace Stacker.Cli.Tasks;
 public class ContentTasks : IContentTasks
 {
     private readonly IBufferClient bufferClient;
-    private readonly IStackerSettingsManager settingsManager;
+    private readonly StackerSettings settings;
 
-    public ContentTasks(IBufferClient bufferClient, IStackerSettingsManager settingsManager)
+    public ContentTasks(IBufferClient bufferClient, StackerSettings settings)
     {
         this.bufferClient = bufferClient;
-        this.settingsManager = settingsManager;
+        this.settings = settings;
     }
 
     public async Task BufferContentItemsAsync<TContentFormatter>(
@@ -52,15 +50,13 @@ public class ContentTasks : IContentTasks
 
         string profileKey = profilePrefix + profileName;
 
-        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-
-        if (settings.BufferProfiles.TryGetValue(profileKey, out string profile))
+        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string profile))
         {
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Buffer Profile:[/] {profileKey} = {profile}");
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFilePath}");
 
             IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
-            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, settings);
+            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
 
             await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
         }
@@ -115,14 +111,12 @@ public class ContentTasks : IContentTasks
             }
         }
 
-        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-
         foreach (ContentItem contentItem in content)
         {
             // Use TagAliases to convert tags into their canonical form.
             contentItem.Tags = contentItem.Tags?.Select(tag =>
             {
-                TagAliases matchedAlias = settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
+                TagAliases matchedAlias = this.settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
                 return matchedAlias != null ? matchedAlias.Tag : tag.Replace("-", " ").Replace(" ", string.Empty);
             }).ToList();
         }

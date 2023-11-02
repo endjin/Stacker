@@ -14,7 +14,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.IO;
@@ -37,16 +36,15 @@ namespace Stacker.Cli.Commands;
 public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdownCommand.Settings>
 {
     private readonly IDownloadTasks downloadTasks;
-    private readonly IStackerSettingsManager settingsManager;
     private readonly ContentItemCleaner cleanerManager;
     private readonly IYamlSerializerFactory serializerFactory;
     private ISerializer serializer;
-    private StackerSettings stackerSettings;
+    private StackerSettings settings;
 
-    public WordPressExportMarkdownCommand(IDownloadTasks downloadTasks, IStackerSettingsManager settingsManager, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
+    public WordPressExportMarkdownCommand(IDownloadTasks downloadTasks, StackerSettings settings, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
     {
         this.downloadTasks = downloadTasks;
-        this.settingsManager = settingsManager;
+        this.settings = settings;
         this.cleanerManager = cleanerManager;
         this.serializerFactory = serializerFactory;
     }
@@ -54,8 +52,6 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        this.stackerSettings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-
         if (!File.Exists(settings.WordPressExportFilePath.FullPath))
         {
             AnsiConsole.WriteLine($"File not found {settings.WordPressExportFilePath.FullPath}");
@@ -179,7 +175,6 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
         AnsiConsole.WriteLine("Processing...");
 
         List<ContentItem> feed = new();
-        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
         List<Post> posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
 
         AnsiConsole.WriteLine($"Total Posts: {posts.Count}");
@@ -187,7 +182,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
         // var attachments = posts.Where(x => x.Attachments.Any());
         foreach (Post post in posts)
         {
-            User user = settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User user = this.settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
             if (user is null)
             {
@@ -288,7 +283,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
     private bool IsCategoryExcluded(string category)
     {
-        return this.stackerSettings.WordPressToMarkdown.TagsToRemove.Contains(category);
+        return this.settings.WordPressToMarkdown.TagsToRemove.Contains(category);
     }
 
     private string GetHeaderImage(List<string> attachments)
@@ -305,7 +300,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
     private bool IsRelevantHost(string url)
     {
-        return this.stackerSettings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
+        return this.settings.WordPressToMarkdown.Hosts.Any(x => url.Contains(x, StringComparison.InvariantCultureIgnoreCase));
     }
 
     /// <summary>

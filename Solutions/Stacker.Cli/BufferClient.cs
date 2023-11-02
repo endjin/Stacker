@@ -9,12 +9,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-
 using Spectre.Console;
 
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Buffer;
-using Stacker.Cli.Contracts.Configuration;
 
 namespace Stacker.Cli;
 
@@ -23,13 +21,13 @@ public class BufferClient : IBufferClient
     private const string BaseUri = "https://api.bufferapp.com/1/";
     private const string UpdateOperation = "updates/create.json";
 
-    private readonly IStackerSettingsManager settingsManager;
     private readonly IHttpClientFactory httpClientFactory;
+    private readonly StackerSettings settings;
 
-    public BufferClient(IStackerSettingsManager settingsManager, IHttpClientFactory httpClientFactory)
+    public BufferClient(IHttpClientFactory httpClientFactory, StackerSettings settings)
     {
-        this.settingsManager = settingsManager;
         this.httpClientFactory = httpClientFactory;
+        this.settings = settings;
     }
 
     public IEnumerable<KeyValuePair<string, string>> ConvertToPayload(string content, string[] profileIds)
@@ -52,8 +50,7 @@ public class BufferClient : IBufferClient
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 
-        StackerSettings settings = this.settingsManager.LoadSettings(nameof(StackerSettings));
-        string updateOperationUrl = $"{UpdateOperation}?access_token={settings.BufferAccessToken}";
+        string updateOperationUrl = $"{UpdateOperation}?access_token={this.settings.BufferAccessToken}";
 
         foreach (string item in content)
         {
