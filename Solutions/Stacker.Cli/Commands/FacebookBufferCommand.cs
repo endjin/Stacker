@@ -31,6 +31,7 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
     {
         await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
                 settings.ContentFilePath,
+                settings.ContentUri,
                 this.profilePrefix,
                 settings.ProfileName,
                 settings.PublicationPeriod,
@@ -53,6 +54,10 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
         [CommandOption("-c|--content-file-path")]
         [Description("Content file path.")]
         public FilePath ContentFilePath { get; init; }
+
+        [CommandOption("-h|--content-http-uri")]
+        [Description("Content http uri.")]
+        public Uri ContentUri { get; init; }
 
         [CommandOption("-n|--profile-name")]
         [Description("Facebook profile to Buffer.")]
