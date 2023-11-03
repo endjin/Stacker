@@ -74,10 +74,10 @@ param (
     [version] $BuildModuleVersion = "1.4.0",
 
     [Parameter()]
-    [string] $BuildModulePackageVersion = "1.4.0-beta0003",
+    [string] $BuildModulePackageVersion = $BuildModuleVersion,
 
     [Parameter()]
-    [bool] $BuildModuleAllowPreRelease = $true,
+    [bool] $BuildModuleAllowPreRelease = $false,
 
     [Parameter()]
     [version] $InvokeBuildModuleVersion = "5.10.1"
@@ -110,7 +110,7 @@ if ($MyInvocation.ScriptName -notlike '*Invoke-Build.ps1') {
 #region Import shared tasks and initialise build framework
 if (!($BuildModulePath)) {
     if (!(Get-Module -ListAvailable Endjin.RecommendedPractices.Build | ? { $_.Version -eq $BuildModuleVersion })) {
-        Write-Information "Installing 'Endjin.RecommendedPractices.Build' module..."
+        Write-Information "Installing 'Endjin.RecommendedPractices.Build' module... [PackageVersion=$BuildModulePackageVersion]"
         Install-Module Endjin.RecommendedPractices.Build -RequiredVersion $BuildModulePackageVersion -Scope CurrentUser -Force -Repository PSGallery -AllowPrerelease:$BuildModuleAllowPreRelease
     }
     $BuildModulePath = "Endjin.RecommendedPractices.Build"
