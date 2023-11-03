@@ -46,7 +46,7 @@ public static class StackerCli
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "PowerBI", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
-            config.AddExample("twitter", "buffer", "-h", """https://endjincdn.blob.core.windows.net/assets/blog/stacker-export.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");
+            config.AddExample("twitter", "buffer", "-h", """https://localhost/stacker-export.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");
             config.AddExample("environment", "init");
             config.AddExample("wordpress", "export", "markdown", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog""");
             config.AddExample("wordpress", "export", "universal", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog\export.json""");
