@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using NodaTime;
@@ -27,15 +28,18 @@ public class ContentTasks : IContentTasks
 {
     private readonly IBufferClient bufferClient;
     private readonly StackerSettings settings;
+    private readonly IHttpClientFactory httpClientFactory;
 
-    public ContentTasks(IBufferClient bufferClient, StackerSettings settings)
+    public ContentTasks(IBufferClient bufferClient, StackerSettings settings, IHttpClientFactory httpClientFactory)
     {
         this.bufferClient = bufferClient;
         this.settings = settings;
+        this.httpClientFactory = httpClientFactory;
     }
 
     public async Task BufferContentItemsAsync<TContentFormatter>(
         FilePath contentFilePath,
+        Uri contentUri,
         string profilePrefix,
         string profileName,
         PublicationPeriod publicationPeriod,
@@ -55,7 +59,7 @@ public class ContentTasks : IContentTasks
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Buffer Profile:[/] {profileKey} = {profile}");
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFilePath}");
 
-            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
+            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
             IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
 
             await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
@@ -68,13 +72,26 @@ public class ContentTasks : IContentTasks
 
     public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
         FilePath contentFilePath,
+        Uri contentUri,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         string filterByTag)
     {
-        List<ContentItem> content = JsonSerializer.Deserialize<List<ContentItem>>(await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false));
+        string fileContent = string.Empty;
+
+        if (contentUri is not null || !string.IsNullOrEmpty(contentUri.AbsoluteUri))
+        {
+            using HttpClient client = this.httpClientFactory.CreateClient();
+            fileContent = await client.GetStringAsync(contentUri).ConfigureAwait(false);
+        }
+        else if (contentFilePath is not null || !string.IsNullOrEmpty(contentFilePath.FullPath))
+        {
+            fileContent = await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false);
+        }
+
+        List<ContentItem> content = JsonSerializer.Deserialize<List<ContentItem>>(fileContent);
 
         if (publicationPeriod != PublicationPeriod.None)
         {

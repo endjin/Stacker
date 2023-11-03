@@ -18,6 +18,7 @@ public interface IContentTasks
 {
     Task BufferContentItemsAsync<TContentFormatter>(
         FilePath contentFilePath,
+        Uri contentUri,
         string profilePrefix,
         string profileName,
         PublicationPeriod publicationPeriod,
@@ -30,6 +31,7 @@ public interface IContentTasks
 
     Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
         FilePath contentFilePath,
+        Uri contentUri,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,

@@ -32,6 +32,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     {
         await this.contentTasks.BufferContentItemsAsync<TweetFormatter>(
             settings.ContentFilePath,
+            settings.ContentUri,
             this.profilePrefix,
             settings.ProfileName,
             settings.PublicationPeriod,
@@ -54,6 +55,10 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         [CommandOption("-c|--content-file-path")]
         [Description("Content file path.")]
         public FilePath ContentFilePath { get; init; }
+
+        [CommandOption("-h|--content-http-uri")]
+        [Description("Content http uri.")]
+        public Uri ContentUri { get; init; }
 
         [CommandOption("-n|--profile-name")]
         [Description("Twitter profile to Buffer.")]
