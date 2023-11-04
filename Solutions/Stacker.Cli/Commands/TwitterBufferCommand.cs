@@ -39,6 +39,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
             settings.FromDate,
             settings.ToDate,
             settings.ItemCount,
+            settings.Randomise,
             settings.FilterByTag,
             settings.WhatIf).ConfigureAwait(false);
 
@@ -71,6 +72,10 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         [CommandOption("-i|--item-count")]
         [Description("Number of content items to buffer. If omitted all content is buffered.")]
         public int ItemCount { get; init; }
+
+        [CommandOption("-r|--randomise")]
+        [Description("Select content items at random")]
+        public bool Randomise { get; set; }
 
         [CommandOption("-p|--publication-period")]
         [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]

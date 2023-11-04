@@ -1,4 +1,4 @@
-// <copyright file="ContentTasks.cs" company="Endjin Limited">
+﻿// <copyright file="ContentTasks.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
@@ -46,6 +46,7 @@ public class ContentTasks : IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
+        bool randomise,
         string filterByTag,
         bool whatIf)
         where TContentFormatter : class, IContentFormatter, new()
@@ -56,10 +57,12 @@ public class ContentTasks : IContentTasks
 
         if (this.settings.BufferProfiles.TryGetValue(profileKey, out string profile))
         {
-            AnsiConsole.MarkupLineInterpolated($"[yellow1]Buffer Profile:[/] {profileKey} = {profile}");
-            AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFilePath}");
+            string contentFile = contentFilePath is not null ? contentFilePath.FullPath : contentUri.AbsoluteUri;
 
-            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, filterByTag).ConfigureAwait(false);
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Channel / Profile:[/] {profileKey} = {profile}");
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFile}");
+
+            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
             IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
 
             await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
@@ -77,6 +80,7 @@ public class ContentTasks : IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
+        bool randomise,
         string filterByTag)
     {
         string fileContent = string.Empty;
@@ -95,6 +99,7 @@ public class ContentTasks : IContentTasks
 
         if (publicationPeriod != PublicationPeriod.None)
         {
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Publication Period:[/] {publicationPeriod}");
             DateInterval dateRange = new PublicationPeriodConverter().Convert(publicationPeriod);
 
             content = content.Where(p => (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) >= dateRange.Start) && (LocalDate.FromDateTime(p.PublishedOn.LocalDateTime) <= dateRange.End)).ToList();
@@ -104,6 +109,7 @@ public class ContentTasks : IContentTasks
             // if fromDate is specified, but toDate isn't, set toDate to now. If toDate is specified, use that.
             if (fromDate != DateTime.MinValue)
             {
+                AnsiConsole.MarkupLineInterpolated($"[yellow1]From Date:[/] {fromDate}");
                 if (toDate == DateTime.MinValue)
                 {
                     toDate = DateTime.Now;
@@ -114,6 +120,8 @@ public class ContentTasks : IContentTasks
                     {
                         toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                     }
+
+                    AnsiConsole.MarkupLineInterpolated($"[yellow1]To Date:[/] {toDate}");
                 }
 
                 content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate).ToList();
@@ -143,7 +151,14 @@ public class ContentTasks : IContentTasks
 
         if (!string.IsNullOrEmpty(filterByTag))
         {
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Filter by tag:[/] {filterByTag}");
             content = content.Where(x => x.Tags.Contains(filterByTag, StringComparer.InvariantCultureIgnoreCase)).ToList();
+        }
+
+        if (randomise)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Randomising![/]");
+            content = content.OrderBy(_ => Guid.NewGuid()).ToList();
         }
 
         if (itemCount == 0)

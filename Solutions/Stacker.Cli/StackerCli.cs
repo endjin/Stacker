@@ -44,6 +44,7 @@ public static class StackerCli
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--item-count", "10");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--publication-period", "ThisMonth");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");
+            config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--item-count", "10", "--randomise", "--what-if");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "PowerBI", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
             config.AddExample("twitter", "buffer", "-h", """https://localhost/stacker-export.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");

@@ -25,6 +25,7 @@ public interface IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
+        bool randomise,
         string filterByTag,
         bool whatIf)
         where TContentFormatter : class, IContentFormatter, new();
@@ -36,5 +37,6 @@ public interface IContentTasks
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
+        bool randomise,
         string filterByTag);
 }
