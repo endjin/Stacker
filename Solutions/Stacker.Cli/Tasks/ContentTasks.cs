@@ -109,6 +109,7 @@ public class ContentTasks : IContentTasks
             // if fromDate is specified, but toDate isn't, set toDate to now. If toDate is specified, use that.
             if (fromDate != DateTime.MinValue)
             {
+                AnsiConsole.MarkupLineInterpolated($"[yellow1]From Date:[/] {fromDate}");
                 if (toDate == DateTime.MinValue)
                 {
                     toDate = DateTime.Now;
@@ -119,6 +120,8 @@ public class ContentTasks : IContentTasks
                     {
                         toDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
                     }
+
+                    AnsiConsole.MarkupLineInterpolated($"[yellow1]To Date:[/] {toDate}");
                 }
 
                 content = content.Where(p => p.PublishedOn.LocalDateTime >= fromDate && p.PublishedOn.LocalDateTime <= toDate).ToList();

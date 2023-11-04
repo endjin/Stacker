@@ -2,13 +2,10 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-using System;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
-using Spectre.IO;
 
 using Stacker.Cli.Cleaners;
 using Stacker.Cli.Configuration;
