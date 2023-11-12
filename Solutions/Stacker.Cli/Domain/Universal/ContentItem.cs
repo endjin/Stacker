@@ -20,7 +20,7 @@ public class ContentItem
 
     public string Id { get; internal set; }
 
-    public bool? Promote { get; internal set; }
+    public bool? Promote { get; set; }
 
     public DateTimeOffset? PromoteUntil { get; set; }
 
@@ -36,7 +36,7 @@ public class ContentItem
         }
     }
 
-    public string Status { get; internal set; }
+    public string Status { get; set; }
 
     public List<string> Tags { get; set; }
 
