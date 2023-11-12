@@ -20,9 +20,9 @@ public class ContentItem
 
     public string Id { get; internal set; }
 
-    public bool Promote { get; internal set; }
+    public bool? Promote { get; internal set; }
 
-    public DateTimeOffset PromoteUntil { get; set; }
+    public DateTimeOffset? PromoteUntil { get; set; }
 
     public DateTimeOffset PublishedOn { get; set; }
 

@@ -85,7 +85,7 @@ public class ContentTasks : IContentTasks
     {
         string fileContent = string.Empty;
 
-        if (contentUri is not null || !string.IsNullOrEmpty(contentUri.AbsoluteUri))
+        if (contentUri is not null && !string.IsNullOrEmpty(contentUri.AbsoluteUri))
         {
             using HttpClient client = this.httpClientFactory.CreateClient();
             fileContent = await client.GetStringAsync(contentUri).ConfigureAwait(false);

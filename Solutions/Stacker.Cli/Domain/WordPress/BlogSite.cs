@@ -350,14 +350,7 @@ public class BlogSite
             {
                 XElement promoteUntilElement = metaKeyElement.NextNode as XElement;
 
-                if (DateTimeOffset.TryParse(promoteUntilElement?.Value, out DateTimeOffset promoteUntil))
-                {
-                    post.PromoteUntil = promoteUntil;
-                }
-                else
-                {
-                    post.PromoteUntil = DateTimeOffset.MaxValue;
-                }
+                post.PromoteUntil = DateTimeOffset.TryParse(promoteUntilElement?.Value, out DateTimeOffset promoteUntil) ? promoteUntil : DateTimeOffset.MaxValue;
             }
         }
         catch (Exception)
