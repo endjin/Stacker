@@ -78,7 +78,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         public bool Randomise { get; set; }
 
         [CommandOption("-p|--publication-period")]
-        [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
+        [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|LastFiveYears|LastTenYears|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
         public PublicationPeriod PublicationPeriod { get; init; }
 
         [CommandOption("-f|--from-date")]
