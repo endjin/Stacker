@@ -97,6 +97,8 @@ public class ContentTasks : IContentTasks
 
         List<ContentItem> content = JsonSerializer.Deserialize<List<ContentItem>>(fileContent);
 
+        content = content.Where(p => p.Promote is true).ToList();
+
         if (publicationPeriod != PublicationPeriod.None)
         {
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Publication Period:[/] {publicationPeriod}");
@@ -138,12 +140,14 @@ public class ContentTasks : IContentTasks
 
         foreach (ContentItem contentItem in content)
         {
+            contentItem.Tags = contentItem.Tags.Except(this.settings.ExcludedTags, StringComparer.InvariantCultureIgnoreCase).ToList();
+
             // Use TagAliases to convert tags into their canonical form.
             contentItem.Tags = contentItem.Tags?.Select(tag =>
             {
                 TagAliases matchedAlias = this.settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
                 return matchedAlias != null ? matchedAlias.Tag : tag.Replace("-", " ").Replace(" ", string.Empty);
-            }).ToList();
+            }).Distinct().OrderByDescending(word => this.settings.PriorityTags.IndexOf(word)).ToList();
         }
 
         // Sort so that content with the shortest lifespan are first.

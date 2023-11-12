@@ -59,9 +59,7 @@ public class TweetFormatter : IContentFormatter
                 int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
-                item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
-
-                foreach (string tag in item.Tags.Distinct())
+                foreach (string tag in item.Tags)
                 {
                     tweetLength += tag.Length + 2; // 2 Offset = Space + #
                     if (tweetLength <= MaxContentLength)
@@ -74,7 +72,7 @@ public class TweetFormatter : IContentFormatter
                     }
                 }
 
-                foreach (string tag in item.Tags.Distinct().Take(tagsToInclude))
+                foreach (string tag in item.Tags.Take(tagsToInclude))
                 {
                     content.Append(" #");
                     content.Append(tag);
