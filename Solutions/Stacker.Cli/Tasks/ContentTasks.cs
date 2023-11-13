@@ -138,6 +138,8 @@ public class ContentTasks : IContentTasks
             }
         }
 
+        content = content.Where(c => c.PromoteUntil is null || c.PromoteUntil >= DateTimeOffset.Now).ToList();
+
         foreach (ContentItem contentItem in content)
         {
             contentItem.Tags = contentItem.Tags.Except(this.settings.ExcludedTags, StringComparer.InvariantCultureIgnoreCase).ToList();
