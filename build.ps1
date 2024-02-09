@@ -80,7 +80,7 @@ param (
     [bool] $BuildModuleAllowPreRelease = $false,
 
     [Parameter()]
-    [version] $InvokeBuildModuleVersion = "5.10.1"
+    [version] $InvokeBuildModuleVersion = "5.10.3"
 )
 
 $ErrorActionPreference = $ErrorActionPreference ? $ErrorActionPreference : 'Stop'
