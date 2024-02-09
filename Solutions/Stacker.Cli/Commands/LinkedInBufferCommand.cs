@@ -30,7 +30,7 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<LinkedInFormatter>(
             settings.ContentFilePath,
             settings.ContentUri,
             this.profilePrefix,
