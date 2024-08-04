@@ -38,6 +38,8 @@ public static class StackerCli
             config.CaseSensitivity(CaseSensitivity.None);
             config.SetApplicationName("stacker");
 
+            config.AddExample("bluesky", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
+            config.AddExample("mastodon", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
             config.AddExample("linkedin", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
             config.AddExample("facebook", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
@@ -86,7 +88,7 @@ public static class StackerCli
                 process.AddCommand<TwitterBufferCommand>("buffer")
                        .WithDescription("Uploads content to Buffer to be published via Twitter");
             });
-            
+
             config.AddBranch("environment", process =>
             {
                 process.SetDescription("Manipulate the stacker environment.");

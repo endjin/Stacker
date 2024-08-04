@@ -39,6 +39,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Domain\ContentPackages\**" />
+    <EmbeddedResource Remove="Domain\ContentPackages\**" />
+    <None Remove="Domain\ContentPackages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="NuGet.Readme.md" Pack="true" PackagePath="\readme.md" />
   </ItemGroup>
 

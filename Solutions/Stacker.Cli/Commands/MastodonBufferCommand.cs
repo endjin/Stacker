@@ -1,4 +1,4 @@
-﻿// <copyright file="TwitterBufferCommand.cs" company="Endjin Limited">
+﻿// <copyright file="MastodonBufferCommand.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
