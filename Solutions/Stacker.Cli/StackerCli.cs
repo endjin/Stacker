@@ -52,6 +52,13 @@ public static class StackerCli
             config.AddExample("wordpress", "export", "markdown", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog""");
             config.AddExample("wordpress", "export", "universal", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog\export.json""");
 
+            config.AddBranch("bluesky", process =>
+            {
+                process.SetDescription("Bluesky functionality.");
+                process.AddCommand<BlueskyBufferCommand>("buffer")
+                       .WithDescription("Uploads content to Buffer to be published via Bluesky");
+            });
+
             config.AddBranch("facebook", process =>
             {
                 process.SetDescription("Facebook functionality.");
@@ -66,13 +73,20 @@ public static class StackerCli
                        .WithDescription("Uploads content to Buffer to be published via LinkedIn");
             });
 
+            config.AddBranch("mastodon", process =>
+            {
+                process.SetDescription("Mastodon functionality.");
+                process.AddCommand<MastodonBufferCommand>("buffer")
+                    .WithDescription("Uploads content to Buffer to be published via Mastodon");
+            });
+
             config.AddBranch("twitter", process =>
             {
                 process.SetDescription("Twitter functionality.");
                 process.AddCommand<TwitterBufferCommand>("buffer")
                        .WithDescription("Uploads content to Buffer to be published via Twitter");
             });
-
+            
             config.AddBranch("environment", process =>
             {
                 process.SetDescription("Manipulate the stacker environment.");
