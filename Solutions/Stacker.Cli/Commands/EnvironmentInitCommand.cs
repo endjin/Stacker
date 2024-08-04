@@ -38,14 +38,14 @@ public class EnvironmentInitCommand : Command
                     { "linkedin|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                     { "twitter|<ACCOUNT NAME>", "<BUFFER CHANNEL ID>" },
                 },
-                Users = new List<User>
-                {
-                    new()
+                Users =
+                [
+                    new User
                     {
                         Email = string.Empty,
                         IsActive = true,
-                    },
-                },
+                    }
+                ],
             },
             nameof(StackerSettings));
 

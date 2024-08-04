@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.IO;
@@ -25,11 +26,11 @@ namespace Stacker.Cli.Commands;
 
 public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUniversalCommand.Settings>
 {
-    private readonly StackerSettings settings;
+    private readonly StackerSettings configuration;
 
-    public WordPressExportUniversalCommand(StackerSettings settings)
+    public WordPressExportUniversalCommand(StackerSettings configuration)
     {
-        this.settings = settings;
+        this.configuration = configuration;
     }
 
     /// <inheritdoc/>
@@ -55,7 +56,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
         AnsiConsole.WriteLine($"Processing...");
 
         List<Post> posts = blogSite.GetAllPosts().ToList();
-        List<Post> validPosts = posts.FilterByValid(this.settings).ToList();
+        List<Post> validPosts = posts.FilterByValid(this.configuration).ToList();
         List<Post> promotablePosts = validPosts.FilterByPromotable().ToList();
         TagToHashTagConverter hashTagConverter = new();
         List<ContentItem> feed = new();
@@ -66,7 +67,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
 
         foreach (Post post in promotablePosts)
         {
-            User user = this.settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User user = this.configuration.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
             feed.Add(new ContentItem
             {
@@ -104,7 +105,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
     }
 
     /// <summary>
-    /// The settings for the command.
+    /// The configuration for the command.
     /// </summary>
     public class Settings : CommandSettings
     {
