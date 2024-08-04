@@ -71,13 +71,10 @@ param (
     [string] $BuildModulePath,
 
     [Parameter()]
-    [version] $BuildModuleVersion = "1.5.5",
+    [version] $BuildModuleVersion = "1.5.6",
 
     [Parameter()]
     [string] $BuildModulePackageVersion = $BuildModuleVersion,
-
-    [Parameter()]
-    [bool] $BuildModuleAllowPreRelease = $false,
 
     [Parameter()]
     [version] $InvokeBuildModuleVersion = "5.10.3"
@@ -110,8 +107,8 @@ if ($MyInvocation.ScriptName -notlike '*Invoke-Build.ps1') {
 #region Import shared tasks and initialise build framework
 if (!($BuildModulePath)) {
     if (!(Get-Module -ListAvailable Endjin.RecommendedPractices.Build | ? { $_.Version -eq $BuildModuleVersion })) {
-        Write-Information "Installing 'Endjin.RecommendedPractices.Build' module... [PackageVersion=$BuildModulePackageVersion]"
-        Install-Module Endjin.RecommendedPractices.Build -RequiredVersion $BuildModulePackageVersion -Scope CurrentUser -Force -Repository PSGallery -AllowPrerelease:$BuildModuleAllowPreRelease
+        Write-Information "Installing 'Endjin.RecommendedPractices.Build' module..."
+        Install-Module Endjin.RecommendedPractices.Build -RequiredVersion $BuildModulePackageVersion -Scope CurrentUser -Force -Repository PSGallery -AllowPrerelease
     }
     $BuildModulePath = "Endjin.RecommendedPractices.Build"
 }
@@ -136,7 +133,6 @@ $SkipTest = $false
 $SkipTestReport = $false
 $SkipAnalysis = $false
 $SkipPackage = $false
-$SkipPublish = $false
 
 
 #
@@ -158,12 +154,6 @@ $NuSpecFilesToPackage = @(
 #
 $ExcludeFilesFromCodeCoverage = ""
 
-# Enable GitHub release functionality
-$CreateGitHubRelease = $true
-$GitHubReleaseArtefacts = @()
-$PublishNuGetPackagesAsGitHubReleaseArtefacts = $true
-
-
 # Synopsis: Build, Test and Package
 task . FullBuild
 
@@ -181,10 +171,37 @@ task PostTest {}
 task PreTestReport {}
 task PostTestReport {}
 task PreAnalysis {}
-task PostAnalysis {}
+task PostAnalysis
 task PrePackage {}
 task PostPackage {}
-task PrePublish {}
-task PostPublish {}
-task RunLast {}
+task PrePublish {
+    # workaround
+    if (!(Test-Path "$here/_local-nuget-feed")) { New-Item -ItemType Directory "$here/_local-nuget-feed" | Out-Null }
+}
+task PostPublish {
+    # Publish NuGet packages as GitHub release artefacts
+    $evaluatedNugetPackagesToPublishGlob = Invoke-Expression "`"$($NugetPackageNamesToPublishGlob)$($NugetPackagesToPublishGlobSuffix)`""
+    Write-Host "evaluatedNugetPackagesToPublishGlob: $evaluatedNugetPackagesToPublishGlob"
+    $nugetPackagesToPublish = Get-ChildItem -Path "$here/_packages" -Filter $evaluatedNugetPackagesToPublishGlob
+    Write-Host "nugetPackagesToPublish: $nugetPackagesToPublish"
 
+    if ($nugetPackagesToPublish) {
+        $existingRelease = exec { gh release list } |
+                                ConvertFrom-Csv -Delimiter "`t" -Header @("TITLE","TYPE","TAG NAME","PUBLISHED") |
+                                Where-Object { $_."TAG NAME" -eq $GitVersion.SemVer }
+
+        if (!$existingRelease) {
+            Write-Host "Creating release"
+            exec { & gh release create $($GitVersion.SemVer) --generate-notes }
+        }
+        else {
+            Write-Host "Updating existing release"
+        }
+
+        foreach ($nugetPackage in $nugetPackagesToPublish) {
+            Write-Host "Uploading: $(Split-Path -Leaf $nugetPackage)"
+            exec { & gh release upload --clobber $($GitVersion.SemVer) $nugetPackage }
+        }
+    }
+}
+task RunLast {}
