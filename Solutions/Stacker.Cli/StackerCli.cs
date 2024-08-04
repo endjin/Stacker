@@ -38,6 +38,8 @@ public static class StackerCli
             config.CaseSensitivity(CaseSensitivity.None);
             config.SetApplicationName("stacker");
 
+            config.AddExample("bluesky", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
+            config.AddExample("mastodon", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
             config.AddExample("linkedin", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
             config.AddExample("facebook", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
@@ -52,6 +54,13 @@ public static class StackerCli
             config.AddExample("wordpress", "export", "markdown", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog""");
             config.AddExample("wordpress", "export", "universal", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog\export.json""");
 
+            config.AddBranch("bluesky", process =>
+            {
+                process.SetDescription("Bluesky functionality.");
+                process.AddCommand<BlueskyBufferCommand>("buffer")
+                       .WithDescription("Uploads content to Buffer to be published via Bluesky");
+            });
+
             config.AddBranch("facebook", process =>
             {
                 process.SetDescription("Facebook functionality.");
@@ -64,6 +73,13 @@ public static class StackerCli
                 process.SetDescription("LinkedIn functionality.");
                 process.AddCommand<LinkedInBufferCommand>("buffer")
                        .WithDescription("Uploads content to Buffer to be published via LinkedIn");
+            });
+
+            config.AddBranch("mastodon", process =>
+            {
+                process.SetDescription("Mastodon functionality.");
+                process.AddCommand<MastodonBufferCommand>("buffer")
+                    .WithDescription("Uploads content to Buffer to be published via Mastodon");
             });
 
             config.AddBranch("twitter", process =>
