@@ -30,7 +30,7 @@ public class MastodonBufferCommand : AsyncCommand<MastodonBufferCommand.Settings
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<TweetFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<MastodonFormatter>(
             settings.ContentFilePath,
             settings.ContentUri,
             this.profilePrefix,

@@ -29,7 +29,7 @@ public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<TweetFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<BlueskyFormatter>(
             settings.ContentFilePath,
             settings.ContentUri,
             this.profilePrefix,
