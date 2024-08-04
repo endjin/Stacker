@@ -1,4 +1,4 @@
-// <copyright file="TweetFormatter.cs" company="Endjin Limited">
+// <copyright file="ShortFormContentFormatter.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
@@ -12,14 +12,20 @@ using Stacker.Cli.Domain.Universal;
 
 namespace Stacker.Cli.Formatters;
 
-public class TweetFormatter : IContentFormatter
+public class ShortFormContentFormatter : IContentFormatter
 {
-    private const int MaxContentLength = 280;
-    private readonly string campaignSource = "twitter";
+    private readonly int maxContentLength;
+    private readonly string campaignSource;
+
+    public ShortFormContentFormatter(int maxContentLength, string campaignSource)
+    {
+        this.campaignSource = campaignSource;
+        this.maxContentLength = maxContentLength;
+    }
 
     public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
-        List<string> tweets = new();
+        List<string> tweets = [];
         StringBuilder content = new();
         StringBuilder campaignTracking = new();
 
@@ -54,6 +60,13 @@ public class TweetFormatter : IContentFormatter
                 }
             }
 
+            // If we don't find a match from our users, just use the display name
+            if (match is null)
+            {
+                content.Append(" by ");
+                content.Append(item.Author.DisplayName);
+            }
+
             if (item?.Tags != null && item.Tags.Any())
             {
                 int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
@@ -62,7 +75,7 @@ public class TweetFormatter : IContentFormatter
                 foreach (string tag in item.Tags)
                 {
                     tweetLength += tag.Length + 2; // 2 Offset = Space + #
-                    if (tweetLength <= MaxContentLength)
+                    if (tweetLength <= this.maxContentLength)
                     {
                         tagsToInclude++;
                     }
