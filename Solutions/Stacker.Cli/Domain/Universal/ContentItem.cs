@@ -40,6 +40,8 @@ public class ContentItem
 
     public List<string> Tags { get; set; }
 
+    public List<HashTag> HashTags { get; set; }
+
     public string UniqueId
     {
         get

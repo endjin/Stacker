@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using Corvus.Retry.Strategies;
+
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Formatters;
 using Stacker.Cli.Domain.Universal;
@@ -25,7 +28,7 @@ public class ShortFormContentFormatter : IContentFormatter
 
     public IEnumerable<string> Format(string campaignMedium, string campaignName, IEnumerable<ContentItem> feedItems, StackerSettings settings)
     {
-        List<string> tweets = [];
+        List<string> socialMediaPosts = [];
         StringBuilder content = new();
         StringBuilder campaignTracking = new();
 
@@ -41,7 +44,26 @@ public class ShortFormContentFormatter : IContentFormatter
             campaignTracking.Append(campaignName.ToLowerInvariant());
             campaignTracking.AppendLine();
 
-            content.Append(item.Content.Title);
+            List<HashTag> titleMatches = [];
+
+            string title = item.Content.Title;
+
+            foreach (HashTag hashTag in item.HashTags.Where(x => !x.Default))
+            {
+                if (title.Contains(hashTag.Text, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    titleMatches.Add(hashTag);
+                    string pattern = $@"\b{Regex.Escape(hashTag.Text)}\b";
+                    title = Regex.Replace(title, pattern, hashTag.Tag, RegexOptions.IgnoreCase);
+                }
+            }
+
+            foreach (HashTag hashTag in titleMatches)
+            {
+                item.HashTags.Remove(hashTag);
+            }
+
+            content.Append(title);
 
             User match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
 
@@ -67,14 +89,14 @@ public class ShortFormContentFormatter : IContentFormatter
                 content.Append(item.Author.DisplayName);
             }
 
-            if (item?.Tags != null && item.Tags.Any())
+            if (item?.Tags is { Count: > 0 })
             {
                 int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
                 foreach (string tag in item.Tags)
                 {
-                    tweetLength += tag.Length + 2; // 2 Offset = Space + #
+                    tweetLength += tag.Length + 2; // 2 - Offset = Space + #
                     if (tweetLength <= this.maxContentLength)
                     {
                         tagsToInclude++;
@@ -92,14 +114,39 @@ public class ShortFormContentFormatter : IContentFormatter
                 }
             }
 
+            if (item?.HashTags is { Count: > 0 })
+            {
+                int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
+                int tagsToInclude = 0;
+
+                foreach (HashTag tag in item.HashTags)
+                {
+                    tweetLength += tag.Tag.Length + 1; // 1 - Offset = Space
+                    if (tweetLength <= this.maxContentLength)
+                    {
+                        tagsToInclude++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                foreach (HashTag tag in item.HashTags.Take(tagsToInclude))
+                {
+                    content.Append(" ");
+                    content.Append(tag.Tag);
+                }
+            }
+
             content.Append(campaignTracking);
 
-            tweets.Add(content.ToString());
+            socialMediaPosts.Add(content.ToString());
 
             content.Clear();
             campaignTracking.Clear();
         }
 
-        return tweets;
+        return socialMediaPosts;
     }
 }
