@@ -21,6 +21,7 @@ using Stacker.Cli.Contracts.Tasks;
 using Stacker.Cli.Converters;
 using Stacker.Cli.Domain.Publication;
 using Stacker.Cli.Domain.Universal;
+using Environment = Spectre.IO.Environment;
 
 namespace Stacker.Cli.Tasks;
 
@@ -62,14 +63,21 @@ public class ContentTasks : IContentTasks
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Channel / Profile:[/] {profileKey} = {profile}");
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFile}");
 
-            IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
-            IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
+            try
+            {
+                IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
+                IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
 
-            await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
+                await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[red]Error: {ex.Message}[/]");
+            }
         }
         else
         {
-            AnsiConsole.WriteLine($"Settings for {profileKey} not found. Please check your Stacker configuration.");
+            AnsiConsole.MarkupLineInterpolated($"Settings for {profileKey} not found. Please check your Stacker configuration.");
         }
     }
 
@@ -92,6 +100,16 @@ public class ContentTasks : IContentTasks
         }
         else if (contentFilePath is not null || !string.IsNullOrEmpty(contentFilePath.FullPath))
         {
+            if (contentFilePath.IsRelative)
+            {
+                contentFilePath = contentFilePath.MakeAbsolute(Environment.Shared.WorkingDirectory);
+
+                if (!File.Exists(contentFilePath.FullPath))
+                {
+                    throw new FileNotFoundException($"File not found: {contentFilePath.FullPath}");
+                }
+            }
+
             fileContent = await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false);
         }
 
