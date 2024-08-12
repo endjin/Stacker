@@ -48,19 +48,22 @@ public class ShortFormContentFormatter : IContentFormatter
 
             string title = item.Content.Title;
 
-            foreach (HashTag hashTag in item.HashTags.Where(x => !x.Default))
+            if (item.HashTags is not null)
             {
-                if (title.Contains(hashTag.Text, StringComparison.InvariantCultureIgnoreCase))
+                foreach (HashTag hashTag in item.HashTags?.Where(x => !x.Default))
                 {
-                    titleMatches.Add(hashTag);
-                    string pattern = $@"\b{Regex.Escape(hashTag.Text)}\b";
-                    title = Regex.Replace(title, pattern, hashTag.Tag, RegexOptions.IgnoreCase);
+                    if (title.Contains(hashTag.Text, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        titleMatches.Add(hashTag);
+                        string pattern = $@"\b{Regex.Escape(hashTag.Text)}\b";
+                        title = Regex.Replace(title, pattern, hashTag.Tag, RegexOptions.IgnoreCase);
+                    }
                 }
-            }
 
-            foreach (HashTag hashTag in titleMatches)
-            {
-                item.HashTags.Remove(hashTag);
+                foreach (HashTag hashTag in titleMatches)
+                {
+                    item.HashTags.Remove(hashTag);
+                }
             }
 
             content.Append(title);
