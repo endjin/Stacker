@@ -18,17 +18,6 @@
     <ToolCommandName>stacker</ToolCommandName>
   </PropertyGroup>
 
-  <!-- Enable these settings for an optimised single .exe -->
-  <!--
-  <PropertyGroup>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
-  </PropertyGroup>
-  -->
-
   <PropertyGroup>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageDescription>A .NET Global Tool for automating marketing content across social channels.</PackageDescription>
