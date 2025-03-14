@@ -39,9 +39,13 @@ public static class StackerCli
             config.SetApplicationName("stacker");
 
             config.AddExample("bluesky", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
+            config.AddExample("bluesky", "buffer", "shuffle", "-n", "azureweekly");
             config.AddExample("mastodon", "buffer", "-c", """c:\temp\content.json""", "-n", "azureweekly");
+            config.AddExample("mastodon", "buffer", "shuffle", "-n", "azureweekly");
             config.AddExample("linkedin", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
+            config.AddExample("linkedin", "buffer", "shuffle", "-n", "endjin");
             config.AddExample("facebook", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
+            config.AddExample("facebook", "buffer", "shuffle", "-n", "endjin");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--item-count", "10");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--publication-period", "ThisMonth");
@@ -50,6 +54,7 @@ public static class StackerCli
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
             config.AddExample("twitter", "buffer", "-c", """c:\temp\content.json""", "-n", "endjin", "--filter-by-tag", "PowerBI", "--from-date", "2023/06/01", "--to-date", "2023/06/30");
             config.AddExample("twitter", "buffer", "-h", """https://localhost/stacker-export.json""", "-n", "endjin", "--filter-by-tag", "MicrosoftFabric", "--what-if");
+            config.AddExample("twitter", "buffer", "shuffle", "-n", "endjin");
             config.AddExample("environment", "init");
             config.AddExample("wordpress", "export", "markdown", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog""");
             config.AddExample("wordpress", "export", "universal", "-w", """C:\temp\wordpress-export.xml""", "-o", """C:\Temp\Blog\export.json""");
@@ -79,7 +84,7 @@ public static class StackerCli
             {
                 process.SetDescription("Mastodon functionality.");
                 process.AddCommand<MastodonBufferCommand>("buffer")
-                    .WithDescription("Uploads content to Buffer to be published via Mastodon");
+                       .WithDescription("Uploads content to Buffer to be published via Mastodon");
             });
 
             config.AddBranch("twitter", process =>

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Spectre.IO;
 
+using Stacker.Cli.Contracts.Buffer;
 using Stacker.Cli.Contracts.Formatters;
 using Stacker.Cli.Domain.Publication;
 using Stacker.Cli.Domain.Universal;
@@ -39,4 +40,9 @@ public interface IContentTasks
         int itemCount,
         bool randomise,
         string filterByTag);
+
+    Task<BufferShuffleResponse> ShuffleBufferQueueAsync(
+        string profilePrefix,
+        string profileName,
+        int? count = null);
 }
