@@ -37,32 +37,53 @@ To uninstall the tool, use:
 Here are some usage examples:
 
 ```PowerShell
-stacker linkedin buffer -c c:\temp\content.json -n endjin
+USAGE:
+    stacker [OPTIONS] <COMMAND>
 
-stacker facebook buffer -c c:\temp\content.json -n endjin
+EXAMPLES:
+    stacker bluesky buffer create -c c:\temp\content.json -n azureweekly
+    stacker bluesky buffer shuffle -n azureweekly
+    stacker mastodon buffer create -c c:\temp\content.json -n azureweekly
+    stacker mastodon buffer shuffle -n azureweekly
+    stacker linkedin buffer create -c c:\temp\content.json -n endjin
+    stacker linkedin buffer shuffle -n endjin
+    stacker facebook buffer create -c c:\temp\content.json -n endjin
+    stacker facebook buffer shuffle -n endjin
+    stacker twitter buffer create -c c:\temp\content.json -n endjin
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --item-count 10
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --publication-period ThisMonth
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --filter-by-tag MicrosoftFabric --what-if
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --filter-by-tag MicrosoftFabric --item-count 10 --randomise --what-if
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --from-date 2023/06/01 --to-date 2023/06/30
+    stacker twitter buffer create -c c:\temp\content.json -n endjin --filter-by-tag PowerBI --from-date 2023/06/01 --to-date 2023/06/30
+    stacker twitter buffer create -h https://localhost/stacker-export.json -n endjin --filter-by-tag MicrosoftFabric --what-if
+    stacker twitter buffer shuffle -n endjin
+    stacker environment init
+    stacker wordpress export markdown -w C:\temp\wordpress-export.xml -o C:\Temp\Blog
+    stacker wordpress export universal -w C:\temp\wordpress-export.xml -o C:\Temp\Blog\export.json
 
-stacker twitter buffer -c c:\temp\content.json -n endjin
-stacker twitter buffer -c c:\temp\content.json -n endjin --item-count 10
-stacker twitter buffer -c c:\temp\content.json -n endjin --publication-period ThisMonth
-stacker twitter buffer -c c:\temp\content.json -n endjin --filter-by-tag "MicrosoftFabric" --what-if
-stacker twitter buffer -c c:\temp\content.json -n endjin --from-date "2023/06/01" --to-date "2023/06/30"
-stacker twitter buffer -c c:\temp\content.json -n endjin --filter-by-tag "PowerBI" --from-date "2023/06/01" --to-date "2023/06/30"
+OPTIONS:
+    -h, --help    Prints help information
 
-stacker environment init
-
-stacker wordpress export markdown -w C:\temp\wordpress-export.xml -o C:\Temp\Blog
-stacker wordpress export universal -w C:\temp\wordpress-export.xml -o C:\Temp\Blog\export.json
+COMMANDS:
+    bluesky        Bluesky functionality
+    facebook       Facebook functionality
+    linkedin       LinkedIn functionality
+    mastodon       Mastodon functionality
+    twitter        Twitter functionality
+    environment    Manipulate the stacker environment
+    wordpress      WordPress functionality
 ```
 
 ### Buffer commands
 
-`stacker twitter buffer` - Upload content items into buffer for the specified Twitter profile.
+`stacker twitter buffer create` - Upload content items into buffer for the specified Twitter profile.
 
-`stacker linkedin buffer` - Upload content items into buffer for the specified LinkedIn profile.
+`stacker linkedin buffer create` - Upload content items into buffer for the specified LinkedIn profile.
 
-`stacker facebook buffer` - Upload content items into buffer for the specified Facebook profile.
+`stacker facebook buffer create` - Upload content items into buffer for the specified Facebook profile.
 
-The `buffer` command also takes the following options to filter the content items to be buffered.
+The `buffer create` command also takes the following options to filter the content items to be buffered.
 
 ```
 OPTIONS:
@@ -76,6 +97,14 @@ OPTIONS:
     -t, --to-date               Include content items published on, or before this date. Use YYYY/MM/DD Format. If omitted DateTime.MaxValue is used
     -w, --what-if               See what the command would do without submitting the content to Buffer
 ```
+
+You can also shuffle items already in the buffer queue (useful if you're inserting content into and existing queue and need to mix it up).
+
+`stacker bluesky buffer shuffle` - Shuffle the content items in the buffer for the specified Bluesky profile.
+`stacker twitter buffer shuffle` - Shuffle the content items in the buffer for the specified Twitter profile.
+`stacker linkedin buffer shuffle` - Shuffle the content items in the buffer for the specified LinkedIn profile.
+`stacker facebook buffer shuffle` - Shuffle the content items in the buffer for the specified Facebook profile.
+`stacker mastodon buffer shuffle` - Shuffle the content items in the buffer for the specified Mastodon profile.
 
 ### WordPress commands
 

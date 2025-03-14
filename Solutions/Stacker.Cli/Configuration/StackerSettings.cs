@@ -11,7 +11,7 @@ public class StackerSettings
     /// <summary>
     /// Gets or sets the selected ADR template name.
     /// </summary>
-    public List<User> Users { get; set; } = new();
+    public List<User> Users { get; set; } = [];
 
     public string BufferAccessToken { get; set; }
 

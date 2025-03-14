@@ -196,4 +196,24 @@ public class ContentTasks : IContentTasks
 
         return content.Take(itemCount);
     }
+
+    public async Task<BufferShuffleResponse> ShuffleBufferQueueAsync(
+        string profilePrefix,
+        string profileName,
+        int? count = null)
+    {
+        string profileKey = profilePrefix + profileName;
+
+        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string profile))
+        {
+            AnsiConsole.MarkupLineInterpolated($"[yellow1]Channel / Profile:[/] {profileKey} = {profile}");
+
+            return await this.bufferClient.ShuffleAsync(profile, count).ConfigureAwait(false);
+        }
+        else
+        {
+            AnsiConsole.MarkupLineInterpolated($"Settings for {profileKey} not found. Please check your Stacker configuration.");
+            return new BufferShuffleResponse { Success = false };
+        }
+    }
 }
