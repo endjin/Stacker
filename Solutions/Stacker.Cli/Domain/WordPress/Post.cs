@@ -12,9 +12,9 @@ public class Post
 {
     public Post()
     {
-        this.Attachments = Enumerable.Empty<Attachment>();
-        this.Categories = Enumerable.Empty<Category>();
-        this.Tags = Enumerable.Empty<Tag>();
+        this.Attachments = [];
+        this.Categories = [];
+        this.Tags = [];
     }
 
     public IEnumerable<Attachment> Attachments { get; internal set; }
@@ -35,9 +35,9 @@ public class Post
 
     public Dictionary<string, string> MetaData { get; set; }
 
-    public bool Promote { get; set; }
+    public bool? Promote { get; set; }
 
-    public DateTimeOffset PromoteUntil { get; set; } = DateTimeOffset.MaxValue;
+    public DateTimeOffset? PromoteUntil { get; set; } = DateTimeOffset.MaxValue;
 
     public DateTimeOffset PublishedAtUtc { get; set; }
 

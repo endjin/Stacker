@@ -30,14 +30,16 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<LinkedInFormatter>(
             settings.ContentFilePath,
+            settings.ContentUri,
             this.profilePrefix,
             settings.ProfileName,
             settings.PublicationPeriod,
             settings.FromDate,
             settings.ToDate,
             settings.ItemCount,
+            settings.Randomise,
             settings.FilterByTag,
             settings.WhatIf).ConfigureAwait(false);
 
@@ -55,6 +57,10 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
         [Description("Content file path.")]
         public FilePath ContentFilePath { get; init; }
 
+        [CommandOption("-h|--content-http-uri")]
+        [Description("Content http uri.")]
+        public Uri ContentUri { get; init; }
+
         [CommandOption("-n|--profile-name")]
         [Description("LinkedIn profile to Buffer.")]
         public string ProfileName { get; init; }
@@ -67,8 +73,12 @@ public class LinkedInBufferCommand : AsyncCommand<LinkedInBufferCommand.Settings
         [Description("Number of content items to buffer. If omitted all content is buffered.")]
         public int ItemCount { get; init; }
 
+        [CommandOption("-r|--randomise")]
+        [Description("Select content items at random")]
+        public bool Randomise { get; set; }
+
         [CommandOption("-p|--publication-period")]
-        [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
+        [Description("Publication period to filter content items by. <LastMonth|LastWeek|LastYear|LastFiveYears|LastTenYears|None|ThisMonth|ThisWeek|ThisYear> If specified --from-date and --to-date are ignored.")]
         public PublicationPeriod PublicationPeriod { get; init; }
 
         [CommandOption("-f|--from-date")]

@@ -1,8 +1,7 @@
-﻿// <copyright file="TwitterBufferCommand.cs" company="Endjin Limited">
+﻿// <copyright file="BlueskyBufferCommand.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-#nullable enable annotations
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -17,12 +16,12 @@ using Stacker.Cli.Formatters;
 
 namespace Stacker.Cli.Commands;
 
-public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
+public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
-    private readonly string profilePrefix = "twitter|";
+    private readonly string profilePrefix = "bluesky|";
 
-    public TwitterBufferCommand(IContentTasks contentTasks)
+    public BlueskyBufferCommand(IContentTasks contentTasks)
     {
         this.contentTasks = contentTasks;
     }
@@ -30,7 +29,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<TwitterFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<BlueskyFormatter>(
             settings.ContentFilePath,
             settings.ContentUri,
             this.profilePrefix,
@@ -92,7 +91,5 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         [CommandOption("-w|--what-if")]
         [Description("See what the command would do without submitting the content to Buffer.")]
         public bool WhatIf { get; set; }
-
-#nullable enable annotations
     }
 }

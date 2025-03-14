@@ -37,7 +37,17 @@ public enum PublicationPeriod
     ThisYear,
 
     /// <summary>
-    /// Filter ContentItems with PublishedOn dates last year.
+    /// Filter ContentItems with PublishedOn dates within the last year.
     /// </summary>
     LastYear,
+
+    /// <summary>
+    /// Filter ContentItems with PublishedOn dates within the last 5 years.
+    /// </summary>
+    LastFiveYears,
+
+    /// <summary>
+    /// Filter ContentItems with PublishedOn dates within the last 10 years.
+    /// </summary>
+    LastTenYears,
 }

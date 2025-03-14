@@ -24,10 +24,10 @@ public class BlogSite
 
     public BlogSite(XDocument doc)
     {
-        this.Authors = Enumerable.Empty<Author>();
-        this.Categories = Enumerable.Empty<Category>();
-        this.Tags = Enumerable.Empty<Tag>();
-        this.Attachments = Enumerable.Empty<Attachment>();
+        this.Authors = [];
+        this.Categories = [];
+        this.Tags = [];
+        this.Attachments = [];
 
         this.InitializeChannelElement(doc);
 
@@ -226,7 +226,7 @@ public class BlogSite
             throw new XmlException("Unable to parse malformed attachment.");
         }
 
-        return new()
+        return new Attachment
         {
             Id = attachmentIdElement?.Value,
             Path = metaValueElement?.Value,
@@ -245,7 +245,7 @@ public class BlogSite
         XElement postPublishedAtUtcElement = postElement.Element(WordpressNamespace + "post_date_gmt");
         XElement postSlugElement = postElement.Element(WordpressNamespace + "post_name");
         XElement postPostIdElement = postElement.Element(WordpressNamespace + "post_id");
-        XElement postStautsElement = postElement.Element(WordpressNamespace + "status");
+        XElement postStatusElement = postElement.Element(WordpressNamespace + "status");
 
         if (postTitleElement == null ||
             postUsernameElement == null ||
@@ -263,7 +263,7 @@ public class BlogSite
             publicationData = DateTimeOffset.MaxValue;
         }
 
-        var post = new Post
+        Post post = new()
         {
             Author = this.GetAuthorByUsername(postUsernameElement.Value),
             Body = postBodyElement.Value,
@@ -271,16 +271,16 @@ public class BlogSite
             Id = postPostIdElement?.Value,
             Link = postLinkElement?.Value,
             PublishedAtUtc = publicationData,
-            Status = postStautsElement?.Value,
+            Status = postStatusElement?.Value,
             Slug = postSlugElement.Value,
             Title = postTitleElement.Value,
         };
 
         post.Attachments = this.GetAttachmentsByPostId(post.Id);
 
-        var categories = new List<Category>();
-        var tags = new List<Tag>();
-        var metaData = new Dictionary<string, string>();
+        List<Category> categories = [];
+        List<Tag> tags = [];
+        Dictionary<string, string> metaData = new();
 
         foreach (XElement wpCategory in postElement.Elements("category"))
         {
@@ -350,14 +350,7 @@ public class BlogSite
             {
                 XElement promoteUntilElement = metaKeyElement.NextNode as XElement;
 
-                if (DateTimeOffset.TryParse(promoteUntilElement?.Value, out DateTimeOffset promoteUntil))
-                {
-                    post.PromoteUntil = promoteUntil;
-                }
-                else
-                {
-                    post.PromoteUntil = DateTimeOffset.MaxValue;
-                }
+                post.PromoteUntil = DateTimeOffset.TryParse(promoteUntilElement?.Value, out DateTimeOffset promoteUntil) ? promoteUntil : DateTimeOffset.MaxValue;
             }
         }
         catch (Exception)
@@ -383,7 +376,7 @@ public class BlogSite
             rawMetaData = Regex.Replace(rawMetaData, @"{(?<first>\w:\d{1,3}:)", "{");
             rawMetaData = Regex.Replace(rawMetaData, "(?<trailing>;)(?:})", "}");
 
-            var regexp = new Regex(@"(?<separators>;\w:\d+?:)(?:"")");
+            Regex regexp = new Regex(@"(?<separators>;\w:\d+?:)(?:"")");
             MatchCollection matches = regexp.Matches(rawMetaData);
             int itemMatchIndex = 0;
 

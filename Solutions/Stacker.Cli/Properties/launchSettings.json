@@ -2,7 +2,7 @@
   "profiles": {
     "Endjin.Stacker.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "wordpress export markdown"
+      "commandLineArgs": "bluesky buffer -c \"C:\\Temp\\478.json\" -n azureweekly"
     }
   }
 }

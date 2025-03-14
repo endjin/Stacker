@@ -1,4 +1,4 @@
-﻿// <copyright file="TwitterBufferCommand.cs" company="Endjin Limited">
+﻿// <copyright file="MastodonBufferCommand.cs" company="Endjin Limited">
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
@@ -17,12 +17,12 @@ using Stacker.Cli.Formatters;
 
 namespace Stacker.Cli.Commands;
 
-public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
+public class MastodonBufferCommand : AsyncCommand<MastodonBufferCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
-    private readonly string profilePrefix = "twitter|";
+    private readonly string profilePrefix = "mastodon|";
 
-    public TwitterBufferCommand(IContentTasks contentTasks)
+    public MastodonBufferCommand(IContentTasks contentTasks)
     {
         this.contentTasks = contentTasks;
     }
@@ -30,7 +30,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
     {
-        await this.contentTasks.BufferContentItemsAsync<TwitterFormatter>(
+        await this.contentTasks.BufferContentItemsAsync<MastodonFormatter>(
             settings.ContentFilePath,
             settings.ContentUri,
             this.profilePrefix,

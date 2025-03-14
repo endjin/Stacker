@@ -41,6 +41,14 @@ public class PublicationPeriodConverter
                 LocalDate startOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1)).PlusYears(-1);
                 LocalDate endOfLastYear = LocalDate.FromDateTime(new DateTime(today.Year, 12, 31)).PlusYears(-1);
                 return new DateInterval(startOfLastYear, endOfLastYear);
+            case PublicationPeriod.LastFiveYears:
+                LocalDate startOfLastFiveYears = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1)).PlusYears(-5);
+                LocalDate endOfLastFiveYears = LocalDate.FromDateTime(new DateTime(today.Year, 12, 31)).PlusYears(-1);
+                return new DateInterval(startOfLastFiveYears, endOfLastFiveYears);
+            case PublicationPeriod.LastTenYears:
+                LocalDate startOfLastTenYears = LocalDate.FromDateTime(new DateTime(today.Year, 1, 1)).PlusYears(-10);
+                LocalDate endOfLastTenYears = LocalDate.FromDateTime(new DateTime(today.Year, 12, 31)).PlusYears(-1);
+                return new DateInterval(startOfLastTenYears, endOfLastTenYears);
             default:
                 throw new ArgumentOutOfRangeException(nameof(publicationPeriod), publicationPeriod, null);
         }

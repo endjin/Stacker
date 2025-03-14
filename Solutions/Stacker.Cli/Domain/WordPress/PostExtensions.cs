@@ -14,7 +14,7 @@ public static class PostExtensions
 {
     public static IEnumerable<Post> FilterByPromotable(this IEnumerable<Post> posts)
     {
-        return posts.Where(p => (p.Promote && p.PromoteUntil == DateTimeOffset.MinValue) || (p.Promote && p.PromoteUntil > DateTimeOffset.Now));
+        return posts.Where(p => (p.Promote is not null && p.Promote.Value &&  p.PromoteUntil == DateTimeOffset.MinValue) || (p.Promote is not null && p.Promote.Value && p.PromoteUntil > DateTimeOffset.Now));
     }
 
     public static IEnumerable<Post> FilterByValid(this IEnumerable<Post> posts, StackerSettings settings)

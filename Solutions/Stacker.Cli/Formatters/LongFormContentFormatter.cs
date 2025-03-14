@@ -50,9 +50,7 @@ public abstract class LongFormContentFormatter : IContentFormatter
                 int contentLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;
 
-                item.Tags = item.Tags.Except(settings.ExcludedTags).OrderByDescending(word => settings.PriorityTags.IndexOf(word)).ToList();
-
-                foreach (string tag in item.Tags.Distinct())
+                foreach (string tag in item.Tags)
                 {
                     contentLength += tag.Length + 2; // 2 Offset = Space + #
                     if (contentLength <= this.maxContentLength)
