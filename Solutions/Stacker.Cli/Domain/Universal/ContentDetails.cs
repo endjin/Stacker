@@ -8,7 +8,7 @@ namespace Stacker.Cli.Domain.Universal;
 
 public class ContentDetails
 {
-    public List<ContentAttachment> Attachments { get; internal set; } = new();
+    public List<ContentAttachment> Attachments { get; internal set; } = [];
 
     public string Body { get; set; }
 

@@ -12,9 +12,9 @@ public class Post
 {
     public Post()
     {
-        this.Attachments = Enumerable.Empty<Attachment>();
-        this.Categories = Enumerable.Empty<Category>();
-        this.Tags = Enumerable.Empty<Tag>();
+        this.Attachments = [];
+        this.Categories = [];
+        this.Tags = [];
     }
 
     public IEnumerable<Attachment> Attachments { get; internal set; }

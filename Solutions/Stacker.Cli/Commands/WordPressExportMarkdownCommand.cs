@@ -174,7 +174,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     {
         AnsiConsole.WriteLine("Processing...");
 
-        List<ContentItem> feed = new();
+        List<ContentItem> feed = [];
         List<Post> posts = blogSite.GetAllPostsInAllPublicationStates().ToList();
 
         AnsiConsole.WriteLine($"Total Posts: {posts.Count}");

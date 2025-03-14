@@ -59,7 +59,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
         List<Post> validPosts = posts.FilterByValid(this.configuration).ToList();
         List<Post> promotablePosts = validPosts.FilterByPromotable().ToList();
         TagToHashTagConverter hashTagConverter = new();
-        List<ContentItem> feed = new();
+        List<ContentItem> feed = [];
 
         AnsiConsole.WriteLine($"Total Posts: {posts.Count()}");
         AnsiConsole.WriteLine($"Valid Posts: {validPosts.Count()}");
