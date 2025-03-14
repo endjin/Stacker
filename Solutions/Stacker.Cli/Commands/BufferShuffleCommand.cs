@@ -12,14 +12,14 @@ using Stacker.Cli.Contracts.Tasks;
 
 namespace Stacker.Cli.Commands;
 
-[Description("Shuffles the Buffer queue for the specified profile")]
 public class BufferShuffleCommand : AsyncCommand<BufferShuffleCommand.Settings>
 {
     private readonly IContentTasks contentTasks;
-    private readonly string profilePrefix = "buffer|";
+    private readonly string profilePrefix;
 
-    public BufferShuffleCommand(IContentTasks contentTasks)
+    public BufferShuffleCommand(IContentTasks contentTasks, string profile)
     {
+        this.profilePrefix = profile + "|";
         this.contentTasks = contentTasks;
     }
 

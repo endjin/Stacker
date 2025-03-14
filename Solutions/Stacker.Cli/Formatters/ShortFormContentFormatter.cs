@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Corvus.Retry.Strategies;
 
 using Stacker.Cli.Configuration;
 using Stacker.Cli.Contracts.Formatters;
