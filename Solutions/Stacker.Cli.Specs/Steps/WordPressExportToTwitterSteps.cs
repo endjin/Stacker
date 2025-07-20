@@ -1,18 +1,14 @@
-﻿namespace StackerCli.Specs.Steps
+﻿using Reqnroll;
+
+namespace Stacker.Cli.Specs.Steps;
+
+[Binding]
+public class WordPressExportToTwitterSteps
 {
-    using Stacker.Cli;
-    using NUnit.Framework;
-    using System.Threading.Tasks;
-    using TechTalk.SpecFlow;
+    private readonly ScenarioContext scenarioContext;
 
-    [Binding]
-    public class WordPressExportToTwitterSteps
+    public WordPressExportToTwitterSteps(ScenarioContext scenarioContext)
     {
-        private readonly ScenarioContext scenarioContext;
-
-        public WordPressExportToTwitterSteps(ScenarioContext scenarioContext)
-        {
-            this.scenarioContext = scenarioContext;
-        }
+        this.scenarioContext = scenarioContext;
     }
 }
