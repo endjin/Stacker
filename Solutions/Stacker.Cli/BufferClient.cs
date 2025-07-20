@@ -40,9 +40,15 @@ public class BufferClient : IBufferClient
 
         string updateOperationUrl = $"{UpdateOperation}?access_token={this.settings.BufferAccessToken}";
 
-        foreach (string item in content)
+        // Convert to list to get count and maintain index
+        var contentList = content.ToList();
+        int totalCount = contentList.Count;
+        int currentIndex = 0;
+
+        foreach (string item in contentList)
         {
-            AnsiConsole.MarkupLineInterpolated($"[chartreuse3_1]Buffering:[/] {item}");
+            currentIndex++;
+            AnsiConsole.MarkupLineInterpolated($"[chartreuse3_1]Buffering ({currentIndex}/{totalCount}):[/] {item}");
 
             if (whatIf)
             {
