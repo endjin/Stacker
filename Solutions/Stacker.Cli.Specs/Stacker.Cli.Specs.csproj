@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
     <RootNamespace>Stacker.Cli.Specs</RootNamespace>
   </PropertyGroup>
 
@@ -12,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Corvus.Testing.SpecFlow.NUnit" Version="3.1.1" />
+    <PackageReference Include="Corvus.Testing.ReqnRoll.NUnit" Version="4.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
   </ItemGroup>
  
   <ItemGroup>
-    <None Update="specflow.json">
+    <None Update="reqnroll.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
