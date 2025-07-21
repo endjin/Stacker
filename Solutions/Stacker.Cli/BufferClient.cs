@@ -48,7 +48,7 @@ public class BufferClient : IBufferClient
         foreach (string item in contentList)
         {
             currentIndex++;
-            AnsiConsole.MarkupLineInterpolated($"[chartreuse3_1]Buffering ({currentIndex}/{totalCount}):[/] {item}");
+            AnsiConsole.MarkupLineInterpolated($"[darkturquoise][[{currentIndex}/{totalCount}]][/] [chartreuse3_1]Buffering:[/] {item}");
 
             if (whatIf)
             {
