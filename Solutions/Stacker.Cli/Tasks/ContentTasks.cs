@@ -39,22 +39,22 @@ public class ContentTasks : IContentTasks
     }
 
     public async Task BufferContentItemsAsync<TContentFormatter>(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         string profilePrefix,
-        string profileName,
+        string? profileName,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag,
+        string? filterByTag,
         bool whatIf)
         where TContentFormatter : class, IContentFormatter, new()
     {
         TContentFormatter formatter = new();
 
-        string profileKey = profilePrefix + profileName;
+        string profileKey = profilePrefix + (profileName ?? string.Empty);
 
         if (this.settings.BufferProfiles.TryGetValue(profileKey, out string? profile))
         {
@@ -65,8 +65,8 @@ public class ContentTasks : IContentTasks
 
             try
             {
-                IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath!, contentUri!, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
-                IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
+                IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
+                IEnumerable<string> formattedContentItems = formatter.Format("social", profileName ?? string.Empty, contentItems, this.settings);
 
                 await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
             }
@@ -82,14 +82,14 @@ public class ContentTasks : IContentTasks
     }
 
     public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag)
+        string? filterByTag)
     {
         string fileContent = string.Empty;
 
@@ -204,10 +204,10 @@ public class ContentTasks : IContentTasks
 
     public async Task<BufferShuffleResponse> ShuffleBufferQueueAsync(
         string profilePrefix,
-        string profileName,
+        string? profileName,
         int? count = null)
     {
-        string profileKey = profilePrefix + profileName;
+        string profileKey = profilePrefix + (profileName ?? string.Empty);
 
         if (this.settings.BufferProfiles.TryGetValue(profileKey, out string? profile))
         {

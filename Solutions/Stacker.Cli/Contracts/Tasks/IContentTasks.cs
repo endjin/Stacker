@@ -18,31 +18,31 @@ namespace Stacker.Cli.Contracts.Tasks;
 public interface IContentTasks
 {
     Task BufferContentItemsAsync<TContentFormatter>(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         string profilePrefix,
-        string profileName,
+        string? profileName,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag,
+        string? filterByTag,
         bool whatIf)
         where TContentFormatter : class, IContentFormatter, new();
 
     Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag);
+        string? filterByTag);
 
     Task<BufferShuffleResponse> ShuffleBufferQueueAsync(
         string profilePrefix,
-        string profileName,
+        string? profileName,
         int? count = null);
 }

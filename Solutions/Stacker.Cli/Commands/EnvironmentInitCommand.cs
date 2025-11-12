@@ -2,8 +2,6 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-#nullable enable annotations
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
