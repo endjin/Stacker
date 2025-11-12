@@ -9,9 +9,9 @@ namespace Stacker.Cli.Configuration;
 [DebuggerDisplay("{Email} IsActive = {IsActive}")]
 public class User
 {
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     public bool IsActive { get; set; }
 
-    public string Twitter { get; set; }
+    public required string Twitter { get; set; }
 }

@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Spectre.Console.Cli;
@@ -24,7 +25,7 @@ public class BufferShuffleCommand : AsyncCommand<BufferShuffleCommand.Settings>
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         BufferShuffleResponse result = await this.contentTasks.ShuffleBufferQueueAsync(
             this.profilePrefix,
@@ -41,7 +42,7 @@ public class BufferShuffleCommand : AsyncCommand<BufferShuffleCommand.Settings>
     {
         [CommandOption("-n|--profile-name")]
         [Description("Buffer profile name to shuffle.")]
-        public string ProfileName { get; init; }
+        public required string ProfileName { get; init; }
 
         [CommandOption("-c|--count")]
         [Description("Number of updates to shuffle. If omitted, all scheduled updates are shuffled.")]

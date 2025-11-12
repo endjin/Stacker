@@ -47,9 +47,9 @@ public class ShortFormContentFormatter : IContentFormatter
 
             string title = item.Content.Title;
 
-            if (item.HashTags is not null)
+            if (item.HashTags is not null && item.HashTags.Count > 0)
             {
-                foreach (HashTag hashTag in item.HashTags?.Where(x => !x.Default))
+                foreach (HashTag hashTag in item.HashTags.Where(x => !x.Default))
                 {
                     if (title.Contains(hashTag.Text, StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -67,7 +67,7 @@ public class ShortFormContentFormatter : IContentFormatter
 
             content.Append(title);
 
-            User match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
+            User? match = settings.Users.Find(x => string.Equals(item.Author.Email, x.Email, StringComparison.InvariantCultureIgnoreCase));
 
             if (match?.IsActive == true)
             {
@@ -91,7 +91,7 @@ public class ShortFormContentFormatter : IContentFormatter
                 content.Append(item.Author.DisplayName);
             }
 
-            if (item?.Tags is { Count: > 0 })
+            if (item.Tags is { Count: > 0 })
             {
                 int tweetLength = content.Length + campaignTracking.Length + 1; // 1 = extra space before link
                 int tagsToInclude = 0;

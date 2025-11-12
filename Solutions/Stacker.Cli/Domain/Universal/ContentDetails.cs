@@ -10,11 +10,11 @@ public class ContentDetails
 {
     public List<ContentAttachment> Attachments { get; internal set; } = [];
 
-    public string Body { get; set; }
+    public required string Body { get; set; }
 
-    public string Excerpt { get; set; }
+    public required string Excerpt { get; set; }
 
-    public string Link { get; set; }
+    public required string Link { get; set; }
 
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }

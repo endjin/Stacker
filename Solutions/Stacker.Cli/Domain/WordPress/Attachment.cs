@@ -9,13 +9,13 @@ namespace Stacker.Cli.Domain.WordPress;
 [DebuggerDisplay("{Title} Id = {Id}")]
 public class Attachment
 {
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
-    public string Path { get; internal set; }
+    public required string Path { get; set; }
 
-    public string PostId { get; internal set; }
+    public required string PostId { get; set; }
 
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
-    public string Url { get; set; }
+    public required string Url { get; set; }
 }

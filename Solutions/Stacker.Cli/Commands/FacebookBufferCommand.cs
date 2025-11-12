@@ -5,6 +5,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Spectre.Console.Cli;
@@ -27,7 +28,7 @@ public class FacebookBufferCommand : AsyncCommand<FacebookBufferCommand.Settings
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         await this.contentTasks.BufferContentItemsAsync<FacebookFormatter>(
                 settings.ContentFilePath,

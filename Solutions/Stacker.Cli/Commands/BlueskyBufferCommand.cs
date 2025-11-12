@@ -2,11 +2,12 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+#nullable enable annotations
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
-
 using Spectre.Console.Cli;
 using Spectre.IO;
 
@@ -27,7 +28,7 @@ public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         await this.contentTasks.BufferContentItemsAsync<BlueskyFormatter>(
             settings.ContentFilePath,
@@ -91,5 +92,7 @@ public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
         [CommandOption("-w|--what-if")]
         [Description("See what the command would do without submitting the content to Buffer.")]
         public bool WhatIf { get; set; }
+
+#nullable enable annotations
     }
 }

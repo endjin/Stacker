@@ -62,9 +62,9 @@ public class BufferClient : IBufferClient
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                BufferError error = JsonSerializer.Deserialize<BufferError>(errorContent);
+                BufferError? error = JsonSerializer.Deserialize<BufferError>(errorContent);
 
-                AnsiConsole.MarkupLineInterpolated($"[red]Buffering Failed:[/] {error.Message}");
+                AnsiConsole.MarkupLineInterpolated($"[red]Buffering Failed:[/] {error?.Message ?? "Unknown error"}");
                 AnsiConsole.WriteLine();
             }
         }
@@ -100,13 +100,13 @@ public class BufferClient : IBufferClient
 
         if (!response.IsSuccessStatusCode)
         {
-            BufferError error = JsonSerializer.Deserialize<BufferError>(content);
-            AnsiConsole.MarkupLineInterpolated($"[red]Shuffling Failed:[/] {error?.Message}");
+            BufferError? error = JsonSerializer.Deserialize<BufferError>(content);
+            AnsiConsole.MarkupLineInterpolated($"[red]Shuffling Failed:[/] {error?.Message ?? "Unknown error"}");
             AnsiConsole.WriteLine();
             return new BufferShuffleResponse { Success = false };
         }
 
-        BufferShuffleResponse result = JsonSerializer.Deserialize<BufferShuffleResponse>(content);
+        BufferShuffleResponse? result = JsonSerializer.Deserialize<BufferShuffleResponse>(content);
         AnsiConsole.MarkupLine("[chartreuse3_1]Shuffling completed successfully[/]");
 
         return result ?? new BufferShuffleResponse { Success = false };

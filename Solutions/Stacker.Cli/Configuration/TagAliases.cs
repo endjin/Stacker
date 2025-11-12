@@ -8,7 +8,7 @@ namespace Stacker.Cli.Configuration;
 
 public class TagAliases
 {
-    public string Tag { get; set; }
+    public required string Tag { get; set; }
 
-    public List<string> Aliases { get; set; }
+    public List<string> Aliases { get; set; } = [];
 }

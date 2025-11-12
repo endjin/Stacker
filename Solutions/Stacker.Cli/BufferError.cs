@@ -13,11 +13,11 @@ public class BufferError
     public bool Success { get; set; }
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     [JsonPropertyName("code")]
     public int Code { get; set; }
 
     [JsonPropertyName("errored_profiles")]
-    public IEnumerable<Profiles> ErroredProfiles { get; set; }
+    public IEnumerable<Profiles> ErroredProfiles { get; set; } = [];
 }

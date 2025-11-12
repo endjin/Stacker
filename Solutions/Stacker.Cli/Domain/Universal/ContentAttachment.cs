@@ -6,7 +6,7 @@ namespace Stacker.Cli.Domain.Universal;
 
 public class ContentAttachment
 {
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
-    public string Path { get; set; }
+    public required string Path { get; set; }
 }

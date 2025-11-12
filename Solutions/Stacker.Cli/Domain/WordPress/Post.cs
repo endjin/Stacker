@@ -19,21 +19,21 @@ public class Post
 
     public IEnumerable<Attachment> Attachments { get; internal set; }
 
-    public Author Author { get; set; }
+    public required Author Author { get; set; }
 
-    public string Body { get; set; }
+    public required string Body { get; set; }
 
     public IEnumerable<Category> Categories { get; set; }
 
-    public string Excerpt { get; set; }
+    public required string Excerpt { get; set; }
 
-    public Attachment FeaturedImage { get; set; }
+    public Attachment? FeaturedImage { get; set; }
 
-    public string Id { get; internal set; }
+    public required string Id { get; set; }
 
-    public string Link { get; set; }
+    public required string Link { get; set; }
 
-    public Dictionary<string, string> MetaData { get; set; }
+    public Dictionary<string, string> MetaData { get; set; } = [];
 
     public bool? Promote { get; set; }
 
@@ -41,11 +41,11 @@ public class Post
 
     public DateTimeOffset PublishedAtUtc { get; set; }
 
-    public string Slug { get; set; }
+    public required string Slug { get; set; }
 
-    public string Status { get; internal set; }
+    public required string Status { get; set; }
 
     public IEnumerable<Tag> Tags { get; set; }
 
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }
