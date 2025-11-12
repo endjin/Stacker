@@ -5,14 +5,13 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Stacker.Cli.Contracts.Buffer
-{
-    public class BufferShuffleResponse
-    {
-        [JsonPropertyName("success")]
-        public bool Success { get; set; }
+namespace Stacker.Cli.Contracts.Buffer;
 
-        [JsonPropertyName("updates")]
-        public List<BufferUpdate> Updates { get; set; }
-    }
+public class BufferShuffleResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+
+    [JsonPropertyName("updates")]
+    public List<BufferUpdate> Updates { get; set; } = [];
 }

@@ -34,7 +34,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         if (!File.Exists(settings.WordPressExportFilePath.FullPath))
         {
@@ -67,7 +67,12 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
 
         foreach (Post post in promotablePosts)
         {
-            User user = this.configuration.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User? user = this.configuration.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User with email '{post.Author.Email}' not found in configuration");
+            }
 
             feed.Add(new ContentItem
             {
@@ -76,6 +81,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
                     DisplayName = post.Author.DisplayName,
                     Email = post.Author.Email,
                     TwitterHandle = user.Twitter,
+                    Username = post.Author.Username,
                 },
                 Content = new ContentDetails
                 {
@@ -84,6 +90,7 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
                     Link = post.Link,
                     Title = post.Title,
                 },
+                Id = post.Id,
                 PublishedOn = post.PublishedAtUtc,
                 Promote = post.Promote,
                 PromoteUntil = post.PromoteUntil,
@@ -111,10 +118,10 @@ public class WordPressExportUniversalCommand : AsyncCommand<WordPressExportUnive
     {
         [CommandOption("-w|--wp-export-file-path")]
         [Description("WordPress Export file path.")]
-        public FilePath WordPressExportFilePath { get; init; }
+        public required FilePath WordPressExportFilePath { get; init; }
 
         [CommandOption("-o|--universal-file-path")]
         [Description("Universal file path.")]
-        public FilePath UniversalFilePath { get; init; }
+        public required FilePath UniversalFilePath { get; init; }
     }
 }

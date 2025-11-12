@@ -9,5 +9,5 @@ namespace Stacker.Cli;
 public class Profiles
 {
     [JsonPropertyName("profile_id")]
-    public string ProfileId { get; set; }
+    public string ProfileId { get; set; } = string.Empty;
 }

@@ -13,15 +13,15 @@ public class StackerSettings
     /// </summary>
     public List<User> Users { get; set; } = [];
 
-    public string BufferAccessToken { get; set; }
+    public required string BufferAccessToken { get; set; }
 
-    public Dictionary<string, string> BufferProfiles { get; set; }
+    public Dictionary<string, string> BufferProfiles { get; set; } = [];
 
-    public List<string> ExcludedTags { get; set; }
+    public List<string> ExcludedTags { get; set; } = [];
 
-    public List<TagAliases> TagAliases { get; set; }
+    public List<TagAliases> TagAliases { get; set; } = [];
 
-    public List<string> PriorityTags { get; set; }
+    public List<string> PriorityTags { get; set; } = [];
 
-    public WordPressToMarkdown WordPressToMarkdown { get; set; }
+    public required WordPressToMarkdown WordPressToMarkdown { get; set; }
 }

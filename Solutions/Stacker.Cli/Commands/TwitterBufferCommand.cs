@@ -2,10 +2,10 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-#nullable enable annotations
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Spectre.Console.Cli;
@@ -28,7 +28,7 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         await this.contentTasks.BufferContentItemsAsync<TwitterFormatter>(
             settings.ContentFilePath,
@@ -51,23 +51,21 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
     /// </summary>
     public class Settings : CommandSettings
     {
-#nullable disable annotations
-
         [CommandOption("-c|--content-file-path")]
         [Description("Content file path.")]
-        public FilePath ContentFilePath { get; init; }
+        public FilePath? ContentFilePath { get; init; }
 
         [CommandOption("-h|--content-http-uri")]
         [Description("Content http uri.")]
-        public Uri ContentUri { get; init; }
+        public Uri? ContentUri { get; init; }
 
         [CommandOption("-n|--profile-name")]
         [Description("Twitter profile to Buffer.")]
-        public string ProfileName { get; init; }
+        public string? ProfileName { get; init; }
 
         [CommandOption("-g|--filter-by-tag")]
         [Description("Tag to filter the content items by.")]
-        public string FilterByTag { get; init; }
+        public string? FilterByTag { get; init; }
 
         [CommandOption("-i|--item-count")]
         [Description("Number of content items to buffer. If omitted all content is buffered.")]
@@ -92,7 +90,5 @@ public class TwitterBufferCommand : AsyncCommand<TwitterBufferCommand.Settings>
         [CommandOption("-w|--what-if")]
         [Description("See what the command would do without submitting the content to Buffer.")]
         public bool WhatIf { get; set; }
-
-#nullable enable annotations
     }
 }

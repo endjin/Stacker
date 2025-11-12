@@ -6,11 +6,11 @@ namespace Stacker.Cli.Domain.Universal;
 
 public class AuthorDetails
 {
-    public string DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
-    public string TwitterHandle { get; set; }
+    public required string TwitterHandle { get; set; }
 
-    public string Username { get; internal set; }
+    public required string Username { get; set; }
 }

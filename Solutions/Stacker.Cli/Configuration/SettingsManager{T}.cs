@@ -2,6 +2,7 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
+using System;
 using System.IO;
 using System.Text.Json;
 
@@ -23,7 +24,9 @@ public class SettingsManager<T> : ISettingsManager<T>
     {
         string filePath = $"{this.GetLocalFilePath(fileName)}.json";
 
-        return File.Exists(filePath) ? JsonSerializer.Deserialize<T>(File.ReadAllText(filePath)) : null;
+        return File.Exists(filePath)
+            ? JsonSerializer.Deserialize<T>(File.ReadAllText(filePath)) ?? throw new InvalidOperationException($"Failed to deserialize settings from {filePath}")
+            : throw new FileNotFoundException($"Settings file not found: {filePath}");
     }
 
     public void SaveSettings(T settings, string fileName)

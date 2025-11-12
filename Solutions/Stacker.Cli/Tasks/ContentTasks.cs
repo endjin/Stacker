@@ -39,26 +39,26 @@ public class ContentTasks : IContentTasks
     }
 
     public async Task BufferContentItemsAsync<TContentFormatter>(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         string profilePrefix,
-        string profileName,
+        string? profileName,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag,
+        string? filterByTag,
         bool whatIf)
         where TContentFormatter : class, IContentFormatter, new()
     {
         TContentFormatter formatter = new();
 
-        string profileKey = profilePrefix + profileName;
+        string profileKey = profilePrefix + (profileName ?? string.Empty);
 
-        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string profile))
+        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string? profile))
         {
-            string contentFile = contentFilePath is not null ? contentFilePath.FullPath : contentUri.AbsoluteUri;
+            string contentFile = contentFilePath is not null ? contentFilePath.FullPath : contentUri?.AbsoluteUri ?? string.Empty;
 
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Channel / Profile:[/] {profileKey} = {profile}");
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Loading:[/] {contentFile}");
@@ -66,7 +66,7 @@ public class ContentTasks : IContentTasks
             try
             {
                 IEnumerable<ContentItem> contentItems = await this.LoadContentItemsAsync(contentFilePath, contentUri, publicationPeriod, fromDate, toDate, itemCount, randomise, filterByTag).ConfigureAwait(false);
-                IEnumerable<string> formattedContentItems = formatter.Format("social", profileName, contentItems, this.settings);
+                IEnumerable<string> formattedContentItems = formatter.Format("social", profileName ?? string.Empty, contentItems, this.settings);
 
                 await this.bufferClient.UploadAsync(formattedContentItems, profile, whatIf).ConfigureAwait(false);
             }
@@ -82,14 +82,14 @@ public class ContentTasks : IContentTasks
     }
 
     public async Task<IEnumerable<ContentItem>> LoadContentItemsAsync(
-        FilePath contentFilePath,
-        Uri contentUri,
+        FilePath? contentFilePath,
+        Uri? contentUri,
         PublicationPeriod publicationPeriod,
         DateTime fromDate,
         DateTime toDate,
         int itemCount,
         bool randomise,
-        string filterByTag)
+        string? filterByTag)
     {
         string fileContent = string.Empty;
 
@@ -98,7 +98,7 @@ public class ContentTasks : IContentTasks
             using HttpClient client = this.httpClientFactory.CreateClient();
             fileContent = await client.GetStringAsync(contentUri).ConfigureAwait(false);
         }
-        else if (contentFilePath is not null || !string.IsNullOrEmpty(contentFilePath.FullPath))
+        else if (contentFilePath is not null && !string.IsNullOrEmpty(contentFilePath.FullPath))
         {
             if (contentFilePath.IsRelative)
             {
@@ -113,7 +113,12 @@ public class ContentTasks : IContentTasks
             fileContent = await File.ReadAllTextAsync(contentFilePath.FullPath).ConfigureAwait(false);
         }
 
-        List<ContentItem> content = JsonSerializer.Deserialize<List<ContentItem>>(fileContent);
+        List<ContentItem>? content = JsonSerializer.Deserialize<List<ContentItem>>(fileContent);
+
+        if (content is null)
+        {
+            throw new InvalidOperationException("Failed to deserialize content items");
+        }
 
         content = content.Where(p => p.Promote is true).ToList();
 
@@ -163,9 +168,9 @@ public class ContentTasks : IContentTasks
             contentItem.Tags = contentItem.Tags.Except(this.settings.ExcludedTags, StringComparer.InvariantCultureIgnoreCase).ToList();
 
             // Use TagAliases to convert tags into their canonical form.
-            contentItem.Tags = contentItem.Tags?.Select(tag =>
+            contentItem.Tags = contentItem.Tags.Select(tag =>
             {
-                TagAliases matchedAlias = this.settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
+                TagAliases? matchedAlias = this.settings.TagAliases.FirstOrDefault(alias => alias.Aliases.Any(a => a == tag));
                 return matchedAlias != null ? matchedAlias.Tag : tag.Replace("-", " ").Replace(" ", string.Empty);
             }).Distinct().OrderByDescending(word => this.settings.PriorityTags.IndexOf(word)).ToList();
         }
@@ -199,12 +204,12 @@ public class ContentTasks : IContentTasks
 
     public async Task<BufferShuffleResponse> ShuffleBufferQueueAsync(
         string profilePrefix,
-        string profileName,
+        string? profileName,
         int? count = null)
     {
-        string profileKey = profilePrefix + profileName;
+        string profileKey = profilePrefix + (profileName ?? string.Empty);
 
-        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string profile))
+        if (this.settings.BufferProfiles.TryGetValue(profileKey, out string? profile))
         {
             AnsiConsole.MarkupLineInterpolated($"[yellow1]Channel / Profile:[/] {profileKey} = {profile}");
 

@@ -38,7 +38,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     private readonly IDownloadTasks downloadTasks;
     private readonly ContentItemCleaner cleanerManager;
     private readonly IYamlSerializerFactory serializerFactory;
-    private ISerializer serializer;
+    private ISerializer serializer = null!;
     private StackerSettings settings;
 
     public WordPressExportMarkdownCommand(IDownloadTasks downloadTasks, StackerSettings settings, ContentItemCleaner cleanerManager, IYamlSerializerFactory serializerFactory)
@@ -50,7 +50,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         if (!File.Exists(settings.WordPressExportFilePath.FullPath))
         {
@@ -67,14 +67,14 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
         StringBuilder sb = new();
         FileInfo fi = new(settings.OutputDirectoryPath.FullPath);
-        DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html"));
-        DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md"));
+        DirectoryInfo tempHtmlFolder = new(Path.Join(Path.GetTempPath(), "stacker", "html") ?? throw new InvalidOperationException("Failed to create temp path"));
+        DirectoryInfo tempMarkdownFolder = new(Path.Join(Path.GetTempPath(), "stacker", "md") ?? throw new InvalidOperationException("Failed to create temp path"));
 
         string inputTempHtmlFilePath;
         string outputTempMarkdownFilePath;
         string outputFilePath;
 
-        if (!fi.Directory.Exists)
+        if (fi.Directory != null && !fi.Directory.Exists)
         {
             fi.Directory.Create();
         }
@@ -111,7 +111,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
 
             FileInfo outputFile = new(outputFilePath);
 
-            if (!outputFile.Directory.Exists)
+            if (outputFile.Directory != null && !outputFile.Directory.Exists)
             {
                 outputFile.Directory.Create();
             }
@@ -182,7 +182,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
         // var attachments = posts.Where(x => x.Attachments.Any());
         foreach (Post post in posts)
         {
-            User user = this.settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
+            User? user = this.settings.Users.Find(u => string.Equals(u.Email, post.Author.Email, StringComparison.InvariantCultureIgnoreCase));
 
             if (user is null)
             {
@@ -293,7 +293,7 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
             return attachments[0];
         }
 
-        string header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
+        string? header = attachments.Find(x => x.Contains("header-", StringComparison.InvariantCultureIgnoreCase) || x.Contains("1024px", StringComparison.InvariantCultureIgnoreCase));
 
         return !string.IsNullOrEmpty(header) ? header.Trim() : string.Empty;
     }
@@ -310,10 +310,10 @@ public class WordPressExportMarkdownCommand : AsyncCommand<WordPressExportMarkdo
     {
         [CommandOption("-w|--wp-export-file-path")]
         [Description("WordPress Export file path.")]
-        public FilePath WordPressExportFilePath { get; init; }
+        public required FilePath WordPressExportFilePath { get; init; }
 
         [CommandOption("-o|--output-directory-path")]
         [Description("Directory path for the exported files.")]
-        public DirectoryPath OutputDirectoryPath { get; init; }
+        public required DirectoryPath OutputDirectoryPath { get; init; }
     }
 }

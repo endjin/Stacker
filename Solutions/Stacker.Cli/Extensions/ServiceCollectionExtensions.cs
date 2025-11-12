@@ -27,21 +27,27 @@ public static class ServiceCollectionExtensions
             .SetBasePath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "endjin", "stacker", "configuration"))
             .AddJsonFile("StackerSettings.json", optional: true, reloadOnChange: false);
 
-        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH")))
+        string? settingsPath = Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH");
+        if (!string.IsNullOrEmpty(settingsPath))
         {
-            builder.AddJsonFile(Environment.GetEnvironmentVariable("STACKER_SETTINGS_PATH"), optional: false);
+            builder.AddJsonFile(settingsPath, optional: false);
         }
 
-        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("STACKER_SETTINGS_JSON")))
+        string? settingsJson = Environment.GetEnvironmentVariable("STACKER_SETTINGS_JSON");
+        if (!string.IsNullOrEmpty(settingsJson))
         {
-            builder.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("STACKER_SETTINGS_JSON"))));
+            builder.AddJsonStream(new MemoryStream(Encoding.ASCII.GetBytes(settingsJson)));
         }
 
         builder.AddEnvironmentVariables();
 
         IConfigurationRoot configurationRoot = builder.Build();
 
-        StackerSettings options = new();
+        StackerSettings options = new()
+        {
+            BufferAccessToken = string.Empty,
+            WordPressToMarkdown = new WordPressToMarkdown(),
+        };
         configurationRoot.Bind(options);
 
         serviceCollection.AddSingleton(options);

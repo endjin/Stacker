@@ -2,9 +2,9 @@
 // Copyright (c) Endjin Limited. All rights reserved.
 // </copyright>
 
-#nullable enable annotations
-
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -25,7 +25,7 @@ public class EnvironmentInitCommand : Command
         this.settingsManager = settingsManager;
     }
 
-    public override int Execute(CommandContext context)
+    public override int Execute([NotNull] CommandContext context, CancellationToken cancellationToken)
     {
         this.appEnvironment.Initialize();
         this.settingsManager.SaveSettings(
@@ -44,8 +44,10 @@ public class EnvironmentInitCommand : Command
                     {
                         Email = string.Empty,
                         IsActive = true,
+                        Twitter = string.Empty,
                     }
                 ],
+                WordPressToMarkdown = new WordPressToMarkdown(),
             },
             nameof(StackerSettings));
 

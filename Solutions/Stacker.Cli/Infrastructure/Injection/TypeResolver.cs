@@ -8,8 +8,6 @@ using Spectre.Console.Cli;
 
 namespace Stacker.Cli.Infrastructure.Injection;
 
-#nullable enable annotations
-
 /// <summary>
 /// Implementation of <see cref="ITypeResolver"/> that uses the <see cref="IServiceProvider"/> to resolve types.
 /// </summary>

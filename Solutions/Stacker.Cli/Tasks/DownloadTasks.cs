@@ -68,7 +68,7 @@ public class DownloadTasks : IDownloadTasks
                     {
                         var fileInfo = new FileInfo(context.Destination);
 
-                        if (!fileInfo.Directory.Exists)
+                        if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
                         {
                             fileInfo.Directory.Create();
                         }

@@ -5,8 +5,8 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
-
 using Spectre.Console.Cli;
 using Spectre.IO;
 
@@ -27,7 +27,7 @@ public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] Settings settings, CancellationToken cancellationToken)
     {
         await this.contentTasks.BufferContentItemsAsync<BlueskyFormatter>(
             settings.ContentFilePath,
@@ -50,23 +50,21 @@ public class BlueskyBufferCommand : AsyncCommand<BlueskyBufferCommand.Settings>
     /// </summary>
     public class Settings : CommandSettings
     {
-#nullable disable annotations
-
         [CommandOption("-c|--content-file-path")]
         [Description("Content file path.")]
-        public FilePath ContentFilePath { get; init; }
+        public FilePath? ContentFilePath { get; init; }
 
         [CommandOption("-h|--content-http-uri")]
         [Description("Content http uri.")]
-        public Uri ContentUri { get; init; }
+        public Uri? ContentUri { get; init; }
 
         [CommandOption("-n|--profile-name")]
         [Description("Twitter profile to Buffer.")]
-        public string ProfileName { get; init; }
+        public string? ProfileName { get; init; }
 
         [CommandOption("-g|--filter-by-tag")]
         [Description("Tag to filter the content items by.")]
-        public string FilterByTag { get; init; }
+        public string? FilterByTag { get; init; }
 
         [CommandOption("-i|--item-count")]
         [Description("Number of content items to buffer. If omitted all content is buffered.")]
